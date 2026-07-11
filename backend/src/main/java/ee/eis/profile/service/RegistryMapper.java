@@ -49,7 +49,7 @@ public class RegistryMapper {
             RelatedParty e = new RelatedParty();
             e.setProfileId(profileId);
             e.setRole(rp.role() != null ? rp.role() : "Seotud isik");
-            e.setPartyType(rp.type());
+            e.setPartyType(normalizePartyType(rp.type()));
             e.setRegistryCode(rp.registryCode());
             e.setCountryCode(rp.countryCode());
             e.setDisplayName(displayName(rp));
@@ -79,6 +79,21 @@ public class RegistryMapper {
             e.setSource(Source.REGISTRY);
             return e;
         }).toList();
+    }
+
+    /** The register reports party type in Estonian; normalise to the NATURAL/LEGAL enum. */
+    private String normalizePartyType(String type) {
+        if (type == null) {
+            return null;
+        }
+        String t = type.toLowerCase();
+        if (t.contains("füüsiline") || t.equals("natural")) {
+            return "NATURAL";
+        }
+        if (t.contains("juriidiline") || t.equals("legal")) {
+            return "LEGAL";
+        }
+        return null;
     }
 
     private String displayName(CompanyResponse.RelatedPartyResponse rp) {

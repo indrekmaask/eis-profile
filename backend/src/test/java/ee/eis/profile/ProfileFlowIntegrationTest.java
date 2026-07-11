@@ -45,7 +45,7 @@ class ProfileFlowIntegrationTest {
     private CompanyResponse company(String rc, String name) {
         return new CompanyResponse(rc, name, "2026-05-15T00:00:00Z", "Osaühing",
                 "Tartu maakond, Tartu, Näidis tn 1", "47111", "Toidukaupade jaemüük", 2500L,
-                List.of(), List.of(new RelatedPartyResponse("Osanik", "12305242", "EE", "LEGAL",
+                List.of(), List.of(new RelatedPartyResponse("Osanik", "12305242", "EE", "Juriidiline isik",
                         null, null, "Philia OÜ", new BigDecimal("100.00"))),
                 List.of(), List.of(),
                 List.of(new AnnualReportResponse(2025, true, true, 500000L, null, null, null, null,
