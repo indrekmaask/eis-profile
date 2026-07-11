@@ -1,0 +1,33 @@
+services:
+  db:
+    build:
+      context: ./docker/postgres
+    image: business-profile-postgres:18
+    environment:
+      POSTGRES_USER: business_profile
+      POSTGRES_PASSWORD: business_profile
+      POSTGRES_DB: business_profile
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U business_profile -d business_profile"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://business_profile:business_profile@db:5432/business_profile
+      CORS_ORIGIN: http://localhost:5173,http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

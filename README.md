@@ -35,10 +35,9 @@ No local Java / Node install is required — everything builds inside containers
 ## Getting started
 
 ```bash
-# 1. Clone WITH submodules (the mock API lives in external/)
-git clone --recurse-submodules <repo-url> eis-kliendiprofiil
+# 1. Clone
+git clone <repo-url> eis-kliendiprofiil
 cd eis-kliendiprofiil
-#    (or, if already cloned:  git submodule update --init --recursive)
 
 # 2. Copy env defaults
 cp .env.example .env
@@ -46,6 +45,8 @@ cp .env.example .env
 # 3. Build and start everything
 docker compose up --build
 ```
+
+> The mock API is vendored under `external/business-profile-mock-api` (plain files, no submodule) — a pinned copy of the provided register simulation. A plain clone is enough.
 
 ### Services & ports
 
