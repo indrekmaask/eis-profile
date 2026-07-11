@@ -3,10 +3,24 @@
     <div class="shell__brand">EIS</div>
     <nav>
       <a routerLink="/profiil" routerLinkActive="is-active">Ettevõtte profiil</a>
+      <a routerLink="/teenus" routerLinkActive="is-active">Toetuse taotlus</a>
+      <a routerLink="/programm" routerLinkActive="is-active">Arenguprogramm</a>
+      <a routerLink="/vali-roll" routerLinkActive="is-active">Vali roll</a>
     </nav>
   </aside>
   <main class="shell__main">
-    <header class="shell__header">Iseteenindus — shell (host)</header>
+    <header class="shell__header">
+      <span>Iseteenindus</span>
+      @if (identity.loggedIn()) {
+        <span class="shell__identity">
+          @if (identity.activeCompany(); as c) {
+            <strong>{{ c.name }}</strong> ·
+          }
+          {{ identity.personCode() }}
+          <button type="button" class="shell__logout" (click)="logout()">Logi välja</button>
+        </span>
+      }
+    </header>
     <router-outlet></router-outlet>
   </main>
 </div>

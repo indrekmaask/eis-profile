@@ -15,7 +15,8 @@
     "baseUrl": ".",
     "paths": {
       "@dds/ui": ["libs/dds-ui/src/public-api.ts"],
-      "@dds/tokens": ["libs/dds-tokens/src/tokens.ts"]
+      "@dds/tokens": ["libs/dds-tokens/src/tokens.ts"],
+      "@eis/profile-api": ["libs/profile-api/src/public-api.ts"]
     }
   },
   "angularCompilerOptions": {

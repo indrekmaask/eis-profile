@@ -1,7 +1,10 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { DdsButton, DdsCard } from '@dds/ui';
 import { CreateProfileRequest, StepUpdateRequest } from '../models/profile.models';
-import { ProfileContextService } from '../services/profile-context.service';
+import { DEFAULT_REGISTRY_CODE, ProfileContextService } from '../services/profile-context.service';
 import { ProfileStore } from '../services/profile-store';
 import { ProfileEdit } from './edit/profile-edit';
 import { ProfileOverview } from './overview/profile-overview';
@@ -21,14 +24,15 @@ export class ProfilePage {
   private readonly pendingCreate = signal(false);
 
   constructor() {
-    // (Re)load whenever the active company changes (Phase 5 switcher drives this).
-    effect(() => {
-      const rc = this.context.registryCode();
-      untracked(() => {
-        this.editing.set(false);
-        this.store.load(rc);
-      });
-    });
+    // Apply the active company/person from the URL on load and on every shell
+    // navigation (the mock switcher / "Vali roll" navigates to /profiil?rc=…&person=…).
+    this.applyFromUrl();
+    inject(Router)
+      .events.pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed(inject(DestroyRef)),
+      )
+      .subscribe(() => this.applyFromUrl());
 
     // Leave the create flow once the profile has been created.
     effect(() => {
@@ -45,6 +49,20 @@ export class ProfilePage {
         onCleanup(() => clearTimeout(t));
       }
     });
+  }
+
+  private applyFromUrl(): void {
+    const params = new URLSearchParams(window.location.search);
+    const rc = params.get('rc') ?? DEFAULT_REGISTRY_CODE;
+    const person = params.get('person');
+    if (person) {
+      this.context.setPerson(person);
+    }
+    if (rc !== this.context.registryCode() || this.store.status() === 'idle') {
+      this.context.setCompany(rc);
+      this.editing.set(false);
+      this.store.load(rc);
+    }
   }
 
   protected startCreate(): void {
