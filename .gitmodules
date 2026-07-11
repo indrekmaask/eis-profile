@@ -1,0 +1,3 @@
+[submodule "external/business-profile-mock-api"]
+	path = external/business-profile-mock-api
+	url = https://github.com/Estonian-Business-and-Innovation-Agency/business-profile-mock-api

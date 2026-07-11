@@ -1,0 +1,35 @@
+# Node
+node_modules/
+dist/
+.angular/
+*.log
+npm-debug.log*
+
+# Java / Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+
+# Env & OS
+.env
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# scaffold temp
+.ngtmp/
+
+# session memory
+.remember/
+
+# playwright-cli session artifacts
+.playwright-cli/
+
+# office lock files
+.~lock.*#
+
+# source/deliverable docs (kept out of git)
+docs/

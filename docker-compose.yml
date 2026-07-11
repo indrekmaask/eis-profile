@@ -1,0 +1,94 @@
+services:
+  # ---- External register simulation (mock API + its own PostgreSQL) ----
+  mock-api-db:
+    build:
+      context: ./external/business-profile-mock-api/docker/postgres
+    image: business-profile-postgres:18
+    environment:
+      POSTGRES_USER: business_profile
+      POSTGRES_PASSWORD: business_profile
+      POSTGRES_DB: business_profile
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U business_profile -d business_profile"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mock-api:
+    build:
+      context: ./external/business-profile-mock-api
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://business_profile:business_profile@mock-api-db:5432/business_profile
+      CORS_ORIGIN: http://localhost:4200
+    ports:
+      - "3000:3000"
+    depends_on:
+      mock-api-db:
+        condition: service_healthy
+
+  # ---- Our backend datastore ----
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-eis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eis}
+      POSTGRES_DB: ${POSTGRES_DB:-eis_profile}
+    ports:
+      - "5433:5432"
+    volumes:
+      - eis_pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-eis} -d ${POSTGRES_DB:-eis_profile}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---- BLL (Java 25 / Spring Boot 4) ----
+  backend:
+    build:
+      context: ./backend
+    environment:
+      SERVER_PORT: 8080
+      REGISTRY_API_BASE_URL: http://mock-api:3000
+      CRM_ENABLED: ${CRM_ENABLED:-false}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-eis_profile}
+      POSTGRES_USER: ${POSTGRES_USER:-eis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eis}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mock-api:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  # ---- Frontend: shell (MF host) ----
+  shell:
+    build:
+      context: .
+      dockerfile: apps/shell/Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      - profile-mfe
+      - backend
+
+  # ---- Frontend: company-profile MFE (MF remote) ----
+  profile-mfe:
+    build:
+      context: .
+      dockerfile: apps/profile-mfe/Dockerfile
+    ports:
+      - "4201:80"
+
+volumes:
+  eis_pgdata:
