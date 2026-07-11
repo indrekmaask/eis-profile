@@ -5,10 +5,13 @@ dist/
 *.log
 npm-debug.log*
 
-# Java / Maven
-target/
-!.mvn/wrapper/maven-wrapper.jar
+# Java
 *.class
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
 
 # Env & OS
 .env
