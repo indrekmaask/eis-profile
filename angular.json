@@ -34,6 +34,9 @@
               }
             ],
             "styles": ["apps/shell/src/styles.scss"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["libs"]
+            },
             "scripts": [],
             "extraWebpackConfig": "apps/shell/webpack.config.js",
             "commonChunk": false
@@ -115,6 +118,9 @@
               }
             ],
             "styles": ["apps/profile-mfe/src/styles.scss"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["libs"]
+            },
             "scripts": [],
             "extraWebpackConfig": "apps/profile-mfe/webpack.config.js",
             "commonChunk": false

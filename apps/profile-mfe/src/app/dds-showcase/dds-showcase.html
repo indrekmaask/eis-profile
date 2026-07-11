@@ -1,0 +1,105 @@
+<div class="showcase">
+  <header class="showcase__head">
+    <span class="showcase__eyebrow">DDS2 · Phase 3</span>
+    <h1>Disainisüsteemi komponendid</h1>
+    <p>EIS ettevõtte profiili kujunduskeel — tokenid ja komponendid.</p>
+  </header>
+
+  <section class="showcase__section">
+    <h2>Nupud</h2>
+    <div class="showcase__row">
+      <button dds-button variant="primary">Salvesta</button>
+      <button dds-button variant="secondary">Katkesta</button>
+      <button dds-button variant="ghost">Lisa veebileht +</button>
+      <button dds-button variant="primary" size="sm">Väike</button>
+      <button dds-button variant="primary" [disabled]="true">Keelatud</button>
+    </div>
+  </section>
+
+  <section class="showcase__section">
+    <h2>Sildid</h2>
+    <div class="showcase__row">
+      <dds-badge tone="info">Registriandmed</dds-badge>
+      <dds-badge tone="success">Esitatud</dds-badge>
+      <dds-badge tone="warning">Vaata üle</dds-badge>
+      <dds-badge tone="error">Puudu</dds-badge>
+      <dds-badge tone="neutral">Mustand</dds-badge>
+    </div>
+  </section>
+
+  <section class="showcase__section">
+    <h2>Sammuindikaator</h2>
+    <dds-stepper [steps]="steps" [active]="activeStep()" (select)="selectStep($event)" />
+  </section>
+
+  <section class="showcase__section">
+    <h2>Registriväljad (kirjutuskaitstud)</h2>
+    <div class="showcase__grid">
+      <dds-registry-field label="Ärinimi" value="Porgand OÜ" />
+      <dds-registry-field label="Registrikood" value="16789012" />
+      <dds-registry-field label="Õiguslik vorm" value="Osaühing" />
+      <dds-registry-field label="EMTAK" value="Toidukaupade jaemüük (47111)" />
+    </div>
+    <dds-registry-provenance asOf="15.05.2026" />
+  </section>
+
+  <form class="showcase__section" [formGroup]="form">
+    <h2>Sisestusväljad</h2>
+    <div class="showcase__grid showcase__grid--form">
+      <dds-input
+        label="E-post"
+        description="Ettevõtte peamine e-posti aadress"
+        [required]="true"
+        formControlName="email"
+      />
+      <dds-dropdown
+        label="Õiguslik vorm"
+        [options]="legalForms"
+        formControlName="legalForm"
+      />
+      <dds-phone-input label="Telefon" [required]="true" formControlName="phone" />
+      <dds-input label="Viga näidiseks" error="See väli on kohustuslik" />
+    </div>
+  </form>
+
+  <section class="showcase__section">
+    <h2>Kontaktandmete plokk</h2>
+    <dds-contact-block heading="Kontaktandmed">
+      <div class="showcase__grid">
+        <dds-registry-field label="Kontaktisik" value="Mari Maasikas" />
+        <dds-registry-field label="Amet" value="Juhatuse liige" />
+      </div>
+    </dds-contact-block>
+  </section>
+
+  <section class="showcase__section">
+    <h2>Sihtturud & tegevuspiirkond (kontrollitud sõnavara)</h2>
+    <div class="showcase__grid showcase__grid--form" [formGroup]="form">
+      <dds-tag-input
+        label="Sihtturud"
+        placeholder="Lisa turg…"
+        [options]="markets"
+        formControlName="markets"
+      />
+      <dds-tag-input
+        label="Tegevuspiirkond"
+        placeholder="Lisa piirkond…"
+        [options]="regions"
+        formControlName="regions"
+      />
+    </div>
+  </section>
+
+  <section class="showcase__section showcase__section--split">
+    <div>
+      <h2>Kaart</h2>
+      <dds-card heading="Seotud isikud">
+        <p>Philia OÜ — Osanik (100%)</p>
+      </dds-card>
+    </div>
+    <div>
+      <h2>Profiili täituvus</h2>
+      <dds-completeness [percent]="67" />
+    </div>
+  </section>
+</div>

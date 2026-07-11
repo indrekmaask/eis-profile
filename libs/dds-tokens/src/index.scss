@@ -1,0 +1,26 @@
+// DDS2 global stylesheet entry. Import once per app:
+//   @use 'dds-tokens/src/index';
+@forward 'fonts';
+@forward 'tokens';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--dds-font-family);
+  font-size: var(--dds-font-size-md);
+  line-height: var(--dds-line-height-normal);
+  color: var(--dds-color-ink-strong);
+  background: var(--dds-color-surface-alt);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

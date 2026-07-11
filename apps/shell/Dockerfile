@@ -5,6 +5,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY angular.json tsconfig.json ./
+COPY libs ./libs
 COPY apps ./apps
 RUN npx ng build shell --configuration production
 
