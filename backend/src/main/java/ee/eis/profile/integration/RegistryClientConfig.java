@@ -9,8 +9,7 @@ import org.springframework.web.client.RestClient;
 public class RegistryClientConfig {
 
     @Bean
-    RestClient registryRestClient(RestClient.Builder builder,
-                                  @Value("${eis.registry.base-url}") String baseUrl) {
-        return builder.baseUrl(baseUrl).build();
+    RestClient registryRestClient(@Value("${eis.registry.base-url}") String baseUrl) {
+        return RestClient.create(baseUrl);
     }
 }
