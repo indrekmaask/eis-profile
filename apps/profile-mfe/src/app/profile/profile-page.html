@@ -1,0 +1,74 @@
+@if (store.toast(); as msg) {
+  <div class="page__toast" role="status">{{ msg }}</div>
+}
+
+@switch (store.status()) {
+  @case ('loading') {
+    <div class="page__center">
+      <div class="page__spinner" aria-label="Laen"></div>
+      <p>Laen profiili…</p>
+    </div>
+  }
+
+  @case ('error') {
+    <div class="page__center">
+      <dds-card heading="Profiili ei õnnestunud laadida">
+        <p>{{ store.errorMessage() || 'Tekkis ootamatu viga.' }}</p>
+        <button dds-button variant="secondary" (click)="onRefresh()">Proovi uuesti</button>
+      </dds-card>
+    </div>
+  }
+
+  @case ('empty') {
+    @if (editing()) {
+      <app-profile-edit
+        mode="create"
+        [prefill]="store.prefill()"
+        [saving]="store.saving()"
+        (createProfile)="onCreate($event)"
+        (cancel)="onCancel()"
+      />
+    } @else {
+      <div class="page__intro">
+        <span class="page__eyebrow">Uus ettevõtte profiil</span>
+        <h1>{{ store.prefill()?.businessName || store.prefill()?.registryCode }}</h1>
+        <p>
+          Sellel ettevõttel ei ole veel profiili. Osa andmeid on juba äriregistrist olemas —
+          täienda vaid puuduvad väljad ning loo profiil.
+        </p>
+        <dds-card heading="Äriregistrist eeltäidetud">
+          <ul class="page__prefill">
+            <li><span>Ärinimi</span><span>{{ store.prefill()?.businessName }}</span></li>
+            <li><span>Õiguslik vorm</span><span>{{ store.prefill()?.legalForm }}</span></li>
+            <li><span>EMTAK</span><span>{{ store.prefill()?.emtakName }}</span></li>
+            <li><span>Seotud isikud</span><span>{{ store.prefill()?.relatedParties?.length || 0 }}</span></li>
+          </ul>
+        </dds-card>
+        <button dds-button variant="primary" (click)="startCreate()">Alusta profiili loomist</button>
+      </div>
+    }
+  }
+
+  @default {
+    @if (store.profile(); as profile) {
+      @if (editing()) {
+        <app-profile-edit
+          mode="edit"
+          [profile]="profile"
+          [saving]="store.saving()"
+          (saveStep)="onSaveStep($event)"
+          (refresh)="onRefresh()"
+          (cancel)="onCancel()"
+        />
+      } @else {
+        <app-profile-overview
+          [profile]="profile"
+          [unavailable]="store.status() === 'unavailable'"
+          [unavailableMessage]="store.errorMessage()"
+          (edit)="onEdit()"
+          (refresh)="onRefresh()"
+        />
+      }
+    }
+  }
+}

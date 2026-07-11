@@ -1,0 +1,156 @@
+@let p = profile();
+
+<div class="overview">
+  <header class="overview__head">
+    <div>
+      <span class="overview__eyebrow">Ettevõtte profiil</span>
+      <h1>{{ p.businessName.value || p.registryCode }}</h1>
+      <p class="overview__sub">Registrikood {{ p.registryCode }}</p>
+    </div>
+    <button dds-button variant="primary" (click)="edit.emit()">Muuda profiili</button>
+  </header>
+
+  @if (unavailable()) {
+    <div class="overview__notice overview__notice--warn" role="status">
+      {{ unavailableMessage() || 'Register on ajutiselt kättesaamatu.' }}
+    </div>
+  }
+
+  @if (p.discrepancies.length) {
+    <div class="overview__notice overview__notice--review" role="status">
+      <strong>Vaata üle:</strong> registris on muutunud
+      {{ p.discrepancies.length }} välja. Kontrolli ja kinnita andmed.
+    </div>
+  }
+
+  <!-- 1. Äriregistri andmed -->
+  <section class="overview__section">
+    <h2>Äriregistri andmed</h2>
+    <div class="overview__grid">
+      <dds-registry-field label="Ärinimi" [value]="p.businessName.value" />
+      <dds-registry-field label="Õiguslik vorm" [value]="p.legalForm.value" />
+      <dds-registry-field
+        label="EMTAK"
+        [value]="p.emtakName.value ? p.emtakName.value + ' (' + p.emtakCode.value + ')' : null"
+      />
+      <dds-registry-field label="Osakapital" [value]="money(p.capitalSize.value)" />
+      @if (legalAddress()) {
+        <dds-registry-field label="Aadress" [value]="legalAddress()" />
+      }
+    </div>
+    <dds-registry-provenance [asOf]="asOf()" (refresh)="refresh.emit()" />
+  </section>
+
+  <!-- 2. Kontaktandmed (#CEE2FD) -->
+  <section class="overview__section">
+    <dds-contact-block heading="Kontaktandmed">
+      @if (primaryContact(); as c) {
+        <div class="overview__grid">
+          <dds-registry-field label="Kontaktisik" [value]="c.fullName" />
+          <dds-registry-field label="Amet" [value]="c.role" />
+          <dds-registry-field label="E-post" [value]="c.email" />
+          <dds-registry-field label="Telefon" [value]="c.phone" />
+        </div>
+      } @else {
+        <p class="overview__empty">Kontaktisik puudub. Lisa see profiili muutmisel.</p>
+      }
+      @if (p.website.value) {
+        <p class="overview__web">Veebileht: <a [href]="p.website.value" target="_blank" rel="noopener">{{ p.website.value }}</a></p>
+      }
+      @if (p.bankAccounts.length) {
+        <ul class="overview__banks">
+          @for (b of p.bankAccounts; track b.id) {
+            <li>{{ b.iban }}@if (b.bankName) { · {{ b.bankName }}}</li>
+          }
+        </ul>
+      }
+    </dds-contact-block>
+  </section>
+
+  <!-- 3. Profiili täituvus -->
+  <section class="overview__section">
+    <dds-completeness [percent]="p.completeness.percent" (continue)="edit.emit()" />
+    @if (missingLabels().length) {
+      <p class="overview__missing">
+        Puuduvad:
+        @for (m of missingLabels(); track m) {
+          <span class="overview__missing-tag">{{ m }}</span>
+        }
+      </p>
+    }
+  </section>
+
+  <!-- 4. Muud andmed -->
+  <section class="overview__section">
+    <h2>Muud andmed</h2>
+    <div class="overview__cards">
+      <dds-card heading="Seotud isikud">
+        @if (p.relatedParties.length) {
+          <ul class="overview__list">
+            @for (rp of p.relatedParties; track rp.displayName) {
+              <li>
+                <span>{{ rp.displayName }}</span>
+                <span class="overview__muted">{{ rp.role }}@if (rp.ownershipPct != null) { · {{ rp.ownershipPct }}%}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="overview__empty">—</p>
+        }
+      </dds-card>
+
+      <dds-card heading="Kinnisvara">
+        <p class="overview__stat">{{ p.cards.realEstateCount }}</p>
+        <p class="overview__muted">objekti registris</p>
+      </dds-card>
+
+      <dds-card heading="Maksekäitumine">
+        <dds-badge [tone]="p.cards.paymentBehaviour === 'Maksehäireid ei ole' ? 'success' : 'neutral'">
+          {{ p.cards.paymentBehaviour || 'Andmed puuduvad' }}
+        </dds-badge>
+        @if (p.cards.officialNoticeCount) {
+          <p class="overview__muted">{{ p.cards.officialNoticeCount }} ametlikku teadet</p>
+        }
+      </dds-card>
+
+      <dds-card heading="Töötajate arv">
+        <p class="overview__stat">{{ p.employeeCount.value ?? p.cards.employeeCount ?? '—' }}</p>
+      </dds-card>
+
+      <dds-card heading="Sihtturud">
+        <p>{{ marketList() }}</p>
+      </dds-card>
+
+      <dds-card heading="Tegevuspiirkond">
+        <p>{{ regionList() }}</p>
+      </dds-card>
+    </div>
+  </section>
+
+  <!-- 5. Finantsnäitajad -->
+  @if (p.annualReports.length) {
+    <section class="overview__section">
+      <h2>Finantsnäitajad</h2>
+      <dds-card>
+        <div class="overview__fin">
+          <div class="overview__fin-row overview__fin-row--head">
+            <span>Aasta</span>
+            <span>Müügitulu (EE)</span>
+            <span>Puhaskasum</span>
+            <span>Bilansimaht</span>
+            <span>Omakapital</span>
+          </div>
+          @for (r of p.annualReports; track r.reportYear) {
+            <div class="overview__fin-row">
+              <span>{{ r.reportYear }}</span>
+              <span>{{ money(r.salesRevenueEstonia) }}</span>
+              <span>{{ money(r.netProfit) }}</span>
+              <span>{{ money(r.balanceSheetTotal) }}</span>
+              <span>{{ money(r.equity) }}</span>
+            </div>
+          }
+        </div>
+      </dds-card>
+    </section>
+  }
+</div>

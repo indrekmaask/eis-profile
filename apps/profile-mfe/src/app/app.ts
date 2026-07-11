@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { DdsShowcase } from './dds-showcase/dds-showcase';
+import { ProfilePage } from './profile/profile-page';
 
 @Component({
   selector: 'app-profile-root',
-  imports: [DdsShowcase],
+  imports: [ProfilePage],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

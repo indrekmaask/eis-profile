@@ -1,0 +1,142 @@
+:host {
+  display: block;
+  max-width: var(--dds-width-block);
+  margin: 0 auto;
+  padding: var(--dds-space-6);
+}
+
+.edit__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--dds-space-4);
+  margin-bottom: var(--dds-space-5);
+}
+
+.edit__eyebrow {
+  font-size: var(--dds-font-size-xs);
+  font-weight: var(--dds-font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dds-color-primary);
+}
+
+.edit__head h1 {
+  margin: var(--dds-space-1) 0 0;
+  font-size: var(--dds-font-size-lg);
+  font-weight: var(--dds-font-weight-bold);
+}
+
+.edit__form {
+  margin-top: var(--dds-space-6);
+}
+
+.edit__step > h2 {
+  font-size: var(--dds-font-size-lg);
+  font-weight: var(--dds-font-weight-bold);
+  margin: 0 0 var(--dds-space-4);
+}
+
+.edit__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--dds-space-3);
+  margin-bottom: var(--dds-space-4);
+}
+
+.edit__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-4);
+  max-width: var(--dds-width-form);
+  align-items: flex-start;
+}
+
+.edit__fields dds-input,
+.edit__fields dds-tag-input {
+  width: 100%;
+}
+
+.edit__repeat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-4);
+  margin-bottom: var(--dds-space-4);
+}
+
+.edit__card {
+  border: 1px solid var(--dds-color-border);
+  border-radius: var(--dds-radius-card);
+  padding: var(--dds-space-4);
+  background: var(--dds-color-surface);
+}
+
+.edit__card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--dds-space-3);
+  font-weight: var(--dds-font-weight-medium);
+}
+
+.edit__subhead {
+  font-size: var(--dds-font-size-md);
+  font-weight: var(--dds-font-weight-bold);
+  margin: var(--dds-space-6) 0 var(--dds-space-3);
+}
+
+.edit__check {
+  display: flex;
+  align-items: center;
+  gap: var(--dds-space-2);
+  margin-top: var(--dds-space-3);
+  font-size: var(--dds-font-size-sm);
+}
+
+.edit__link {
+  background: none;
+  border: none;
+  color: var(--dds-color-error);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+
+.edit__note,
+.edit__muted {
+  color: var(--dds-color-ink-subtle);
+  font-size: var(--dds-font-size-sm);
+}
+
+.edit__note {
+  margin: 0 0 var(--dds-space-4);
+}
+
+.edit__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-2);
+}
+
+.edit__list li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--dds-space-3);
+}
+
+.edit__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--dds-space-6);
+  padding-top: var(--dds-space-4);
+  border-top: 1px solid var(--dds-color-border);
+}
+
+.edit__footer-right {
+  display: flex;
+  gap: var(--dds-space-3);
+}
