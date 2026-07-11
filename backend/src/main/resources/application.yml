@@ -4,6 +4,22 @@ server:
 spring:
   application:
     name: profile-backend
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:eis_profile}
+    username: ${POSTGRES_USER:eis}
+    password: ${POSTGRES_PASSWORD:eis}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate.default_schema: profile
+  flyway:
+    enabled: true
+    default-schema: profile
+    schemas: profile
+    create-schemas: true
+    locations: classpath:db/migration,classpath:db/seed
 
 # Integration + feature flags (used from Phase 2 onward; declared here so config is visible early)
 eis:

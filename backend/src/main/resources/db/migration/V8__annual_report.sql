@@ -1,0 +1,46 @@
+-- Annual reports — read-only, from the register. Financial field names mirror the mock
+-- API annualReports[] (src/types/company.ts), snake_cased. Monetary values in cents/whole
+-- units as delivered by the register; stored as BIGINT.
+
+CREATE TABLE annual_report (
+    id                                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    profile_id                                  UUID NOT NULL REFERENCES customer_profile (id) ON DELETE CASCADE,
+    report_year                                 INTEGER NOT NULL,
+    is_required                                 BOOLEAN NOT NULL,
+    is_submitted                                BOOLEAN NOT NULL,
+    sales_revenue_estonia                       BIGINT,
+    sales_revenue_eu                            BIGINT,
+    sales_revenue_non_eu                        BIGINT,
+    operating_profit                            BIGINT,
+    operating_profit_unconsolidated             BIGINT,
+    depreciation                                BIGINT,
+    depreciation_unconsolidated                 BIGINT,
+    net_profit                                  BIGINT,
+    net_profit_unconsolidated                   BIGINT,
+    balance_sheet_total                         BIGINT,
+    balance_sheet_total_unconsolidated          BIGINT,
+    share_capital                               BIGINT,
+    share_capital_unconsolidated                BIGINT,
+    equity                                      BIGINT,
+    equity_unconsolidated                       BIGINT,
+    long_term_loan_obligations                  BIGINT,
+    long_term_loan_obligations_unconsolidated   BIGINT,
+    short_term_loan_obligations                 BIGINT,
+    short_term_loan_obligations_unconsolidated  BIGINT,
+    obligations_total                           BIGINT,
+    obligations_total_unconsolidated            BIGINT,
+    current_assets_total                        BIGINT,
+    current_assets_total_unconsolidated         BIGINT,
+    fixed_assets_total                          BIGINT,
+    fixed_assets_total_unconsolidated           BIGINT,
+    short_term_obligations_total                BIGINT,
+    short_term_obligations_total_unconsolidated BIGINT,
+    long_term_obligations_total                 BIGINT,
+    long_term_obligations_total_unconsolidated  BIGINT,
+    source                                      VARCHAR(10) NOT NULL DEFAULT 'REGISTRY',
+    created_at                                  TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT annual_report_source_chk CHECK (source IN ('REGISTRY', 'CRM', 'USER')),
+    CONSTRAINT annual_report_year_chk CHECK (report_year BETWEEN 1900 AND 2200),
+    CONSTRAINT annual_report_unique UNIQUE (profile_id, report_year)
+);
