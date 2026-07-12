@@ -39,12 +39,11 @@ No local Java / Node install is required — everything builds inside containers
 git clone <repo-url> eis-kliendiprofiil
 cd eis-kliendiprofiil
 
-# 2. Copy env defaults
-cp .env.example .env
-
-# 3. Build and start everything
+# 2. Build and start everything
 docker compose up --build
 ```
+
+No configuration step — Compose ships with sane defaults baked in. Override any value (e.g. `POSTGRES_PASSWORD`, `CRM_ENABLED`) by exporting it or dropping a `.env` file next to `docker-compose.yml`, but nothing is required to run.
 
 > The mock API is vendored under `external/business-profile-mock-api` (plain files, no submodule) — a pinned copy of the provided register simulation. A plain clone is enough.
 
@@ -56,7 +55,7 @@ docker compose up --build
 | Profile MFE (remote) | http://localhost:4201 | Loaded by the shell via `remoteEntry.js` |
 | Backend (BLL) | http://localhost:8080 | Health: `/actuator/health` |
 | Mock API (register) | http://localhost:3000 | Swagger: `/api/docs`; `GET /api/v1/companies/{8-digit}` |
-| Backend PostgreSQL | localhost:5433 | DB `eis_profile` (user/pass from `.env`) |
+| Backend PostgreSQL | localhost:5433 | DB `eis_profile` (default user/pass `eis`/`eis`) |
 | Mock-API PostgreSQL | internal | Owned by the mock API |
 
 ### Smoke test
