@@ -4,6 +4,8 @@ import { Login } from './identity/login';
 import { RoleSelect } from './identity/role-select';
 import { ServiceApplication } from './services/service-application';
 import { PreAdvisory } from './services/pre-advisory';
+import { ServicesList } from './services/services-list';
+import { ServiceDetail } from './services/service-detail';
 import { Toolaud } from './dashboard/toolaud';
 import { KupsusLanding } from './kupsus/kupsus-landing';
 import { KupsusHindamine } from './kupsus/kupsus-hindamine';
@@ -22,6 +24,8 @@ export const routes: Routes = [
         exposedModule: './Component',
       }).then((m) => m.App),
   },
+  { path: 'services', component: ServicesList },
+  { path: 'services/:id', component: ServiceDetail },
   { path: 'maturity', component: KupsusLanding },
   { path: 'maturity/assessment', component: KupsusHindamine },
   { path: 'maturity/result', component: KupsusTulemus },

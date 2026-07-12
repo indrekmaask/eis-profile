@@ -55,7 +55,7 @@ export class App {
       items: [
         { label: 'Töölaud', link: '/dashboard' },
         { label: 'Taotlused' },
-        { label: 'Minu teenused' },
+        { label: 'Minu teenused', link: '/services' },
         { label: 'Arenguplaan' },
         { label: 'Ettevõtte profiil', link: '/profile' },
         { label: 'Küpsusdiagnostika', link: '/maturity' },

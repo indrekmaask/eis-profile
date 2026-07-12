@@ -77,7 +77,7 @@
                         class="sidenav__item"
                         [routerLink]="it.link"
                         routerLinkActive="is-active"
-                        [routerLinkActiveOptions]="{ exact: it.link === '/maturity' ? false : true }"
+                        [routerLinkActiveOptions]="{ exact: (it.link === '/maturity' || it.link === '/services') ? false : true }"
                       >{{ it.label }}</a>
                     } @else {
                       <span class="sidenav__item sidenav__item--muted">{{ it.label }}</span>
