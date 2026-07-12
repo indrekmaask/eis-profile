@@ -181,6 +181,6 @@ export class PreAdvisory {
     this.booked.set(true);
   }
   protected toRoles(): void {
-    this.router.navigate(['/vali-roll']);
+    this.router.navigate(['/select-role']);
   }
 }

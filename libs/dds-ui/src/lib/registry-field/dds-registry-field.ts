@@ -22,11 +22,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
         display: flex;
         flex-direction: column;
         gap: var(--dds-space-1);
-        padding: var(--dds-space-3) var(--dds-space-4);
-        background: var(--dds-color-surface);
-        border: 1px solid var(--dds-color-border);
-        border-left: 4px solid var(--dds-color-registry-accent);
-        border-radius: var(--dds-radius-control);
+        padding: var(--dds-space-1) 0 var(--dds-space-1) var(--dds-space-4);
+        border-left: 3px solid var(--dds-color-registry-accent);
         font-family: var(--dds-font-family);
       }
       .dds-rf__label {

@@ -1,26 +1,134 @@
-<div class="shell">
-  <aside class="shell__nav">
-    <div class="shell__brand">EIS</div>
-    <nav>
-      <a routerLink="/profiil" routerLinkActive="is-active">Ettevõtte profiil</a>
-      <a routerLink="/teenus" routerLinkActive="is-active">Toetuse taotlus</a>
-      <a routerLink="/programm" routerLinkActive="is-active">Arenguprogramm</a>
-      <a routerLink="/vali-roll" routerLinkActive="is-active">Vali roll</a>
-    </nav>
-  </aside>
-  <main class="shell__main">
-    <header class="shell__header">
-      <span>Iseteenindus</span>
-      @if (identity.loggedIn()) {
-        <span class="shell__identity">
-          @if (identity.activeCompany(); as c) {
-            <strong>{{ c.name }}</strong> ·
-          }
-          {{ identity.personCode() }}
-          <button type="button" class="shell__logout" (click)="logout()">Logi välja</button>
-        </span>
-      }
+@if (!showChrome()) {
+  <router-outlet></router-outlet>
+} @else {
+  <div class="portal" [class.portal--no-nav]="!showSidebar()">
+    <header class="topbar">
+      <a class="topbar__brand" routerLink="/dashboard" aria-label="EIS – avaleht">
+        <img src="/img/eis-logo.svg" alt="eis" />
+      </a>
+      <div class="topbar__right">
+        <button type="button" class="topbar__icon" aria-label="Otsi">🔍</button>
+        <button type="button" class="topbar__lang">EST ▾</button>
+        @if (identity.loggedIn()) {
+          <span class="topbar__user">
+            <span class="topbar__glyph" aria-hidden="true">◍</span>
+            @if (identity.personName()) {
+              <strong>{{ identity.personName() }}</strong>
+            }
+            @if (identity.activeCompany(); as c) {
+              <span class="topbar__sep">|</span> {{ c.name }} ▾
+            }
+            <button type="button" class="topbar__logout" (click)="logout()">Logi välja</button>
+          </span>
+        }
+      </div>
     </header>
-    <router-outlet></router-outlet>
-  </main>
-</div>
+
+    <div class="portal__body">
+      @if (showSidebar()) {
+        <aside class="sidenav">
+          @for (g of navGroups; track g.label) {
+            <div class="sidenav__group">
+              <div class="sidenav__grouphead">
+                <span class="sidenav__gicon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    @switch (g.icon) {
+                      @case ('home') {
+                        <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <path d="M9 21v-6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6" />
+                      }
+                      @case ('wallet') {
+                        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                        <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+                      }
+                      @case ('globe') {
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                        <path d="M2 12h20" />
+                      }
+                      @case ('chart') {
+                        <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                        <path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" />
+                      }
+                      @case ('settings') {
+                        <path d="M20 7h-9" /><path d="M14 17H5" />
+                        <circle cx="17" cy="17" r="3" /><circle cx="7" cy="7" r="3" />
+                      }
+                    }
+                  </svg>
+                </span>
+                <span class="sidenav__glabel">{{ g.label }}</span>
+                <span class="sidenav__chev">{{ g.expanded ? '▴' : '▾' }}</span>
+              </div>
+              @if (g.expanded && g.items) {
+                <div class="sidenav__items">
+                  @for (it of g.items; track it.label) {
+                    @if (it.link === '/profile') {
+                      <a
+                        class="sidenav__item"
+                        [routerLink]="it.link"
+                        [queryParams]="profileParams()"
+                        routerLinkActive="is-active"
+                      >{{ it.label }}</a>
+                    } @else if (it.link) {
+                      <a
+                        class="sidenav__item"
+                        [routerLink]="it.link"
+                        routerLinkActive="is-active"
+                        [routerLinkActiveOptions]="{ exact: it.link === '/maturity' ? false : true }"
+                      >{{ it.label }}</a>
+                    } @else {
+                      <span class="sidenav__item sidenav__item--muted">{{ it.label }}</span>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          }
+        </aside>
+      }
+
+      <main class="portal__main">
+        <router-outlet></router-outlet>
+
+        <footer class="footer">
+          <div class="footer__cols">
+            <div class="footer__col">
+              <h4>Ettevõtluse ja Innovatsiooni Sihtasutus</h4>
+              <p>
+                Aitame suurendada Eesti rahvusvahelist konkurentsivõimet, arendada ettevõtlust ja
+                parandada elanike elamistingimusi.
+              </p>
+              <p>✉ klienditeenindus&#64;eis.ee</p>
+              <p>→ Meist</p>
+              <div class="footer__social">
+                <img src="/img/social-linkedin.svg" alt="LinkedIn" />
+                <img src="/img/social-facebook.svg" alt="Facebook" />
+                <img src="/img/social-youtube.svg" alt="YouTube" />
+              </div>
+            </div>
+            <div class="footer__col">
+              <h4>Kasulikud lingid</h4>
+              @for (l of ['Overview', 'Business', 'Work & Study', 'Visit', 'Stories']; track l) {
+                <a href="#" (click)="$event.preventDefault()">{{ l }} →</a>
+              }
+            </div>
+            <div class="footer__col">
+              <h4>Discover Estonia</h4>
+              @for (l of ['Estonia', 'Visit Estonia', 'e-Residency', 'Work in Estonia', 'Trade in Estonia']; track l) {
+                <a href="#" (click)="$event.preventDefault()">{{ l }} ↗</a>
+              }
+            </div>
+          </div>
+          <div class="footer__bar">
+            <img class="footer__brand" src="/img/eis-logo.svg" alt="eis" />
+            <span>Managed by Estonian Business and Innovation Agency.</span>
+            <span class="footer__legal">Terms of use · Privacy policy · Cookie policy</span>
+          </div>
+        </footer>
+      </main>
+    </div>
+  </div>
+}

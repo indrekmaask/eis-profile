@@ -4,6 +4,16 @@ import { DdsButton, DdsCard } from '@dds/ui';
 import { AccessEntry, ProfileApiService } from '@eis/profile-api';
 import { IdentityService } from './identity.service';
 
+/** Estonian labels for the register access-role enum. */
+const ROLE_LABELS: Record<string, string> = {
+  OWNER: 'Omanik',
+  BOARD_MEMBER: 'Juhatuse liige',
+  AUTHORIZED_REPRESENTATIVE: 'Volitatud esindaja',
+  SHAREHOLDER: 'Osanik',
+  PROCURATOR: 'Prokurist',
+  BENEFICIAL_OWNER: 'Tegelik kasusaaja',
+};
+
 /** "Vali roll": lists companies the logged-in person may act for (via profile_access). */
 @Component({
   selector: 'app-role-select',
@@ -23,7 +33,7 @@ import { IdentityService } from './identity.service';
         <div class="roles__list">
           @for (e of entries(); track e.registryCode) {
             <dds-card [heading]="e.businessName">
-              <p class="roles__muted">Registrikood {{ e.registryCode }} · roll: {{ e.accessRole }}</p>
+              <p class="roles__muted">Registrikood {{ e.registryCode }} · roll: {{ roleLabel(e.accessRole) }}</p>
               <button dds-button variant="primary" size="sm" (click)="choose(e)">
                 Vali see ettevõte
               </button>
@@ -103,9 +113,13 @@ export class RoleSelect {
     });
   }
 
+  protected roleLabel(role: string): string {
+    return ROLE_LABELS[role] ?? role;
+  }
+
   protected choose(e: AccessEntry): void {
     this.identity.selectCompany(e.registryCode, e.businessName);
-    this.router.navigate(['/profiil'], {
+    this.router.navigate(['/profile'], {
       queryParams: { rc: e.registryCode, person: this.identity.personCode() },
     });
   }

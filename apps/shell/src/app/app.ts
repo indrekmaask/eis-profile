@@ -1,6 +1,20 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { IdentityService } from './identity/identity.service';
+
+interface NavItem {
+  label: string;
+  link?: string;
+  params?: Record<string, string>;
+}
+interface NavGroup {
+  label: string;
+  icon: string;
+  expanded?: boolean;
+  items?: NavItem[];
+}
 
 @Component({
   selector: 'app-root',
@@ -12,6 +26,46 @@ import { IdentityService } from './identity/identity.service';
 export class App {
   protected readonly identity = inject(IdentityService);
   private readonly router = inject(Router);
+
+  private readonly url = toSignal(
+    this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd),
+      map(() => this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  protected readonly isLogin = computed(() => {
+    const u = this.url();
+    return u === '/' || u.startsWith('/?');
+  });
+  protected readonly showChrome = computed(() => !this.isLogin());
+  protected readonly showSidebar = computed(() => this.showChrome() && !!this.identity.activeCompany());
+
+  protected readonly profileParams = computed(() => ({
+    rc: this.identity.activeCompany()?.registryCode ?? '',
+    person: this.identity.personCode(),
+  }));
+
+  protected readonly navGroups: NavGroup[] = [
+    {
+      label: 'Peamine',
+      icon: 'home',
+      expanded: true,
+      items: [
+        { label: 'Töölaud', link: '/dashboard' },
+        { label: 'Taotlused' },
+        { label: 'Minu teenused' },
+        { label: 'Arenguplaan' },
+        { label: 'Ettevõtte profiil', link: '/profile' },
+        { label: 'Küpsusdiagnostika', link: '/maturity' },
+      ],
+    },
+    { label: 'Finantsid', icon: 'wallet' },
+    { label: 'Eksport', icon: 'globe' },
+    { label: 'Aruandlus', icon: 'chart' },
+    { label: 'Haldus', icon: 'settings' },
+  ];
 
   protected logout(): void {
     this.identity.logout();

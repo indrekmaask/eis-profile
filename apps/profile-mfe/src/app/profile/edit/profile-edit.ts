@@ -224,6 +224,10 @@ export class ProfileEdit {
     this.activeStep.set(Math.max(0, Math.min(this.steps.length - 1, i)));
   }
   protected next(): void {
+    // Persist as you go (edit mode) so each step saves without a separate button.
+    if (this.mode() === 'edit' && !this.persistStep()) {
+      return;
+    }
     this.go(this.activeStep() + 1);
   }
   protected prev(): void {
@@ -233,16 +237,22 @@ export class ProfileEdit {
   protected readonly isLastStep = computed(() => this.activeStep() === this.steps.length - 1);
   protected readonly canSaveStep = computed(() => STEP_NUMBER[this.activeStep()] !== undefined);
 
-  protected onSaveStep(): void {
+  /** Emits the PATCH for the current step; returns false if the step is invalid. */
+  private persistStep(): boolean {
     const step = STEP_NUMBER[this.activeStep()];
     if (step === undefined) {
-      return;
+      return true;
     }
     if (step === 2 && (this.contacts.invalid || this.bankAccounts.invalid)) {
       this.form.markAllAsTouched();
-      return;
+      return false;
     }
     this.saveStep.emit({ step, body: this.stepBody(step) });
+    return true;
+  }
+
+  protected onSave(): void {
+    this.persistStep();
   }
 
   private stepBody(step: number): StepUpdateRequest {

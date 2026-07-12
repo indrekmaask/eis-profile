@@ -145,6 +145,6 @@ export class ServiceApplication {
     this.submitted.set(true);
   }
   protected toRoles(): void {
-    this.router.navigate(['/vali-roll']);
+    this.router.navigate(['/select-role']);
   }
 }

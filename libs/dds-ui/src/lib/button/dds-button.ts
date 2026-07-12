@@ -4,7 +4,7 @@ export type DdsButtonVariant = 'primary' | 'secondary' | 'ghost';
 export type DdsButtonSize = 'md' | 'sm';
 
 @Component({
-  selector: 'dds-button, button[dds-button]',
+  selector: 'dds-button, button[dds-button], a[dds-button]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content></ng-content>`,
   host: {

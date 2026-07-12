@@ -1,156 +1,166 @@
 @let p = profile();
 
-<div class="overview">
-  <header class="overview__head">
+<div class="ov">
+  <nav class="ov__crumb">Peamine / Ettevõtte profiil</nav>
+
+  <header class="ov__head">
     <div>
-      <span class="overview__eyebrow">Ettevõtte profiil</span>
       <h1>{{ p.businessName.value || p.registryCode }}</h1>
-      <p class="overview__sub">Registrikood {{ p.registryCode }}</p>
+      <p class="ov__sub">Registrikood {{ p.registryCode }}</p>
     </div>
-    <button dds-button variant="primary" (click)="edit.emit()">Muuda profiili</button>
+    <button dds-button variant="secondary" size="sm" (click)="edit.emit()">Muuda profiili →</button>
   </header>
 
   @if (unavailable()) {
-    <div class="overview__notice overview__notice--warn" role="status">
+    <div class="ov__notice ov__notice--warn" role="status">
       {{ unavailableMessage() || 'Register on ajutiselt kättesaamatu.' }}
     </div>
   }
-
   @if (p.discrepancies.length) {
-    <div class="overview__notice overview__notice--review" role="status">
-      <strong>Vaata üle:</strong> registris on muutunud
-      {{ p.discrepancies.length }} välja. Kontrolli ja kinnita andmed.
+    <div class="ov__notice ov__notice--review" role="status">
+      <strong>Vaata üle:</strong> registris on muutunud {{ p.discrepancies.length }} välja.
+      Kontrolli ja kinnita andmed.
     </div>
   }
 
-  <!-- 1. Äriregistri andmed -->
-  <section class="overview__section">
-    <h2>Äriregistri andmed</h2>
-    <div class="overview__grid">
-      <dds-registry-field label="Ärinimi" [value]="p.businessName.value" />
-      <dds-registry-field label="Õiguslik vorm" [value]="p.legalForm.value" />
-      <dds-registry-field
-        label="EMTAK"
-        [value]="p.emtakName.value ? p.emtakName.value + ' (' + p.emtakCode.value + ')' : null"
-      />
-      <dds-registry-field label="Osakapital" [value]="money(p.capitalSize.value)" />
-      @if (legalAddress()) {
-        <dds-registry-field label="Aadress" [value]="legalAddress()" />
-      }
-    </div>
-    <dds-registry-provenance [asOf]="asOf()" (refresh)="refresh.emit()" />
-  </section>
+  <div class="ov__completeness">
+    <dds-completeness [percent]="p.completeness.percent" (continue)="edit.emit()" />
+  </div>
 
-  <!-- 2. Kontaktandmed (#CEE2FD) -->
-  <section class="overview__section">
+  <div class="ov__topgrid">
+    <section class="card ov__general">
+      <h2>Üldandmed</h2>
+      <dl class="ov__rows">
+        @if (legalAddress()) {
+          <div class="ov__row"><dt>Aadress</dt><dd>{{ legalAddress() }}</dd></div>
+        }
+        <div class="ov__row"><dt>Tegevusala</dt><dd>{{ emtak() }}</dd></div>
+        <div class="ov__row"><dt>Osakapital</dt><dd>{{ money(p.capitalSize.value) }}</dd></div>
+      </dl>
+      <p class="ov__prov">
+        <span aria-hidden="true">ⓘ</span>
+        Andmed pärinevad registritest@if (asOf()) {: {{ asOf() }} seisuga}.
+        <button type="button" class="ov__link" (click)="refresh.emit()">Värskenda andmeid</button>
+      </p>
+    </section>
+
     <dds-contact-block heading="Kontaktandmed">
       @if (primaryContact(); as c) {
-        <div class="overview__grid">
-          <dds-registry-field label="Kontaktisik" [value]="c.fullName" />
-          <dds-registry-field label="Amet" [value]="c.role" />
-          <dds-registry-field label="E-post" [value]="c.email" />
-          <dds-registry-field label="Telefon" [value]="c.phone" />
-        </div>
+        <p class="ov__contactname">{{ c.fullName }}</p>
+        @if (c.role) { <p class="ov__muted">{{ c.role }}</p> }
+        @if (c.email) { <p>{{ c.email }}</p> }
+        @if (c.phone) { <p>{{ c.phone }}</p> }
       } @else {
-        <p class="overview__empty">Kontaktisik puudub. Lisa see profiili muutmisel.</p>
+        <p class="ov__muted">Kontaktisik puudub. Lisa see profiili muutmisel.</p>
       }
+      @if (legalAddress()) { <p class="ov__spaced">{{ legalAddress() }}</p> }
       @if (p.website.value) {
-        <p class="overview__web">Veebileht: <a [href]="p.website.value" target="_blank" rel="noopener">{{ p.website.value }}</a></p>
+        <p><a class="ov__weblink" [href]="p.website.value" target="_blank" rel="noopener">{{ p.website.value }} ↗</a></p>
       }
       @if (p.bankAccounts.length) {
-        <ul class="overview__banks">
+        <ul class="ov__banks">
           @for (b of p.bankAccounts; track b.id) {
             <li>{{ b.iban }}@if (b.bankName) { · {{ b.bankName }}}</li>
           }
         </ul>
       }
     </dds-contact-block>
-  </section>
+  </div>
 
-  <!-- 3. Profiili täituvus -->
-  <section class="overview__section">
-    <dds-completeness [percent]="p.completeness.percent" (continue)="edit.emit()" />
-    @if (missingLabels().length) {
-      <p class="overview__missing">
-        Puuduvad:
-        @for (m of missingLabels(); track m) {
-          <span class="overview__missing-tag">{{ m }}</span>
-        }
-      </p>
-    }
-  </section>
-
-  <!-- 4. Muud andmed -->
-  <section class="overview__section">
-    <h2>Muud andmed</h2>
-    <div class="overview__cards">
-      <dds-card heading="Seotud isikud">
+  <section>
+    <h2 class="ov__section">Muud andmed</h2>
+    <div class="ov__cards">
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="users" /></span>
+        <h3>Seotud isikud</h3>
         @if (p.relatedParties.length) {
-          <ul class="overview__list">
+          <ul class="mcard__list">
             @for (rp of p.relatedParties; track rp.displayName) {
               <li>
                 <span>{{ rp.displayName }}</span>
-                <span class="overview__muted">{{ rp.role }}@if (rp.ownershipPct != null) { · {{ rp.ownershipPct }}%}</span>
+                <span class="ov__muted">{{ rp.role }}@if (rp.ownershipPct != null) { · {{ rp.ownershipPct }}%}</span>
               </li>
             }
           </ul>
         } @else {
-          <p class="overview__empty">—</p>
+          <p class="mcard__value">0</p>
         }
-      </dds-card>
+      </div>
 
-      <dds-card heading="Kinnisvara">
-        <p class="overview__stat">{{ p.cards.realEstateCount }}</p>
-        <p class="overview__muted">objekti registris</p>
-      </dds-card>
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="building" /></span>
+        <h3>Kinnisvara</h3>
+        <p class="mcard__value">{{ p.cards.realEstateCount }}</p>
+        <p class="ov__muted">objekti registris</p>
+      </div>
 
-      <dds-card heading="Maksekäitumine">
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="landmark" /></span>
+        <h3>Maksekäitumine</h3>
         <dds-badge [tone]="p.cards.paymentBehaviour === 'Maksehäireid ei ole' ? 'success' : 'neutral'">
           {{ p.cards.paymentBehaviour || 'Andmed puuduvad' }}
         </dds-badge>
         @if (p.cards.officialNoticeCount) {
-          <p class="overview__muted">{{ p.cards.officialNoticeCount }} ametlikku teadet</p>
+          <p class="ov__muted">{{ p.cards.officialNoticeCount }} ametlikku teadet</p>
         }
-      </dds-card>
+      </div>
 
-      <dds-card heading="Töötajate arv">
-        <p class="overview__stat">{{ p.employeeCount.value ?? p.cards.employeeCount ?? '—' }}</p>
-      </dds-card>
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="user" /></span>
+        <h3>Töötajate arv</h3>
+        <p class="mcard__value">{{ p.employeeCount.value ?? p.cards.employeeCount ?? '—' }}</p>
+      </div>
 
-      <dds-card heading="Sihtturud">
-        <p>{{ marketList() }}</p>
-      </dds-card>
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="globe" /></span>
+        <h3>Sihtturud</h3>
+        @if (marketLabels().length) {
+          <div class="mcard__pills">
+            @for (m of marketLabels(); track m) { <span class="pill">{{ m }}</span> }
+          </div>
+        } @else { <p class="ov__muted">—</p> }
+      </div>
 
-      <dds-card heading="Tegevuspiirkond">
-        <p>{{ regionList() }}</p>
-      </dds-card>
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="map-pin" /></span>
+        <h3>Tegevuspiirkond</h3>
+        @if (regionLabels().length) {
+          <div class="mcard__pills">
+            @for (r of regionLabels(); track r) { <span class="pill">{{ r }}</span> }
+          </div>
+        } @else { <p class="ov__muted">—</p> }
+      </div>
     </div>
   </section>
 
-  <!-- 5. Finantsnäitajad -->
   @if (p.annualReports.length) {
-    <section class="overview__section">
-      <h2>Finantsnäitajad</h2>
-      <dds-card>
-        <div class="overview__fin">
-          <div class="overview__fin-row overview__fin-row--head">
-            <span>Aasta</span>
-            <span>Müügitulu (EE)</span>
-            <span>Puhaskasum</span>
-            <span>Bilansimaht</span>
-            <span>Omakapital</span>
+    <section>
+      <h2 class="ov__section">Finantsnäitajad</h2>
+      <div class="ov__fingrid">
+        <div class="card">
+          <h3 class="ov__cardh">Müügitulu</h3>
+          <div class="chart">
+            @for (b of revenueBars(); track b.year) {
+              <div class="chart__row">
+                <span class="chart__year">{{ b.year }}</span>
+                <span class="chart__track"><span class="chart__bar" [style.width.%]="b.pct"></span></span>
+                <span class="chart__val">{{ b.label }}</span>
+              </div>
+            }
           </div>
-          @for (r of p.annualReports; track r.reportYear) {
-            <div class="overview__fin-row">
-              <span>{{ r.reportYear }}</span>
-              <span>{{ money(r.salesRevenueEstonia) }}</span>
-              <span>{{ money(r.netProfit) }}</span>
-              <span>{{ money(r.balanceSheetTotal) }}</span>
-              <span>{{ money(r.equity) }}</span>
-            </div>
-          }
         </div>
-      </dds-card>
+
+        @if (latestReport(); as r) {
+          <div class="card">
+            <h3 class="ov__cardh">Viimane majandusaasta ({{ r.reportYear }})</h3>
+            <dl class="ov__rows">
+              <div class="ov__row"><dt>Müügitulu kokku</dt><dd>{{ money(r.salesRevenueEstonia) }}</dd></div>
+              <div class="ov__row"><dt>Puhaskasum</dt><dd>{{ money(r.netProfit) }}</dd></div>
+              <div class="ov__row"><dt>Bilansimaht</dt><dd>{{ money(r.balanceSheetTotal) }}</dd></div>
+            </dl>
+          </div>
+        }
+      </div>
     </section>
   }
 </div>

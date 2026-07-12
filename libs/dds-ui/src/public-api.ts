@@ -14,3 +14,5 @@ export { DdsCompleteness } from './lib/completeness/dds-completeness';
 export { DdsStepper } from './lib/stepper/dds-stepper';
 export type { DdsStep } from './lib/stepper/dds-stepper';
 export { DdsTagInput } from './lib/tag-input/dds-tag-input';
+export { DdsIcon } from './lib/icon/dds-icon';
+export type { DdsIconName } from './lib/icon/dds-icon';

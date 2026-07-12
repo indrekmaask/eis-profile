@@ -4,7 +4,9 @@ import { DdsButton, DdsInput } from '@dds/ui';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { IdentityService } from './identity.service';
 
-const DEMO_PEOPLE = [{ code: '37510090251', label: 'Priit Mikelsaar — Biomarket OÜ omanik' }];
+const DEMO_PEOPLE = [
+  { code: '37510090251', name: 'Priit Mikelsaar', label: 'Priit Mikelsaar — Biomarket OÜ omanik' },
+];
 
 /** Mock dev login (Scenario prerequisite). No real TARA/RIA — enter or pick an ID code. */
 @Component({
@@ -91,7 +93,8 @@ export class Login {
     if (this.code.value.length !== 11) {
       return;
     }
-    this.identity.login(this.code.value);
-    this.router.navigate(['/vali-roll']);
+    const name = DEMO_PEOPLE.find((p) => p.code === this.code.value)?.name ?? '';
+    this.identity.login(this.code.value, name);
+    this.router.navigate(['/select-role']);
   }
 }

@@ -4,12 +4,17 @@ import { Login } from './identity/login';
 import { RoleSelect } from './identity/role-select';
 import { ServiceApplication } from './services/service-application';
 import { PreAdvisory } from './services/pre-advisory';
+import { Toolaud } from './dashboard/toolaud';
+import { KupsusLanding } from './kupsus/kupsus-landing';
+import { KupsusHindamine } from './kupsus/kupsus-hindamine';
+import { KupsusTulemus } from './kupsus/kupsus-tulemus';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', component: Login },
-  { path: 'vali-roll', component: RoleSelect },
+  { path: 'select-role', component: RoleSelect },
+  { path: 'dashboard', component: Toolaud },
   {
-    path: 'profiil',
+    path: 'profile',
     loadComponent: () =>
       loadRemoteModule({
         type: 'manifest',
@@ -17,6 +22,9 @@ export const routes: Routes = [
         exposedModule: './Component',
       }).then((m) => m.App),
   },
-  { path: 'teenus', component: ServiceApplication },
-  { path: 'programm', component: PreAdvisory },
+  { path: 'maturity', component: KupsusLanding },
+  { path: 'maturity/assessment', component: KupsusHindamine },
+  { path: 'maturity/result', component: KupsusTulemus },
+  { path: 'service', component: ServiceApplication },
+  { path: 'programme', component: PreAdvisory },
 ];

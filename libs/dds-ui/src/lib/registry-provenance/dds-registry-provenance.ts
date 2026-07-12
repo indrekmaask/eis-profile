@@ -24,9 +24,15 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
         align-items: center;
         flex-wrap: wrap;
         gap: var(--dds-space-2);
+        background: var(--dds-color-surface-alt);
+        border-radius: var(--dds-radius-control);
+        padding: var(--dds-space-3) var(--dds-space-4);
         font-family: var(--dds-font-family);
         font-size: var(--dds-font-size-sm);
-        color: var(--dds-color-ink-subtle);
+        color: var(--dds-color-ink-muted);
+      }
+      .dds-prov__text {
+        margin-right: auto;
       }
       .dds-prov__icon {
         color: var(--dds-color-registry-accent);

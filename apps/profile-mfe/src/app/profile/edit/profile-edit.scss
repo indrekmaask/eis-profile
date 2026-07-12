@@ -1,8 +1,16 @@
 :host {
   display: block;
-  max-width: var(--dds-width-block);
+  max-width: 820px;
   margin: 0 auto;
-  padding: var(--dds-space-6);
+  padding: var(--dds-space-6) var(--dds-space-5);
+  font-family: var(--dds-font-family);
+  color: var(--dds-color-ink-strong);
+}
+
+.edit__crumb {
+  color: var(--dds-color-ink-muted);
+  font-size: var(--dds-font-size-sm);
+  margin-bottom: var(--dds-space-3);
 }
 
 .edit__head {
@@ -13,28 +21,44 @@
   margin-bottom: var(--dds-space-5);
 }
 
-.edit__eyebrow {
-  font-size: var(--dds-font-size-xs);
+.edit__head h1 {
+  margin: 0;
+  font-size: var(--dds-font-size-2xl);
   font-weight: var(--dds-font-weight-bold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--dds-color-primary);
 }
 
-.edit__head h1 {
-  margin: var(--dds-space-1) 0 0;
-  font-size: var(--dds-font-size-lg);
-  font-weight: var(--dds-font-weight-bold);
+.edit__sub {
+  margin: var(--dds-space-2) 0 0;
+  color: var(--dds-color-ink-muted);
+  max-width: 640px;
+}
+.edit__sub strong {
+  color: var(--dds-color-ink-strong);
 }
 
 .edit__form {
-  margin-top: var(--dds-space-6);
+  margin-top: var(--dds-space-5);
+}
+
+/* Each step's content sits in a white panel, matching Figma. */
+.edit__step {
+  background: var(--dds-color-surface);
+  border-radius: var(--dds-radius-card);
+  box-shadow: var(--dds-shadow-card);
+  padding: var(--dds-space-6);
 }
 
 .edit__step > h2 {
-  font-size: var(--dds-font-size-lg);
+  font-size: var(--dds-font-size-xl);
   font-weight: var(--dds-font-weight-bold);
   margin: 0 0 var(--dds-space-4);
+}
+
+.edit__reglist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-4);
+  margin-bottom: var(--dds-space-4);
 }
 
 .edit__grid {

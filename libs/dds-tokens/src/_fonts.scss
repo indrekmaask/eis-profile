@@ -28,3 +28,29 @@
 //   font-display: swap;
 //   src: url('/fonts/aino-bold.woff2') format('woff2');
 // }
+
+// Geist (Vercel, OFL) — the DDS2 body typeface. Open-source, so it IS shipped
+// (self-hosted under each app's public/fonts/). Latin subset covers Estonian
+// diacritics (õ ä ö ü). Used as the primary family; Aino, once licensed files
+// are added above, takes precedence for display text via the token stack.
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/geist-sans-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/geist-sans-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/geist-sans-latin-700-normal.woff2') format('woff2');
+}
