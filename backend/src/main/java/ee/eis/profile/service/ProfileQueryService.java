@@ -91,7 +91,8 @@ public class ProfileQueryService {
                 .toList();
         var reportList = annualReports.findByProfileIdOrderByReportYearDesc(id).stream()
                 .map(r -> new ProfileView.AnnualReport(r.getReportYear(), r.isSubmitted(),
-                        r.getSalesRevenueEstonia(), r.getNetProfit(), r.getBalanceSheetTotal(), r.getEquity()))
+                        r.getSalesRevenueEstonia(), r.getSalesRevenueEu(), r.getSalesRevenueNonEu(),
+                        r.getNetProfit(), r.getBalanceSheetTotal(), r.getEquity()))
                 .toList();
         List<MarketRegion> regions = marketRegions.findByProfileId(id);
         var regionViews = regions.stream()
@@ -107,10 +108,12 @@ public class ProfileQueryService {
                 .orElse(new SnapshotExtractor.Cards(0, 0, "—", 0));
         String dataAsOf = snapshot.map(CompanyResponse::dataAsOfDate).orElse(null);
 
-        boolean hasOperating = addressList.stream().anyMatch(a -> "OPERATING".equals(a.addressType()));
+        var primary = contactList.stream().filter(ProfileView.Contact::primary).findFirst()
+                .or(() -> contactList.stream().findFirst());
         var comp = completeness.calculate(new ProfileCompletenessCalculator.Input(
-                !contactList.isEmpty(), !bankList.isEmpty(), StringUtils.hasText(p.getWebsite()),
-                p.getEmployeeCount() != null, hasOperating, !regions.isEmpty()));
+                primary.map(c -> StringUtils.hasText(c.email())).orElse(false),
+                primary.map(c -> StringUtils.hasText(c.phone())).orElse(false),
+                p.getEmployeeCount() != null, !regions.isEmpty(), StringUtils.hasText(p.getWebsite())));
 
         return new ProfileView(
                 p.getRegistryCode(), p.getProfileStatus(), dataAsOf,
@@ -123,7 +126,7 @@ public class ProfileQueryService {
                 sv(p.getEmployeeCount(), p.getEmployeeCountSource()),
                 new ProfileView.Completeness(comp.percent(), comp.missing()),
                 new ProfileView.Cards(partyList.size(), cards.realEstateCount(), cards.officialNoticeCount(),
-                        cards.paymentBehaviour(), p.getEmployeeCount(), targetMarkets, operatingRegions),
+                        cards.paymentBehaviour(), cards.totalDebt(), p.getEmployeeCount(), targetMarkets, operatingRegions),
                 contactList, bankList, addressList, partyList, reportList, regionViews, discrepancies);
     }
 

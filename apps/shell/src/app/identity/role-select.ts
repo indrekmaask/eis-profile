@@ -1,92 +1,139 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { DdsButton, DdsCard } from '@dds/ui';
+import { catchError, forkJoin, map, of } from 'rxjs';
+import { DdsButton, DdsIcon } from '@dds/ui';
 import { AccessEntry, ProfileApiService } from '@eis/profile-api';
 import { IdentityService } from './identity.service';
 
-/** Estonian labels for the register access-role enum. */
-const ROLE_LABELS: Record<string, string> = {
-  OWNER: 'Omanik',
-  BOARD_MEMBER: 'Juhatuse liige',
-  AUTHORIZED_REPRESENTATIVE: 'Volitatud esindaja',
-  SHAREHOLDER: 'Osanik',
-  PROCURATOR: 'Prokurist',
-  BENEFICIAL_OWNER: 'Tegelik kasusaaja',
+/**
+ * Demo access for companies with NO backend profile (Scenario 2): profile_access
+ * rows require an existing profile, so registry-only companies are listed here by
+ * registry code only — the company data itself is fetched from the register (mock API).
+ */
+const DEMO_REGISTRY_CODES: Record<string, string[]> = {
+  '48505150220': ['16890123'],
 };
 
 /** "Vali roll": lists companies the logged-in person may act for (via profile_access). */
 @Component({
   selector: 'app-role-select',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DdsButton, DdsCard],
+  imports: [DdsButton, DdsIcon],
   template: `
     <div class="roles">
-      <span class="roles__eyebrow">Vali roll</span>
-      <h1>Kelle nimel tegutsed?</h1>
-      @if (identity.info(); as info) {
-        <p>Sisse logitud: {{ identity.personCode() }} · sünniaeg {{ info.birthDateDisplay }}</p>
-      }
+      <div class="roles__intro">
+        <h1>Vali roll</h1>
+        <p>
+          Iseteenindusse sisse logimiseks peab sul olema Eestis registreeritud ettevõte ning pead
+          olema selle ettevõtte juhatuse liige või ettevõtte volitatud esindaja.
+        </p>
+        <button dds-button variant="secondary" (click)="back()">
+          ‹ Katkesta ja tagasi avalehele
+        </button>
+      </div>
 
-      @if (loading()) {
-        <p>Laen ettevõtteid…</p>
-      } @else if (entries().length) {
-        <div class="roles__list">
-          @for (e of entries(); track e.registryCode) {
-            <dds-card [heading]="e.businessName">
-              <p class="roles__muted">Registrikood {{ e.registryCode }} · roll: {{ roleLabel(e.accessRole) }}</p>
-              <button dds-button variant="primary" size="sm" (click)="choose(e)">
-                Vali see ettevõte
-              </button>
-            </dds-card>
-          }
-        </div>
-      } @else {
-        <dds-card heading="Seotud ettevõtteid ei leitud">
+      <div class="roles__panel">
+        @if (loading()) {
+          <p class="roles__muted">Laen ettevõtteid…</p>
+        } @else if (entries().length) {
+          <span class="roles__panel-heading">Sinu isikukoodiga seotud ettevõtted</span>
+          <ul class="roles__list">
+            @for (e of entries(); track e.registryCode) {
+              <li>
+                <button type="button" class="roles__company" (click)="choose(e)">
+                  <dds-icon name="building" />
+                  <span>{{ e.businessName }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <span class="roles__panel-heading">Sinu isikukoodiga seotud ettevõtted</span>
           <p class="roles__muted">
             Sellel isikul ei ole registris seotud ettevõtteid. Proovi mõnda näidiskasutajat.
           </p>
-          <button dds-button variant="secondary" size="sm" (click)="back()">Tagasi sisselogimisse</button>
-        </dds-card>
-      }
+        }
+      </div>
     </div>
   `,
   styles: [
     `
       .roles {
-        max-width: var(--dds-width-form);
+        max-width: var(--dds-width-content, 1120px);
         margin: 0 auto;
-        padding: var(--dds-space-6);
+        padding: var(--dds-space-7) var(--dds-space-6);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: var(--dds-space-7);
+        align-items: start;
+      }
+      @media (max-width: 800px) {
+        .roles {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      .roles__intro {
         display: flex;
         flex-direction: column;
         gap: var(--dds-space-4);
         align-items: flex-start;
       }
-      .roles__eyebrow {
-        font-size: var(--dds-font-size-xs);
-        font-weight: var(--dds-font-weight-bold);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--dds-color-primary);
-      }
       h1 {
         margin: 0;
-        font-size: var(--dds-font-size-lg);
+        font-size: var(--dds-font-size-2xl, 44px);
         font-weight: var(--dds-font-weight-bold);
       }
       p {
         margin: 0;
         color: var(--dds-color-ink-muted);
       }
+      .roles__panel {
+        background: var(--dds-color-surface, #fff);
+        border-radius: var(--dds-radius-lg, 12px);
+        box-shadow: var(--dds-shadow-card, 0 1px 3px rgba(16, 24, 40, 0.08));
+        padding: var(--dds-space-5) var(--dds-space-6);
+      }
+      .roles__panel-heading {
+        display: block;
+        color: var(--dds-color-ink-muted);
+        padding-bottom: var(--dds-space-4);
+        border-bottom: 1px solid var(--dds-color-border, #e4e7ec);
+      }
       .roles__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .roles__list li + li {
+        border-top: 1px solid var(--dds-color-border, #e4e7ec);
+      }
+      .roles__company {
         width: 100%;
         display: flex;
-        flex-direction: column;
-        gap: var(--dds-space-4);
+        align-items: center;
+        gap: var(--dds-space-3);
+        padding: var(--dds-space-4) var(--dds-space-2);
+        background: none;
+        border: 0;
+        font: inherit;
+        font-weight: var(--dds-font-weight-bold);
+        color: var(--dds-color-ink);
+        cursor: pointer;
+        text-align: left;
+      }
+      .roles__company:hover {
+        color: var(--dds-color-primary);
+      }
+      .roles__company dds-icon {
+        width: 20px;
+        height: 20px;
+        flex: none;
+        color: var(--dds-color-ink-subtle);
       }
       .roles__muted {
         color: var(--dds-color-ink-subtle);
         font-size: var(--dds-font-size-sm);
-        margin-bottom: var(--dds-space-3);
+        margin-top: var(--dds-space-3);
       }
     `,
   ],
@@ -104,17 +151,39 @@ export class RoleSelect {
       this.router.navigate(['/']);
       return;
     }
-    this.api.listAccess(this.identity.personCode()).subscribe({
-      next: (list) => {
-        this.entries.set(list);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.api
+      .listAccess(this.identity.personCode())
+      .pipe(catchError(() => of([] as AccessEntry[])))
+      .subscribe((list) => this.resolveDemoCompanies(list));
   }
 
-  protected roleLabel(role: string): string {
-    return ROLE_LABELS[role] ?? role;
+  /** Registry-only demo companies: fetch their data from the register (mock API). */
+  private resolveDemoCompanies(list: AccessEntry[]): void {
+    const missing = (DEMO_REGISTRY_CODES[this.identity.personCode()] ?? []).filter(
+      (code) => !list.some((e) => e.registryCode === code),
+    );
+    if (!missing.length) {
+      this.entries.set(list);
+      this.loading.set(false);
+      return;
+    }
+    forkJoin(
+      missing.map((code) =>
+        this.api.prefill(code).pipe(
+          map(
+            (p): AccessEntry => ({
+              registryCode: p.registryCode,
+              businessName: p.businessName,
+              accessRole: 'BOARD_MEMBER',
+            }),
+          ),
+          catchError(() => of(null)),
+        ),
+      ),
+    ).subscribe((extra) => {
+      this.entries.set([...list, ...extra.filter((e): e is AccessEntry => e !== null)]);
+      this.loading.set(false);
+    });
   }
 
   protected choose(e: AccessEntry): void {

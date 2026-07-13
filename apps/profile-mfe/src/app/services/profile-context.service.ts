@@ -6,7 +6,7 @@ import { Injectable, signal } from '@angular/core';
  * applies on every navigation. Defaults to the seeded Biomarket owner (Scenario 1).
  */
 export const DEFAULT_REGISTRY_CODE = '10966560'; // Biomarket OÜ (seeded)
-export const DEFAULT_PERSON_CODE = '37510090251'; // seeded OWNER
+export const DEFAULT_PERSON_CODE = '48505150220'; // seeded OWNER (Eva Tamm, demo login)
 
 @Injectable({ providedIn: 'root' })
 export class ProfileContextService {

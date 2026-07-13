@@ -25,50 +25,40 @@
         mode="create"
         [prefill]="store.prefill()"
         [saving]="store.saving()"
+        [errorMessage]="store.errorMessage()"
         (createProfile)="onCreate($event)"
         (cancel)="onCancel()"
       />
     } @else {
       <div class="page__intro">
-        <span class="page__eyebrow">Uus ettevõtte profiil</span>
-        <h1>{{ store.prefill()?.businessName || store.prefill()?.registryCode }}</h1>
-        <p>
-          Sellel ettevõttel ei ole veel profiili. Osa andmeid on juba äriregistrist olemas —
-          täienda vaid puuduvad väljad ning loo profiil.
+        <h1>Ettevõtte profiil</h1>
+        <p class="page__sub">
+          {{ store.prefill()?.businessName }} · {{ store.prefill()?.registryCode }}
         </p>
-        <dds-card heading="Äriregistrist eeltäidetud">
-          <ul class="page__prefill">
-            <li><span>Ärinimi</span><span>{{ store.prefill()?.businessName }}</span></li>
-            <li><span>Õiguslik vorm</span><span>{{ store.prefill()?.legalForm }}</span></li>
-            <li><span>EMTAK</span><span>{{ store.prefill()?.emtakName }}</span></li>
-            <li><span>Seotud isikud</span><span>{{ store.prefill()?.relatedParties?.length || 0 }}</span></li>
-          </ul>
-        </dds-card>
-        <button dds-button variant="primary" (click)="startCreate()">Alusta profiili loomist</button>
+        <div class="page__empty card">
+          <span class="page__empty-icon" aria-hidden="true">✎</span>
+          <h2>Profiili pole veel koostatud</h2>
+          <p>
+            EIS toob ettevõtte põhiandmed Äriregistrist automaatselt. Sina lisad ainult paar
+            välja, mida registris pole — kontakt, töötajate arv, sihtturud. See võtab paar
+            minutit.
+          </p>
+          <button dds-button variant="primary" (click)="startCreate()">Koosta profiil →</button>
+        </div>
       </div>
     }
   }
 
   @default {
     @if (store.profile(); as profile) {
-      @if (editing()) {
-        <app-profile-edit
-          mode="edit"
-          [profile]="profile"
-          [saving]="store.saving()"
-          (saveStep)="onSaveStep($event)"
-          (refresh)="onRefresh()"
-          (cancel)="onCancel()"
-        />
-      } @else {
-        <app-profile-overview
-          [profile]="profile"
-          [unavailable]="store.status() === 'unavailable'"
-          [unavailableMessage]="store.errorMessage()"
-          (edit)="onEdit()"
-          (refresh)="onRefresh()"
-        />
-      }
+      <app-profile-overview
+        [profile]="profile"
+        [unavailable]="store.status() === 'unavailable'"
+        [unavailableMessage]="store.errorMessage()"
+        [saving]="store.saving()"
+        (saveSection)="onSaveSection($event)"
+        (refresh)="onRefresh()"
+      />
     }
   }
 }

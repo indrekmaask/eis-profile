@@ -116,7 +116,7 @@ class ProfileFlowIntegrationTest {
 
     @Test
     void accessListsSeededBiomarketForPerson() {
-        assertThat(query.listAccessFor("37510090251"))
+        assertThat(query.listAccessFor("48505150220"))
                 .anySatisfy(e -> assertThat(e.registryCode()).isEqualTo("10966560"));
     }
 }

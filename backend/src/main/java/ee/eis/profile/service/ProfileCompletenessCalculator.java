@@ -6,31 +6,31 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
- * "Profiili täituvus" — a simple unweighted checklist of six user-owned fields.
- * percent = filled / 6. Also reports which items are still missing (for "vaja täita").
+ * "Profiili täituvus" — measures ONLY user-managed fields (v22 flows): primary contact's
+ * e-mail and phone, employee count, target markets and the website. Registry data is filled
+ * automatically and does not count — an empty profile would otherwise show a misleadingly
+ * high percentage.
  */
 @Component
 public class ProfileCompletenessCalculator {
 
     /** Presence of each checklist item. */
     public record Input(
-            boolean contactPerson,
-            boolean bankAccount,
-            boolean website,
+            boolean primaryContactEmail,
+            boolean primaryContactPhone,
             boolean employeeCount,
-            boolean operatingAddress,
-            boolean marketRegion) {}
+            boolean marketRegion,
+            boolean website) {}
 
     public record Result(int percent, List<String> missing) {}
 
     public Result calculate(Input in) {
         Map<String, Boolean> items = new LinkedHashMap<>();
-        items.put("contactPerson", in.contactPerson());
-        items.put("bankAccount", in.bankAccount());
-        items.put("website", in.website());
+        items.put("primaryContactEmail", in.primaryContactEmail());
+        items.put("primaryContactPhone", in.primaryContactPhone());
         items.put("employeeCount", in.employeeCount());
-        items.put("operatingAddress", in.operatingAddress());
         items.put("marketRegion", in.marketRegion());
+        items.put("website", in.website());
 
         long filled = items.values().stream().filter(Boolean::booleanValue).count();
         List<String> missing = items.entrySet().stream()

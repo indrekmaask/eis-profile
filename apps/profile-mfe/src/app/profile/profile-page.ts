@@ -68,16 +68,13 @@ export class ProfilePage {
   protected startCreate(): void {
     this.editing.set(true);
   }
-  protected onEdit(): void {
-    this.editing.set(true);
-  }
   protected onCancel(): void {
     this.editing.set(false);
   }
   protected onRefresh(): void {
     this.store.refresh(this.context.registryCode());
   }
-  protected onSaveStep(e: { step: number; body: StepUpdateRequest }): void {
+  protected onSaveSection(e: { step: number; body: StepUpdateRequest }): void {
     this.store.updateStep(this.context.registryCode(), e.step, e.body);
   }
   protected onCreate(req: CreateProfileRequest): void {

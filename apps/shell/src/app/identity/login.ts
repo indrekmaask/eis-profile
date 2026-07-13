@@ -5,7 +5,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { IdentityService } from './identity.service';
 
 const DEMO_PEOPLE = [
-  { code: '37510090251', name: 'Priit Mikelsaar', label: 'Priit Mikelsaar — Biomarket OÜ omanik' },
+  { code: '48505150220', name: 'Eva Tamm', label: 'Eva Tamm — Biomarket OÜ & Karu Koobas OÜ' },
 ];
 
 /** Mock dev login (Scenario prerequisite). No real TARA/RIA — enter or pick an ID code. */
@@ -23,7 +23,7 @@ const DEMO_PEOPLE = [
       </p>
 
       <div class="login__field">
-        <dds-input label="Isikukood" placeholder="nt 37510090251" [formControl]="code" />
+        <dds-input label="Isikukood" placeholder="nt 48505150220" [formControl]="code" />
       </div>
 
       <div class="login__demos">

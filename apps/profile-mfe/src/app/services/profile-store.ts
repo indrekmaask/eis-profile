@@ -63,6 +63,7 @@ export class ProfileStore {
 
   create(request: CreateProfileRequest): void {
     this.saving.set(true);
+    this.errorMessage.set(null);
     this.api.create(request).subscribe({
       next: (p) => {
         this.profile.set(p);
@@ -72,7 +73,12 @@ export class ProfileStore {
       },
       error: (err: HttpErrorResponse) => {
         this.saving.set(false);
-        this.fail(err);
+        if (err.status === 400) {
+          // Validation failure: stay in the create flow and surface the message inline.
+          this.errorMessage.set(err.error?.detail ?? 'Kontrolli sisestatud andmeid');
+        } else {
+          this.fail(err);
+        }
       },
     });
   }

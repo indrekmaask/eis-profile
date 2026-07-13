@@ -1,184 +1,147 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { DdsBadge, DdsButton, DdsCard, DdsDropdown, DdsInput, DdsOption } from '@dds/ui';
+import { DdsButton, DdsCard } from '@dds/ui';
 import { ProfileApiService, ProfileView, derivePersonInfo } from '@eis/profile-api';
 import { IdentityService } from '../identity/identity.service';
+import { exportRevenue, money } from './services.data';
+
+const MARKET_LABELS: Record<string, string> = {
+  EE: 'Eesti', FI: 'Soome', SE: 'Rootsi', LV: 'Läti', LT: 'Leedu', NO: 'Norra',
+  DK: 'Taani', DE: 'Saksamaa', PL: 'Poola', NL: 'Holland', FR: 'Prantsusmaa',
+  GB: 'Ühendkuningriik', US: 'Ameerika Ühendriigid',
+};
+
+const TAIE_OPTIONS = [
+  'Digilahendused',
+  'Tervisetehnoloogiad ja -teenused',
+  'Kohalike ressursside väärindamine',
+  'Nutikad ja kestlikud energialahendused',
+];
+
+const CONTENT_QUESTIONS = [
+  'Millises tegevusvaldkonnas ettevõte täna tegutseb ja millise tegevusvaldkonna alla planeeritakse arenguprogrammis tehtav muutus? *',
+  'Milline on ettevõtte omanike ambitsioon ja nägemus ettevõtte arengust järgneva 3–5 aasta jooksul? Palun kirjelda ambitsiooni/eesmärki sisuliselt ja numbriliselt. *',
+  'Milline on arenguprogrammi abil planeeritava strateegilise muudatuse või arenduse idee? Milliseid tegevusi on plaanis ellu viia ja milline on planeeritav investeeringu suurus? *',
+];
 
 /**
- * Development-programme pre-advisory (P5-4). Contact picker (primary preselected);
- * the contact's birth date is DERIVED from the ID code client-side (not fetched).
- * Clear boundary: profile-sourced fields vs. what the user types manually.
+ * Arenguprogrammi eelnõustamine — own subpage (v22 flows): profile-prefilled
+ * registration form with a contact picker; birth date derived from the ID code.
  */
 @Component({
   selector: 'app-pre-advisory',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DdsBadge, DdsButton, DdsCard, DdsDropdown, DdsInput],
-  template: `
-    <div class="adv">
-      <span class="adv__eyebrow">Arenguprogramm · eelnõustamine</span>
-      <h1>Broneeri eelnõustamine</h1>
-
-      @if (!identity.activeCompany()) {
-        <dds-card heading="Vali esmalt ettevõte">
-          <button dds-button variant="primary" size="sm" (click)="toRoles()">Vali roll</button>
-        </dds-card>
-      } @else if (profile(); as p) {
-        <dds-card heading="Profiilist (ei pea uuesti sisestama)">
-          <div class="adv__row"><span>Ettevõte</span><span>{{ p.businessName.value }}</span></div>
-          <div class="adv__row"><span>Töötajate arv</span><span>{{ p.employeeCount.value ?? '—' }}</span></div>
-          <div class="adv__row"><span>Sihtturud</span><span>{{ p.cards.targetMarkets.join(', ') || '—' }}</span></div>
-        </dds-card>
-
-        <dds-card heading="Kontaktisik">
-          <dds-badge tone="info">Profiilist</dds-badge>
-          @if (contactOptions().length) {
-            <div class="adv__field">
-              <dds-dropdown
-                label="Vali kontaktisik"
-                [options]="contactOptions()"
-                [formControl]="selectedContact"
-              />
-            </div>
-            @if (selectedInfo(); as info) {
-              <p class="adv__derived">
-                Sünniaeg <strong>{{ info.birthDateDisplay }}</strong> · sugu {{ info.sex }}
-                <dds-badge tone="neutral">Tuletatud isikukoodist</dds-badge>
-              </p>
-            } @else {
-              <p class="adv__muted">Valitud kontaktil pole profiilis isikukoodi — sünniaega ei saa tuletada.</p>
-            }
-          } @else {
-            <p class="adv__muted">Profiilis pole kontaktisikuid.</p>
-          }
-        </dds-card>
-
-        <dds-card heading="Käsitsi täidetav">
-          <dds-badge tone="warning">Ei tule profiilist</dds-badge>
-          <div class="adv__field">
-            <dds-input
-              label="Nõustamise eesmärk"
-              description="Kirjelda, mida soovid programmilt"
-              [formControl]="goal"
-            />
-          </div>
-        </dds-card>
-
-        @if (booked()) {
-          <div class="adv__ok" role="status">✓ Eelnõustamine broneeritud (näidis).</div>
-        } @else {
-          <button dds-button variant="primary" (click)="book()">Broneeri</button>
-        }
-      } @else {
-        <p>Laen profiili…</p>
-      }
-    </div>
-  `,
-  styles: [
-    `
-      .adv {
-        max-width: var(--dds-width-form);
-        margin: 0 auto;
-        padding: var(--dds-space-6);
-        display: flex;
-        flex-direction: column;
-        gap: var(--dds-space-4);
-        align-items: flex-start;
-      }
-      .adv__eyebrow {
-        font-size: var(--dds-font-size-xs);
-        font-weight: var(--dds-font-weight-bold);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--dds-color-primary);
-      }
-      h1 {
-        margin: 0;
-        font-size: var(--dds-font-size-xl);
-        font-weight: var(--dds-font-weight-bold);
-      }
-      dds-card {
-        width: 100%;
-      }
-      .adv__row {
-        display: flex;
-        justify-content: space-between;
-        gap: var(--dds-space-4);
-        padding: var(--dds-space-1) 0;
-      }
-      .adv__row span:first-child {
-        color: var(--dds-color-ink-subtle);
-      }
-      .adv__field {
-        margin-top: var(--dds-space-3);
-        max-width: 360px;
-      }
-      .adv__derived {
-        display: flex;
-        align-items: center;
-        gap: var(--dds-space-2);
-        margin: var(--dds-space-3) 0 0;
-        font-size: var(--dds-font-size-sm);
-      }
-      .adv__muted {
-        color: var(--dds-color-ink-subtle);
-        font-size: var(--dds-font-size-sm);
-        margin: var(--dds-space-3) 0 0;
-      }
-      .adv__ok {
-        background: var(--dds-color-success-bg);
-        color: var(--dds-color-success);
-        border-radius: var(--dds-radius-control);
-        padding: var(--dds-space-3) var(--dds-space-4);
-        font-weight: var(--dds-font-weight-medium);
-      }
-    `,
-  ],
+  imports: [ReactiveFormsModule, RouterLink, DdsButton, DdsCard],
+  templateUrl: './pre-advisory.html',
+  styleUrl: './pre-advisory.scss',
 })
 export class PreAdvisory {
   protected readonly identity = inject(IdentityService);
   private readonly api = inject(ProfileApiService);
   private readonly router = inject(Router);
 
+  protected readonly taieOptions = TAIE_OPTIONS;
+  protected readonly questions = CONTENT_QUESTIONS;
+
   protected readonly profile = signal<ProfileView | null>(null);
-  protected readonly selectedContact = new FormControl('', { nonNullable: true });
-  protected readonly goal = new FormControl('', { nonNullable: true });
-  protected readonly booked = signal(false);
-  private readonly selectedContactId = signal('');
+  protected readonly done = signal(false);
+  protected readonly submitAttempted = signal(false);
 
-  protected readonly contactOptions = computed<DdsOption[]>(() =>
-    (this.profile()?.contacts ?? []).map((c) => ({
-      value: c.id,
-      label: c.fullName + (c.primary ? ' (peamine)' : ''),
-    })),
-  );
+  /** Selected person: a contact id, or 'new' for "Keegi teine". */
+  protected readonly selectedKey = signal<string>('');
 
-  protected readonly selectedInfo = computed(() => {
+  protected readonly website = new FormControl('', { nonNullable: true });
+  protected readonly newName = new FormControl('', { nonNullable: true });
+  protected readonly email = new FormControl('', { nonNullable: true });
+  protected readonly phone = new FormControl('', { nonNullable: true });
+  protected readonly taie = new FormControl('', { nonNullable: true });
+  protected readonly answers = [
+    new FormControl('', { nonNullable: true }),
+    new FormControl('', { nonNullable: true }),
+    new FormControl('', { nonNullable: true }),
+  ];
+
+  protected readonly markets = signal<string[]>([]);
+
+  protected readonly selectedContact = computed(() => {
     const p = this.profile();
-    if (!p) {
+    if (!p || this.selectedKey() === 'new') {
       return null;
     }
-    const contact = p.contacts.find((c) => c.id === this.selectedContactId());
-    return derivePersonInfo(contact?.personCode);
+    return p.contacts.find((c) => c.id === this.selectedKey()) ?? null;
   });
+
+  protected readonly birthDate = computed(() => {
+    const info = derivePersonInfo(this.selectedContact()?.personCode);
+    return info ? info.birthDateDisplay.replace(/(^|\.)0/g, '$1') : null;
+  });
+
+  protected readonly exportLabel = computed(() => {
+    const r = this.profile()?.annualReports[0];
+    return r ? money(exportRevenue(r)) : '—';
+  });
+
+  protected readonly marketOptions = computed(() =>
+    Object.entries(MARKET_LABELS).filter(([code]) => !this.markets().includes(code)),
+  );
 
   constructor() {
     const company = this.identity.activeCompany();
     if (company) {
       this.api.getProfile(company.registryCode).subscribe((p) => {
         this.profile.set(p);
+        this.website.setValue(p.website.value ?? '');
+        this.markets.set([...p.cards.targetMarkets]);
         const primary = p.contacts.find((c) => c.primary) ?? p.contacts[0];
         if (primary) {
-          this.selectedContact.setValue(primary.id);
-          this.selectedContactId.set(primary.id);
+          this.pick(primary.id);
+        } else {
+          this.pick('new');
         }
       });
     }
-    this.selectedContact.valueChanges.subscribe((v) => this.selectedContactId.set(v ?? ''));
   }
 
-  protected book(): void {
-    this.booked.set(true);
+  protected pick(key: string): void {
+    this.selectedKey.set(key);
+    const c = this.selectedContact();
+    this.email.setValue(c?.email ?? '');
+    this.phone.setValue(c?.phone ?? '');
+    if (key === 'new') {
+      this.newName.setValue('');
+    }
+  }
+
+  protected marketLabel(code: string): string {
+    return MARKET_LABELS[code] ?? code;
+  }
+  protected removeMarket(code: string): void {
+    this.markets.update((m) => m.filter((c) => c !== code));
+  }
+  protected addMarket(code: string): void {
+    if (code) {
+      this.markets.update((m) => (m.includes(code) ? m : [...m, code]));
+    }
+  }
+
+  protected invalid(control: FormControl<string>): boolean {
+    return this.submitAttempted() && !control.value.trim();
+  }
+
+  protected submit(): void {
+    this.submitAttempted.set(true);
+    const nameOk = this.selectedKey() !== 'new' || this.newName.value.trim();
+    const answersOk = this.answers.every((a) => a.value.trim());
+    if (!nameOk || !this.email.value.trim() || !this.phone.value.trim() || !answersOk || !this.taie.value) {
+      return;
+    }
+    this.done.set(true);
+    window.scrollTo(0, 0);
+  }
+
+  protected toDashboard(): void {
+    this.router.navigate(['/dashboard']);
   }
   protected toRoles(): void {
     this.router.navigate(['/select-role']);

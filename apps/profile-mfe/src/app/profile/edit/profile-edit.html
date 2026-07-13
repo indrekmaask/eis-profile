@@ -1,16 +1,15 @@
-@let h = header();
+@let pf = prefill();
 
 <div class="edit">
-  <nav class="edit__crumb">Peamine / Ettevõtte profiil / Muuda profiili</nav>
+  <nav class="edit__crumb">Iseteenindus / Profiil</nav>
   <header class="edit__head">
     <div>
-      <h1>{{ mode() === 'create' ? 'Uus ettevõtte profiil' : 'Profiili muutmine' }}</h1>
-      <p class="edit__sub">
-        Ettevõtte esindaja saab sisestada neid andmeid mida registritest pärida ei ole võimalik.
-        @if (h?.businessName) { <strong>{{ h?.businessName }}</strong> }
+      <h1>Profiili loomine</h1>
+      <p class="edit__sub">{{ pf?.businessName }} · {{ pf?.registryCode }}</p>
+      <p class="edit__lead">
+        Ettevõtte esindaja saab sisestada andmeid, mida registrist pärida ei ole võimalik.
       </p>
     </div>
-    <button dds-button variant="ghost" size="sm" (click)="cancel.emit()">Tagasi</button>
   </header>
 
   <dds-stepper [steps]="steps" [active]="activeStep()" (select)="go($event)" />
@@ -19,173 +18,190 @@
     @switch (activeStep()) {
       <!-- Step 1: Üldandmed -->
       @case (0) {
-        <section class="edit__step">
-          <h2>Üldandmed</h2>
-          @if (h) {
-            <div class="edit__reglist">
-              <dds-registry-field label="Ettevõtte nimi" [value]="h.businessName" />
-              @if (h.legalAddress) {
-                <dds-registry-field label="Aadress" [value]="h.legalAddress" />
-              }
-              <dds-registry-field label="Tegevusala" [value]="h.emtak" />
-            </div>
-            <dds-registry-provenance
-              [asOf]="h.dataAsOfDate"
-              (refresh)="refresh.emit()"
-            />
-          }
-
-          <div class="edit__fields">
-            <dds-input
-              label="Töötajate arv"
-              inputmode="numeric"
-              formControlName="employeeCount"
-            />
-            <dds-input label="Tegevuskoha aadress" formControlName="operatingAddress" />
-            @if (showWebsite()) {
-              <dds-input label="Veebileht" placeholder="https://" formControlName="website" />
-            } @else {
-              <button type="button" dds-button variant="ghost" (click)="revealWebsite()">
-                Lisa veebileht +
-              </button>
-            }
+        <section class="edit__step card">
+          <div class="edit__step-head">
+            <h2>Üldandmed</h2>
+            <span class="edit__src">🔒 osaliselt Äriregistrist</span>
           </div>
+          <div class="edit__rows">
+            <div class="edit__row"><span class="edit__k">Ettevõtte nimi</span><span>{{ pf?.businessName }}</span></div>
+            <div class="edit__row"><span class="edit__k">Registrikood</span><span>{{ pf?.registryCode }}</span></div>
+            <div class="edit__row"><span class="edit__k">Juriidiline aadress</span><span>{{ pf?.legalAddress }}</span></div>
+            <div class="edit__row edit__row--input">
+              <span class="edit__k">Tegevusaadress <span class="edit__optional">(vabatahtlik)</span></span>
+              <dds-input
+                label=""
+                placeholder="Lisa, kui tegevuskoht erineb juriidilisest — muidu jäta tühjaks"
+                formControlName="operatingAddress"
+              />
+            </div>
+            <div class="edit__row"><span class="edit__k">Tegevusala</span><span>{{ emtak() }}</span></div>
+            <div class="edit__row">
+              <span class="edit__k">Osakapital</span>
+              <span>{{ money(pf?.capitalSize) }}</span>
+            </div>
+            <div class="edit__row edit__row--input">
+              <span class="edit__k">Veebileht</span>
+              <dds-input label="" placeholder="nt firma.ee" formControlName="website" />
+            </div>
+          </div>
+          <p class="edit__note">
+            Registriväljad (lukus) tulevad Äriregistrist@if (asOf()) { (seis {{ asOf() }})} —
+            parandused tehakse Äriregistris. Tegevusaadress ja veebileht on sinu hallatavad. Kui
+            tegevusaadress on tühi, kasutatakse taotlustes juriidilist aadressi.
+          </p>
+          <p class="edit__note">
+            Äriregistrist tuuakse automaatselt ka <strong>majandusnäitajad</strong> (müügitulu,
+            kasum, eksport) ja <strong>seotud isikud</strong> — need on nähtavad pärast profiili
+            loomist profiilivaates.
+          </p>
         </section>
       }
 
-      <!-- Step 2: Kontaktandmed -->
+      <!-- Step 2: Kontaktisikud -->
       @case (1) {
-        <section class="edit__step">
-          <h2>Kontaktandmed</h2>
+        <section class="edit__step card">
+          <div class="edit__step-head">
+            <h2>Kontaktisikud</h2>
+            <span class="edit__src">sina lisad · vähemalt üks</span>
+          </div>
+          <p class="edit__intro">
+            Registris kontaktandmeid ei ole. Lisa vähemalt üks kontaktisik — e-post ja telefon
+            käivad isiku all. Määra üks peamiseks; tema andmed lähevad vaikimisi taotlustele.
+          </p>
+
+          <span class="edit__grouplabel">Kontaktisikud</span>
+
           <div formArrayName="contacts" class="edit__repeat">
             @for (c of contacts.controls; track $index; let i = $index) {
               <div class="edit__card" [formGroupName]="i">
-                <div class="edit__card-head">
-                  <span>Kontaktisik {{ i + 1 }}</span>
-                  <button type="button" class="edit__link" (click)="removeContact(i)">Eemalda</button>
-                </div>
                 <div class="edit__grid">
-                  <dds-input label="Nimi" formControlName="fullName" />
-                  <dds-input label="Amet" formControlName="role" />
-                  <dds-input
-                    label="E-post"
-                    type="email"
-                    [required]="true"
-                    formControlName="email"
-                    [error]="showError(c.controls.email) ? 'Sisesta korrektne e-post' : ''"
-                  />
-                  <dds-phone-input
-                    label="Telefon"
-                    [required]="true"
-                    formControlName="phone"
-                    [error]="showError(c.controls.phone) ? 'Telefon on kohustuslik' : ''"
-                  />
-                  <dds-input label="Isikukood" formControlName="personCode" />
+                  <dds-input label="Nimi" [required]="true" formControlName="fullName"
+                    [error]="showError(c.controls.fullName) ? 'Nimi on kohustuslik' : ''" />
+                  <dds-input label="Roll" placeholder="nt Juhatuse liige" formControlName="role" />
+                  <dds-input label="E-post" type="email" [required]="true" formControlName="email"
+                    [error]="showError(c.controls.email) ? 'Sisesta korrektne e-post' : ''" />
+                  <dds-phone-input label="Telefon" formControlName="phone" />
                 </div>
-                <label class="edit__check">
-                  <input type="checkbox" formControlName="primary" />
-                  Peamine kontakt
-                </label>
-              </div>
-            }
-          </div>
-          <button type="button" dds-button variant="secondary" (click)="addContact()">
-            Lisa kontaktisik +
-          </button>
-
-          <h3 class="edit__subhead">Pangakontod</h3>
-          <div formArrayName="bankAccounts" class="edit__repeat">
-            @for (b of bankAccounts.controls; track $index; let i = $index) {
-              <div class="edit__card" [formGroupName]="i">
-                <div class="edit__card-head">
-                  <span>Pangakonto {{ i + 1 }}</span>
-                  <button type="button" class="edit__link" (click)="removeBank(i)">Eemalda</button>
-                </div>
-                <div class="edit__grid">
-                  <dds-input
-                    label="IBAN"
-                    [required]="true"
-                    formControlName="iban"
-                    [error]="showError(b.controls.iban) ? 'IBAN on kohustuslik' : ''"
-                  />
-                  <dds-input label="Pank" formControlName="bankName" />
-                </div>
-                <label class="edit__check">
-                  <input type="checkbox" formControlName="primary" />
-                  Peamine konto
-                </label>
-              </div>
-            }
-          </div>
-          <button type="button" dds-button variant="secondary" (click)="addBank()">
-            Lisa pangakonto +
-          </button>
-        </section>
-      }
-
-      <!-- Step 3: Seotud isikud (display-only) -->
-      @case (2) {
-        <section class="edit__step">
-          <h2>Seotud isikud</h2>
-          <p class="edit__note">Andmed pärinevad äriregistrist ja neid ei saa siin muuta.</p>
-          @if (relatedParties().length) {
-            <dds-card>
-              <ul class="edit__list">
-                @for (rp of relatedParties(); track rp.displayName) {
-                  <li>
-                    <span>{{ rp.displayName }}</span>
-                    <span class="edit__muted">
-                      {{ rp.role }}@if (rp.ownershipPct != null) { · {{ rp.ownershipPct }}%}
-                    </span>
-                  </li>
+                <dds-input label="Isikukood (vabatahtlik)" formControlName="personCode" />
+                @if (birthLabel(c.controls.personCode.value); as b) {
+                  <p class="edit__birth">✓ sünnikuupäev: {{ b }}</p>
                 }
-              </ul>
-            </dds-card>
+                <div class="edit__card-foot">
+                  <label class="edit__radio">
+                    <input type="radio" name="primaryContact" [checked]="c.controls.primary.value" (change)="setPrimary(i)" />
+                    peamine kontakt
+                  </label>
+                  <button type="button" class="edit__link edit__link--danger" aria-label="Eemalda kontaktisik" (click)="removeContact(i)">×</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <button type="button" dds-button variant="secondary" size="sm" (click)="addContact()">
+            + Lisa uus kontaktisik
+          </button>
+
+          @if (contactsError()) {
+            <p class="edit__error" role="alert">{{ contactsError() }}</p>
+          }
+
+          @if (partySuggestions().length) {
+            <div class="edit__suggest">
+              <p class="edit__suggest-label">
+                <strong>Lisa seotud isikute hulgast</strong> — registrist, nimi ja isikukood
+                täidetakse automaatselt
+              </p>
+              <div class="edit__chips">
+                @for (s of partySuggestions(); track s.personCode) {
+                  <button type="button" class="edit__chip" (click)="addContact(s)">
+                    <span class="edit__chip-name">+ {{ s.displayName }}</span>
+                    <span class="edit__chip-roles">{{ s.roles }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </section>
+
+        <section class="edit__step card">
+          <div class="edit__step-head">
+            <h2>Seotud isikud</h2>
+            <span class="edit__src">🔒 Äriregistrist</span>
+          </div>
+          <p class="edit__intro">
+            Äriregistrist — vaata üle, muuta ei saa. Füüsilisi isikuid saad ülalt „Lisa seotud
+            isikute hulgast" mugavalt kontaktiks lisada (nimi ja isikukood täidetakse
+            automaatselt).
+          </p>
+          @if (relatedParties().length) {
+            <ul class="edit__parties">
+              @for (rp of relatedParties(); track $index) {
+                <li>
+                  <span class="edit__party-name">{{ rp.displayName }}</span>
+                  <span class="edit__party-role">
+                    {{ rp.role }}@if (rp.ownershipPct != null) { ({{ rp.ownershipPct }}%)}
+                  </span>
+                  <span class="edit__muted">
+                    {{ isNatural(rp.partyType) ? 'isikukood' : 'reg' }} {{ rp.registryCode }}
+                  </span>
+                </li>
+              }
+            </ul>
           } @else {
             <p class="edit__muted">Seotud isikuid ei ole registris.</p>
           }
+          <p class="edit__nb">
+            NB (kontseptsioon): isikukood on isikuandmed — päris süsteemis nõuab kuvamine
+            õiguslikku alust; proovitöös testandmed.
+          </p>
         </section>
       }
 
-      <!-- Step 4: Muu -->
-      @case (3) {
-        <section class="edit__step">
-          <h2>Muu</h2>
+      <!-- Step 3: Muud andmed -->
+      @case (2) {
+        <section class="edit__step card">
+          <div class="edit__step-head">
+            <h2>Muud andmed</h2>
+            <span class="edit__src">sina lisad</span>
+          </div>
           <div class="edit__fields">
+            <dds-input label="Töötajate arv" inputmode="numeric" formControlName="employeeCount" />
             <dds-tag-input
               label="Sihtturud"
-              placeholder="Lisa turg…"
+              placeholder="+ lisa sihtriik…"
               [options]="markets"
               formControlName="targetMarkets"
             />
-            <dds-tag-input
-              label="Tegevuspiirkond"
-              placeholder="Lisa piirkond…"
-              [options]="regions"
-              formControlName="operatingRegions"
-            />
+            <p class="edit__muted">ekspordi tugiteenuste soovitamiseks</p>
           </div>
+          <p class="edit__note">
+            Töötajate arv ja sihtturud aitavad arvutada teenuste sobivust (nt arenguprogrammi
+            töötajate nõue, ekspordinõuded).
+          </p>
         </section>
       }
     }
   </form>
 
+  @if (errorMessage()) {
+    <p class="edit__error" role="alert">{{ errorMessage() }}</p>
+  }
+
   <footer class="edit__footer">
     <div>
-      @if (activeStep() > 0) {
-        <button dds-button variant="ghost" (click)="prev()">← Eelmine</button>
+      @if (activeStep() === 0) {
+        <button dds-button variant="secondary" (click)="cancel.emit()">Loobu</button>
+      } @else {
+        <button dds-button variant="secondary" (click)="prev()">← Eelmine</button>
       }
     </div>
     <div class="edit__footer-right">
       @if (!isLastStep()) {
         <button dds-button variant="primary" (click)="next()">Järgmine →</button>
-      } @else if (mode() === 'create') {
-        <button dds-button variant="primary" [disabled]="saving()" (click)="onCreate()">
-          {{ saving() ? 'Loon…' : 'Loo profiil' }}
-        </button>
       } @else {
-        <button dds-button variant="primary" [disabled]="saving()" (click)="onSave()">
-          {{ saving() ? 'Salvestan…' : 'Salvesta' }}
+        <button dds-button variant="primary" [disabled]="saving()" (click)="onCreate()">
+          {{ saving() ? 'Salvestan…' : 'Salvesta profiil' }}
         </button>
       }
     </div>

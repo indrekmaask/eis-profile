@@ -20,6 +20,7 @@ export interface Cards {
   realEstateCount: number;
   officialNoticeCount: number;
   paymentBehaviour: string | null;
+  taxDebt: number;
   employeeCount: number | null;
   targetMarkets: string[];
   operatingRegions: string[];
@@ -63,6 +64,8 @@ export interface AnnualReport {
   reportYear: number;
   submitted: boolean;
   salesRevenueEstonia: number | null;
+  salesRevenueEu: number | null;
+  salesRevenueNonEu: number | null;
   netProfit: number | null;
   balanceSheetTotal: number | null;
   equity: number | null;

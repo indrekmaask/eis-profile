@@ -21,6 +21,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--dds-space-4);
+  flex-wrap: wrap;
 }
 .ov__head h1 {
   margin: 0;
@@ -30,6 +31,48 @@
 .ov__sub {
   margin: var(--dds-space-1) 0 0;
   color: var(--dds-color-ink-muted);
+}
+
+.ov__lead {
+  margin: 0;
+  color: var(--dds-color-ink-muted);
+  max-width: 60ch;
+}
+
+/* Täituvus pill (header, PDF-style) */
+.ov__meter {
+  display: flex;
+  align-items: center;
+  gap: var(--dds-space-3);
+  background: var(--dds-color-surface);
+  border: 1px solid var(--dds-color-border);
+  border-radius: var(--dds-radius-pill);
+  padding: var(--dds-space-2) var(--dds-space-3);
+  font-size: var(--dds-font-size-sm);
+}
+.ov__meter-label {
+  color: var(--dds-color-ink-muted);
+  white-space: nowrap;
+}
+.ov__meter-track {
+  width: 90px;
+  height: 6px;
+  border-radius: var(--dds-radius-pill);
+  background: var(--dds-color-surface-alt);
+  overflow: hidden;
+}
+.ov__meter-bar {
+  display: block;
+  height: 100%;
+  background: var(--dds-color-primary);
+  border-radius: var(--dds-radius-pill);
+}
+.ov__meter-pct {
+  font-weight: var(--dds-font-weight-bold);
+}
+.ov__meter-done {
+  color: var(--dds-color-success, #067647);
+  font-weight: var(--dds-font-weight-bold);
 }
 
 .ov__notice {
@@ -45,9 +88,22 @@
   background: var(--dds-color-registry-highlight);
   color: var(--dds-color-registry-accent);
 }
+.ov__notice--info {
+  background: var(--dds-color-registry-highlight);
+  color: var(--dds-color-registry-accent);
+}
 
-.ov__completeness :is(dds-completeness) {
-  display: block;
+/* Registry data bar */
+.ov__regbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dds-space-4);
+  background: var(--dds-color-surface-alt);
+  border-radius: var(--dds-radius-control);
+  padding: var(--dds-space-3) var(--dds-space-4);
+  font-size: var(--dds-font-size-sm);
+  color: var(--dds-color-ink-muted);
 }
 
 .card {
@@ -57,18 +113,57 @@
   padding: var(--dds-space-5);
 }
 
-/* ---- Üldandmed + Kontaktandmed ---- */
-.ov__topgrid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: var(--dds-space-4);
-  align-items: start;
-}
-.ov__general h2 {
-  margin: 0 0 var(--dds-space-4);
+/* ---- Sections ---- */
+.ov__section-card h2 {
+  margin: 0;
   font-size: var(--dds-font-size-xl);
   font-weight: var(--dds-font-weight-bold);
 }
+.ov__section-head {
+  display: flex;
+  align-items: center;
+  gap: var(--dds-space-3);
+  margin-bottom: var(--dds-space-4);
+}
+.ov__section-head button {
+  margin-left: auto;
+}
+.ov__src {
+  color: var(--dds-color-ink-subtle);
+  font-size: var(--dds-font-size-xs);
+  white-space: nowrap;
+}
+.ov__src-inline {
+  color: var(--dds-color-ink-subtle);
+  font-size: var(--dds-font-size-xs);
+  margin-left: var(--dds-space-2);
+}
+.ov__grouplabel {
+  display: block;
+  font-size: var(--dds-font-size-xs);
+  font-weight: var(--dds-font-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dds-color-ink-subtle);
+  margin-bottom: var(--dds-space-3);
+}
+.ov__footnote {
+  margin: var(--dds-space-4) 0 0;
+  padding-top: var(--dds-space-3);
+  border-top: 1px solid var(--dds-color-border);
+  color: var(--dds-color-ink-subtle);
+  font-size: var(--dds-font-size-sm);
+}
+.ov__optional {
+  font-weight: var(--dds-font-weight-regular);
+  color: var(--dds-color-ink-subtle);
+  font-size: var(--dds-font-size-xs);
+}
+.ov__muted-italic {
+  color: var(--dds-color-ink-subtle);
+  font-style: italic;
+}
+
 .ov__rows {
   margin: 0;
   display: flex;
@@ -77,6 +172,7 @@
 .ov__row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: var(--dds-space-4);
   padding: var(--dds-space-3) 0;
   border-top: 1px solid var(--dds-color-border);
@@ -87,19 +183,27 @@
 .ov__row dt {
   color: var(--dds-color-ink-muted);
   font-weight: var(--dds-font-weight-medium);
+  white-space: nowrap;
 }
 .ov__row dd {
   margin: 0;
   text-align: right;
 }
-.ov__prov {
-  display: flex;
-  align-items: center;
-  gap: var(--dds-space-2);
-  margin: var(--dds-space-4) 0 0;
-  color: var(--dds-color-ink-muted);
-  font-size: var(--dds-font-size-sm);
+.ov__row--input dd {
+  flex: 1;
+  max-width: 520px;
 }
+.ov__row--input dds-input {
+  display: block;
+  text-align: left;
+}
+
+.ov__actions {
+  display: flex;
+  gap: var(--dds-space-3);
+  margin-top: var(--dds-space-4);
+}
+
 .ov__link {
   background: none;
   border: none;
@@ -108,38 +212,105 @@
   font: inherit;
   font-weight: var(--dds-font-weight-bold);
   color: var(--dds-color-primary);
-  text-decoration: underline;
+}
+.ov__link--danger {
+  color: var(--dds-color-danger, #b42318);
 }
 
-.ov__contactname {
-  margin: 0;
+/* ---- Kontaktisikud ---- */
+.ov__contacts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-3);
+}
+.ov__contact {
+  border: 1px solid var(--dds-color-border);
+  border-radius: var(--dds-radius-control);
+  padding: var(--dds-space-3) var(--dds-space-4);
+}
+.ov__contact-top {
+  display: flex;
+  align-items: center;
+  gap: var(--dds-space-3);
+}
+.ov__contact-name {
   font-weight: var(--dds-font-weight-bold);
 }
-.ov__muted {
+.ov__contact-role {
+  margin-left: auto;
   color: var(--dds-color-ink-muted);
   font-size: var(--dds-font-size-sm);
 }
-:is(dds-contact-block) p {
-  margin: 2px 0 0;
+.ov__contact-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dds-space-2) var(--dds-space-5);
+  margin-top: var(--dds-space-2);
+  font-size: var(--dds-font-size-sm);
 }
-.ov__spaced {
-  margin-top: var(--dds-space-3) !important;
+.ov__meta-k {
+  color: var(--dds-color-ink-subtle);
+  font-size: var(--dds-font-size-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-right: var(--dds-space-1);
 }
-.ov__weblink {
+.ov__pill {
+  background: var(--dds-color-surface-alt);
+  color: var(--dds-color-ink-strong);
+  border-radius: var(--dds-radius-pill);
+  padding: 2px var(--dds-space-3);
+  font-size: var(--dds-font-size-xs);
+  white-space: nowrap;
+}
+.ov__pill--blue {
+  background: var(--dds-color-registry-highlight);
   color: var(--dds-color-primary);
   font-weight: var(--dds-font-weight-medium);
-  text-decoration: none;
 }
-.ov__banks {
-  margin: var(--dds-space-3) 0 0;
-  padding-left: var(--dds-space-4);
+
+.ov__contact-forms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-4);
+  align-items: flex-start;
+}
+.ov__contact-form {
+  width: 100%;
+  border: 1px solid var(--dds-color-border);
+  border-radius: var(--dds-radius-control);
+  padding: var(--dds-space-4);
+  background: var(--dds-color-surface-alt);
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-3);
+}
+.ov__grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--dds-space-3) var(--dds-space-4);
+}
+.ov__birth {
+  margin: 0;
   font-size: var(--dds-font-size-sm);
-  color: var(--dds-color-ink-muted);
+  color: var(--dds-color-success, #067647);
+}
+.ov__contact-form-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ov__radio {
+  display: flex;
+  align-items: center;
+  gap: var(--dds-space-2);
+  font-size: var(--dds-font-size-sm);
+  cursor: pointer;
 }
 
 /* ---- Muud andmed ---- */
 .ov__section {
-  margin: var(--dds-space-2) 0 var(--dds-space-4);
+  margin: var(--dds-space-2) 0 var(--dds-space-2);
   font-size: var(--dds-font-size-xl);
   font-weight: var(--dds-font-weight-bold);
 }
@@ -149,10 +320,28 @@
   gap: var(--dds-space-4);
 }
 .mcard {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--dds-space-2);
   min-height: 150px;
+}
+.mcard--action {
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+}
+.mcard--action:hover {
+  outline: 2px solid var(--dds-color-primary);
+}
+.mcard__chevron {
+  position: absolute;
+  top: var(--dds-space-4);
+  right: var(--dds-space-4);
+  color: var(--dds-color-ink-subtle);
+  font-size: var(--dds-font-size-lg);
 }
 .mcard__icon {
   width: 48px;
@@ -173,85 +362,151 @@
   font-size: var(--dds-font-size-md);
   font-weight: var(--dds-font-weight-bold);
 }
+.mcard__src {
+  font-weight: var(--dds-font-weight-regular);
+  color: var(--dds-color-ink-subtle);
+  font-size: var(--dds-font-size-xs);
+}
 .mcard__value {
   margin: 0;
   font-size: var(--dds-font-size-2xl);
   font-weight: var(--dds-font-weight-regular);
-}
-.mcard__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--dds-space-1);
-}
-.mcard__list li {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--dds-space-2);
-  font-size: var(--dds-font-size-sm);
 }
 .mcard__pills {
   display: flex;
   flex-wrap: wrap;
   gap: var(--dds-space-2);
 }
-.pill {
-  background: var(--dds-color-surface-alt);
-  color: var(--dds-color-ink-strong);
-  border-radius: var(--dds-radius-pill);
-  padding: 2px var(--dds-space-3);
-  font-size: var(--dds-font-size-sm);
+
+.ov__other-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-4);
+  max-width: 520px;
 }
 
-/* ---- Finantsnäitajad ---- */
+/* ---- Majandusnäitajad ---- */
 .ov__fingrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--dds-space-4);
   align-items: start;
+  margin-top: var(--dds-space-4);
+}
+.ov__cardh-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--dds-space-4);
 }
 .ov__cardh {
-  margin: 0 0 var(--dds-space-4);
+  margin: 0;
   font-size: var(--dds-font-size-md);
   font-weight: var(--dds-font-weight-bold);
 }
-.chart {
+.colchart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--dds-space-6);
+  height: 160px;
+  padding: 0 var(--dds-space-4);
+}
+.colchart__item {
   display: flex;
   flex-direction: column;
-  gap: var(--dds-space-3);
-}
-.chart__row {
-  display: grid;
-  grid-template-columns: 48px 1fr auto;
   align-items: center;
-  gap: var(--dds-space-3);
+  justify-content: flex-end;
+  gap: var(--dds-space-2);
+  height: 100%;
+  width: 48px;
+}
+.colchart__bar {
+  display: block;
+  width: 40px;
+  background: var(--dds-color-primary);
+  border-radius: 2px 2px 0 0;
+}
+.colchart__year {
+  color: var(--dds-color-ink-muted);
   font-size: var(--dds-font-size-sm);
 }
-.chart__year {
+
+/* ---- Seotud isikud modal ---- */
+.ov__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8vh var(--dds-space-4) var(--dds-space-4);
+  z-index: 50;
+}
+.ov__modal {
+  background: var(--dds-color-surface);
+  border-radius: var(--dds-radius-card);
+  box-shadow: var(--dds-shadow-card);
+  padding: var(--dds-space-5);
+  width: min(560px, 100%);
+  max-height: 80vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-4);
+}
+.ov__modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ov__modal-head h2 {
+  margin: 0;
+  font-size: var(--dds-font-size-lg);
+  font-weight: var(--dds-font-weight-bold);
+}
+.ov__party-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+.ov__party-list li {
+  padding: var(--dds-space-3) 0;
+  border-top: 1px solid var(--dds-color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-2);
+}
+.ov__party-list li:first-child {
+  border-top: none;
+}
+.ov__party-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dds-space-3);
+}
+.ov__party-name {
+  font-weight: var(--dds-font-weight-bold);
+}
+.ov__nb {
+  margin: 0;
+  padding-top: var(--dds-space-3);
+  border-top: 1px solid var(--dds-color-border);
+  color: var(--dds-color-warning, #b54708);
+  font-size: var(--dds-font-size-sm);
+}
+
+.ov__muted {
   color: var(--dds-color-ink-muted);
-}
-.chart__track {
-  background: var(--dds-color-surface-alt);
-  border-radius: var(--dds-radius-pill);
-  height: 10px;
-}
-.chart__bar {
-  display: block;
-  height: 100%;
-  border-radius: var(--dds-radius-pill);
-  background: var(--dds-color-primary);
-}
-.chart__val {
-  font-weight: var(--dds-font-weight-medium);
-  white-space: nowrap;
+  font-size: var(--dds-font-size-sm);
 }
 
 @media (max-width: 900px) {
-  .ov__topgrid,
   .ov__cards,
-  .ov__fingrid {
+  .ov__fingrid,
+  .ov__grid2 {
     grid-template-columns: 1fr;
   }
 }

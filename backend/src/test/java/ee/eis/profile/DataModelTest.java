@@ -54,13 +54,13 @@ class DataModelTest {
         assertThat(p.getEmtakSource()).isEqualTo(Source.REGISTRY);
 
         UUID id = p.getId();
-        assertThat(contacts.findByProfileId(id)).hasSize(1);
+        assertThat(contacts.findByProfileId(id)).hasSize(2);
         assertThat(bankAccounts.findByProfileId(id)).hasSize(1);
         assertThat(addresses.findByProfileId(id)).hasSize(2);
-        assertThat(relatedParties.findByProfileId(id)).hasSize(3);
+        assertThat(relatedParties.findByProfileId(id)).hasSize(7);
         assertThat(annualReports.findByProfileIdOrderByReportYearDesc(id)).hasSize(3);
-        assertThat(marketRegions.findByProfileId(id)).hasSize(6);
-        assertThat(access.findByPersonCode("37510090251")).hasSize(1);
+        assertThat(marketRegions.findByProfileId(id)).hasSize(3);
+        assertThat(access.findByPersonCode("48505150220")).hasSize(1);
     }
 
     @Test

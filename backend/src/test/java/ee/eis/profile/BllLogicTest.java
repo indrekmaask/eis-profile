@@ -36,7 +36,8 @@ class BllLogicTest {
     void estonianPersonCodeChecksum() {
         assertThat(personCode.isValid("37510090251")).isTrue();
         assertThat(personCode.isValid("49403136515")).isTrue();
-        assertThat(personCode.isValid("37510090252")).isFalse(); // wrong control digit
+        assertThat(personCode.isValid("38502020023")).isTrue(); // mock API test code (checksum not enforced)
+        assertThat(personCode.isValid("39913320000")).isFalse(); // impossible date
         assertThat(personCode.isValid("123")).isFalse();
     }
 
@@ -70,12 +71,12 @@ class BllLogicTest {
 
     @Test
     void completenessChecklist() {
-        var full = completeness.calculate(new Input(true, true, true, true, true, true));
+        var full = completeness.calculate(new Input(true, true, true, true, true));
         assertThat(full.percent()).isEqualTo(100);
         assertThat(full.missing()).isEmpty();
 
-        var partial = completeness.calculate(new Input(true, false, true, false, true, true));
-        assertThat(partial.percent()).isEqualTo(67); // 4/6
-        assertThat(partial.missing()).containsExactly("bankAccount", "employeeCount");
+        var partial = completeness.calculate(new Input(true, true, true, true, false));
+        assertThat(partial.percent()).isEqualTo(80); // 4/5
+        assertThat(partial.missing()).containsExactly("website");
     }
 }

@@ -34,11 +34,42 @@ export interface ServiceDef {
 
 function latest(p: ProfileView): AnnualLike {
   const r = p.annualReports[0];
-  return { year: r?.reportYear ?? null, revenue: r?.salesRevenueEstonia ?? 0 };
+  return {
+    year: r?.reportYear ?? null,
+    revenue: r ? totalRevenue(r) : 0,
+    exportRevenue: r ? exportRevenue(r) : 0,
+  };
 }
 interface AnnualLike {
   year: number | null;
   revenue: number;
+  exportRevenue: number;
+}
+
+type ReportLike = {
+  salesRevenueEstonia: number | null;
+  salesRevenueEu: number | null;
+  salesRevenueNonEu: number | null;
+};
+
+export function totalRevenue(r: ReportLike): number {
+  return (r.salesRevenueEstonia ?? 0) + (r.salesRevenueEu ?? 0) + (r.salesRevenueNonEu ?? 0);
+}
+export function exportRevenue(r: ReportLike): number {
+  return (r.salesRevenueEu ?? 0) + (r.salesRevenueNonEu ?? 0);
+}
+
+/** Total-revenue growth (%) between the two most recent reports; null if not computable. */
+export function growth(p: ProfileView): number | null {
+  const rows = p.annualReports.slice().sort((a, b) => b.reportYear - a.reportYear);
+  if (rows.length < 2) {
+    return null;
+  }
+  const prev = totalRevenue(rows[1]);
+  if (!prev) {
+    return null;
+  }
+  return ((totalRevenue(rows[0]) - prev) / prev) * 100;
 }
 
 const REGION_LABELS: Record<string, string> = {
@@ -97,17 +128,36 @@ export const SERVICES: ServiceDef[] = [
     configured: true,
     eligibility: 'RULE_BASED',
     booking: true,
-    advisorAssessed: true,
     intro:
-      'Toetus arenguplaani elluviimiseks. Kohustuslik eelnõustamine (EIS); sobivust hindab kliendihaldur eelnõustamisel, seejärel esitatakse taotlus e-toetuse keskkonnas.',
-    criteria: [
-      'Eesti äriregistris registreeritud',
-      'Tegutsenud vähemalt 2 aastat',
-      'Vähemalt 8 töötajat',
-      'Eksport ≥ 50 000 € VÕI müügitulu kasv ≥ 5%/a',
-      'Panustab TAIE fookusvaldkonda',
-      'Panustab vähemalt ühte kolmikpöörde suunda (innovatsioon / digitaliseerimine / kestlik areng)',
-    ],
+      'Toetus arenguplaani elluviimiseks. Sobivuse eelkontroll tehakse automaatselt profiili ja registriandmete põhjal. Kohustuslik esimene samm on eelnõustamine, kus kliendihaldur täpsustab sobivust ja aitab taotluse ette valmistada.',
+    // Automaatne eelkontroll — arvutatud päris andmetest. VTA jääk ja TAIE = "?" (andmeid pole / sõltub taotlusest).
+    rules: (p) => {
+      const years = p.annualReports.length;
+      const exp = latest(p).exportRevenue;
+      const g = growth(p);
+      const emp = p.employeeCount.value;
+      const growthOrExport = (g != null && g >= 5) || exp >= 50000;
+      return [
+        { icon: '✓', label: 'Ettevõte on Eesti äriregistris', detail: 'profiil põhineb registrikandel' },
+        { icon: years >= 2 ? '✓' : '✗', label: 'Tegutsenud vähemalt 2 aastat', detail: `aruandeid ${years}` },
+        {
+          icon: growthOrExport ? '✓' : '✗',
+          label: 'Kasv ≥ 5%/a VÕI eksport ≥ 50 000 €',
+          detail: `kasv ${g == null ? '—' : (g >= 0 ? '+' : '') + g.toFixed(1) + '%'}, eksport ${money(exp)} — ${growthOrExport ? 'VÕI täidetud' : 'kumbki ei täidetud'}`,
+        },
+        {
+          icon: emp != null ? (emp >= 8 ? '✓' : '✗') : '?',
+          label: 'Vähemalt 8 töötajat',
+          detail: emp != null ? `profiilis: ${emp}` : 'lisa töötajate arv profiilile',
+        },
+        {
+          icon: '?',
+          label: 'VTA vaba jääk piisav (kuni 300 000 € / 3 a)',
+          detail: 'eeltäidetakse tulevikus riigiabi registrist (RAR) — praeguses mock-API-s pole, kontrollib menetleja',
+        },
+        { icon: '?', label: 'Panustab TAIE fookusvaldkonda', detail: 'projekti sisu — vali taotlusel' },
+      ];
+    },
   },
   {
     id: 'digi',

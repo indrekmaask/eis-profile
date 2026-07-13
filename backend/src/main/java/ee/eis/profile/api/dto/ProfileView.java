@@ -30,7 +30,7 @@ public record ProfileView(
     public record Completeness(int percent, List<String> missing) {}
 
     public record Cards(int relatedPartyCount, int realEstateCount, int officialNoticeCount,
-                        String paymentBehaviour, Integer employeeCount,
+                        String paymentBehaviour, long taxDebt, Integer employeeCount,
                         List<String> targetMarkets, List<String> operatingRegions) {}
 
     public record Contact(String id, String fullName, String role, String email, String phone,
@@ -44,6 +44,7 @@ public record ProfileView(
                                String displayName, BigDecimal ownershipPct) {}
 
     public record AnnualReport(int reportYear, boolean submitted, Long salesRevenueEstonia,
+                               Long salesRevenueEu, Long salesRevenueNonEu,
                                Long netProfit, Long balanceSheetTotal, Long equity) {}
 
     public record MarketRegionView(String regionType, String value) {}
