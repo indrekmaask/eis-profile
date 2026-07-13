@@ -16,39 +16,61 @@ get public domains.
 
 ## Service reference-variable placeholders
 
-Below, `<backend-db>`, `<mock-db>`, `<backend>`, `<mock-api>`, `<profile-mfe>`
-are the **names you give each service** in Railway. Substitute them in the
-`${{ ... }}` references.
+Below, `<postgres>`, `<backend>`, `<mock-api>`, `<profile-mfe>` are the **names
+you give each service** in Railway. Substitute them in the `${{ ... }}` references.
 
-## 1. Databases (managed)
+## 1. Database — one Postgres instance, TWO databases
 
-Add two Postgres via **New → Database → Add PostgreSQL**:
+Deploy a single Postgres service `<postgres>` from image `postgres:18-alpine`
+with a volume at `/var/lib/postgresql/data`. Variables:
 
-- `<backend-db>` — schema/seed applied automatically by the backend's Flyway on boot.
-- `<mock-db>` — schema/seed applied automatically by the mock-api on boot.
+- `POSTGRES_USER` = `eis`
+- `POSTGRES_PASSWORD` = *(a generated secret)*
+- `POSTGRES_DB` = `eis_profile`   ← created on first init (backend's DB)
+- `PGDATA` = `/var/lib/postgresql/data/pgdata`
 
-No config needed; each exposes `PGDATABASE/PGUSER/PGPASSWORD`,
-`DATABASE_PRIVATE_URL`, and `RAILWAY_PRIVATE_DOMAIN`.
+Both apps share this one instance but use **separate databases** (isolated by
+DB, and internally by schema):
+
+- `eis_profile` — backend/BLL (schema `profile`, Flyway migrates+seeds on boot).
+- `business_profile` — mock-api (schema `business_registry`).
+
+**Manual one-time step (required):** the vendored mock-api's first migration runs
+`ALTER DATABASE business_profile …` (hard-coded DB name in
+`external/business-profile-mock-api/src/db/migrations/001-initial-schema.sql`),
+so a database literally named `business_profile` must exist — pointing mock-api at
+`eis_profile` fails. `POSTGRES_DB` only creates one DB at init, so create the
+second manually once (it persists on the volume). Add a temporary TCP proxy to
+`<postgres>` (Settings → Networking → TCP Proxy, target port 5432), then:
+
+```sh
+psql "postgresql://eis:<password>@<proxy-host>:<proxy-port>/eis_profile" \
+  -c "CREATE DATABASE business_profile OWNER eis;"
+```
+
+Remove the TCP proxy afterwards. mock-api creates its own `business_registry`
+schema + seed data on boot.
 
 ## 2. `<mock-api>` — external register mock (private only)
 
 - **Root Directory:** `external/business-profile-mock-api`
 - **Dockerfile:** auto-detected (`Dockerfile` in root dir)
 - **Variables:**
-  - `DATABASE_URL` = `${{<mock-db>.DATABASE_PRIVATE_URL}}`
-- No public domain. Listens on `$PORT` automatically.
+  - `DATABASE_URL` = `postgresql://eis:<password>@${{<postgres>.RAILWAY_PRIVATE_DOMAIN}}:5432/business_profile`
+  - `PORT` = `3000`
+- No public domain. Reads `PORT` + `DATABASE_URL`; binds all interfaces.
 
 ## 3. `<backend>` — Spring Boot BLL (private only)
 
 - **Root Directory:** `backend`
 - **Dockerfile:** auto-detected (`backend/Dockerfile`)
 - **Variables:**
-  - `POSTGRES_HOST` = `${{<backend-db>.RAILWAY_PRIVATE_DOMAIN}}`
+  - `POSTGRES_HOST` = `${{<postgres>.RAILWAY_PRIVATE_DOMAIN}}`
   - `POSTGRES_PORT` = `5432`
-  - `POSTGRES_DB` = `${{<backend-db>.PGDATABASE}}`
-  - `POSTGRES_USER` = `${{<backend-db>.PGUSER}}`
-  - `POSTGRES_PASSWORD` = `${{<backend-db>.PGPASSWORD}}`
-  - `REGISTRY_API_BASE_URL` = `http://${{<mock-api>.RAILWAY_PRIVATE_DOMAIN}}:${{<mock-api>.PORT}}`
+  - `POSTGRES_DB` = `eis_profile`
+  - `POSTGRES_USER` = `eis`
+  - `POSTGRES_PASSWORD` = *(same secret as `<postgres>`)*
+  - `REGISTRY_API_BASE_URL` = `http://${{<mock-api>.RAILWAY_PRIVATE_DOMAIN}}:3000`
   - `CRM_ENABLED` = `false`
 - No public domain (only the frontends call it, privately). Listens on `$PORT`
   (`application.yml` reads `${PORT:...}`).
