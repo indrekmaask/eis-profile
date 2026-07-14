@@ -21,6 +21,9 @@ export interface ServiceDef {
   configured: boolean;
   eligibility: Eligibility;
   intro: string;
+  /** Title/description overrides for the "Minu teenused" list card (Figma copy). */
+  listTitle?: string;
+  listIntro?: string;
   booking: boolean;
   advisorAssessed?: boolean;
   criteria?: string[];
@@ -104,6 +107,9 @@ export const SERVICES: ServiceDef[] = [
     booking: true,
     intro:
       'Toetus arenguplaani elluviimiseks. Sobivuse eelkontroll tehakse automaatselt profiili ja registriandmete põhjal. Kohustuslik esimene samm on eelnõustamine, kus kliendihaldur täpsustab sobivust ja aitab taotluse ette valmistada.',
+    listTitle: 'Ettevõtte arenguprogrammi eelnõustamine',
+    listIntro:
+      'Arenguprogramm on mitmeetapiline teekond (eelnõustamine → olukorra kaardistamine → arenguplaani ettevalmistamine → elluviimine → tulemuste hindamine). Kohustuslik esimene samm on eelnõustamine, kus sulle määratakse kliendihaldur.',
     // Automaatne eelkontroll — arvutatud päris andmetest. VTA jääk ja TAIE = "?" (andmeid pole / sõltub taotlusest).
     rules: (p) => {
       const years = p.annualReports.length;

@@ -4,16 +4,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DdsButton } from '@dds/ui';
 import { ProfileApiService, ProfileView } from '@eis/profile-api';
 import { IdentityService } from '../identity/identity.service';
-import { SERVICES, ServiceDef, Verdict, evaluate, verdictIcon, verdictRank } from './services.data';
-
-interface EvaluatedService {
-  s: ServiceDef;
-  v: Verdict;
-}
+import { SERVICES } from './services.data';
 
 /**
- * "Minu teenused" — services list with a per-service eligibility pre-assessment
- * computed from the company's profile + register data. Best-fit services first.
+ * "Minu teenused" — available services computed from the company's profile,
+ * laid out per the Figma frame: available-services cards + active-applications
+ * empty state.
  */
 @Component({
   selector: 'app-services-list',
@@ -42,21 +38,45 @@ interface EvaluatedService {
         </div>
       } @else {
         <p class="svc__lead">
-          See on <b>eelhinnang</b> sinu profiili ja registriandmete põhjal — see aitab leida sobivaid
-          teenuseid, aga <b>ei ole lõplik otsus</b>. Iga taotluse vaatab üle menetleja. Sobivad
-          teenused on eespool.
+          Eelhinnang arvutatakse {{ companyName() }} profiili ja aruannete andmetelt (seis
+          {{ asOf() }}).<br />
+          Kliki teenusel detailide ja taotlemise jaoks.
         </p>
+
+        <h2 class="svc__section">Sulle saada olevad teenused</h2>
         <div class="svc__list">
-          @for (e of evaluated(); track e.s.id) {
-            <a class="svc__row" [routerLink]="['/services', e.s.id]">
-              <span class="svc__ico" [class]="'is-' + e.v.kind">{{ icon(e.v.kind) }}</span>
-              <span class="svc__body">
-                <span class="svc__name">{{ e.s.name }}</span>
-                <span class="svc__meta">{{ e.v.txt }} · {{ e.s.sum }}</span>
+          @for (s of services; track s.id) {
+            <a class="svc__row card" [routerLink]="['/services', s.id]">
+              <span class="svc__ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 17l6-6 4 4 8-8" />
+                  <path d="M14 7h7v7" />
+                </svg>
               </span>
-              <span class="svc__arrow">→</span>
+              <span class="svc__body">
+                <span class="svc__name">{{ s.listTitle ?? s.name }}</span>
+                <span class="svc__desc">{{ s.listIntro ?? s.intro }}</span>
+              </span>
+              <dds-button variant="pill" size="sm" class="svc__cta">Vaata lähemalt →</dds-button>
             </a>
           }
+        </div>
+
+        <h2 class="svc__section">Aktiivsed taotlused</h2>
+        <div class="svc__row card svc__row--static">
+          <span class="svc__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 2v2" /><path d="M14 2v2" />
+              <path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1" />
+              <path d="M6 2v2" />
+            </svg>
+          </span>
+          <span class="svc__body">
+            <span class="svc__name">Aktiivseid teenuseid veel pole</span>
+            <span class="svc__desc">Kui alustad teenuse kasutamist või esitad taotluse, ilmuvad need siia.</span>
+          </span>
         </div>
       }
     </div>
@@ -81,10 +101,15 @@ interface EvaluatedService {
       .svc__lead {
         margin: 0 0 var(--dds-space-2);
         max-width: 760px;
-        color: var(--dds-color-ink-muted);
+        color: var(--dds-color-ink-strong);
       }
       .svc__muted {
         color: var(--dds-color-ink-muted);
+      }
+      .svc__section {
+        margin: var(--dds-space-4) 0 0;
+        font-size: var(--dds-font-size-xl);
+        font-weight: var(--dds-font-weight-regular);
       }
       .svc__list {
         display: flex;
@@ -94,61 +119,49 @@ interface EvaluatedService {
       .svc__row {
         display: flex;
         align-items: center;
-        gap: var(--dds-space-4);
+        gap: var(--dds-space-5);
         background: var(--dds-color-surface);
         border-radius: var(--dds-radius-card);
         box-shadow: var(--dds-shadow-card);
-        padding: var(--dds-space-4) var(--dds-space-5);
+        padding: var(--dds-space-5) var(--dds-space-6);
         text-decoration: none;
         color: var(--dds-color-ink-strong);
       }
-      .svc__row:hover {
+      a.svc__row:hover {
         outline: 2px solid var(--dds-color-primary);
       }
       .svc__ico {
+        width: 56px;
+        height: 56px;
         flex: none;
-        width: 40px;
-        height: 40px;
+        border: 1px solid var(--dds-color-ink-muted);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
-        font-weight: var(--dds-font-weight-bold);
+        color: var(--dds-color-ink-muted);
       }
-      .svc__ico.is-ok {
-        background: var(--dds-color-success-bg);
-        color: var(--dds-color-success);
-      }
-      .svc__ico.is-no {
-        background: var(--dds-color-error-bg);
-        color: var(--dds-color-error);
-      }
-      .svc__ico.is-warn {
-        background: var(--dds-color-warning-bg);
-        color: var(--dds-color-warning);
-      }
-      .svc__ico.is-maybe,
-      .svc__ico.is-open {
-        background: var(--dds-color-registry-highlight);
-        color: var(--dds-color-registry-accent);
+      .svc__ico svg {
+        width: 26px;
+        height: 26px;
       }
       .svc__body {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: var(--dds-space-2);
         flex: 1;
         min-width: 0;
       }
       .svc__name {
-        font-weight: var(--dds-font-weight-bold);
+        font-size: var(--dds-font-size-lg);
       }
-      .svc__meta {
+      .svc__desc {
         color: var(--dds-color-ink-muted);
         font-size: var(--dds-font-size-sm);
+        max-width: 640px;
       }
-      .svc__arrow {
-        color: var(--dds-color-ink-muted);
+      .svc__cta {
+        flex: none;
       }
       .svc__empty {
         background: var(--dds-color-surface);
@@ -180,6 +193,7 @@ export class ServicesList {
   private readonly api = inject(ProfileApiService);
   private readonly router = inject(Router);
 
+  protected readonly services = SERVICES;
   protected readonly loading = signal(true);
   protected readonly profileMissing = signal(false);
   private readonly profile = signal<ProfileView | null>(null);
@@ -189,13 +203,17 @@ export class ServicesList {
     person: this.identity.personCode(),
   }));
 
-  protected readonly evaluated = computed<EvaluatedService[]>(() => {
-    const p = this.profile();
-    if (!p) {
-      return [];
+  protected readonly companyName = computed(
+    () => this.profile()?.businessName.value ?? this.identity.activeCompany()?.name ?? '',
+  );
+
+  protected readonly asOf = computed(() => {
+    const iso = this.profile()?.dataAsOfDate;
+    if (!iso) {
+      return '—';
     }
-    return SERVICES.map((s) => ({ s, v: evaluate(p, s) }))
-      .sort((a, b) => verdictRank(a.v.kind) - verdictRank(b.v.kind));
+    const [y, m, d] = iso.slice(0, 10).split('-');
+    return `${d}.${m}.${y}`;
   });
 
   constructor() {
@@ -216,9 +234,6 @@ export class ServicesList {
     });
   }
 
-  protected icon(kind: Verdict['kind']): string {
-    return verdictIcon(kind);
-  }
   protected toRoles(): void {
     this.router.navigate(['/select-role']);
   }
