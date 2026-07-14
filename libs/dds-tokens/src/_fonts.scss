@@ -1,33 +1,21 @@
-// DDS2 typeface: Aino (RIA / eesti.ee design system).
-//
-// Aino is a licensed font and is NOT shipped in this repo. To activate it,
-// drop the .woff2 files under each app's `public/fonts/` (served at /fonts/*)
-// and uncomment the @font-face blocks below. Until then the token font stack
-// (see _tokens.scss `--dds-font-family`) falls back to a near-equivalent
-// grotesque / system sans, so layouts stay faithful without the proprietary
-// files — and no failed font requests hit the console.
-//
-// @font-face {
-//   font-family: 'Aino';
-//   font-style: normal;
-//   font-weight: 400;
-//   font-display: swap;
-//   src: url('/fonts/aino-regular.woff2') format('woff2');
-// }
-// @font-face {
-//   font-family: 'Aino';
-//   font-style: normal;
-//   font-weight: 500;
-//   font-display: swap;
-//   src: url('/fonts/aino-medium.woff2') format('woff2');
-// }
-// @font-face {
-//   font-family: 'Aino';
-//   font-style: normal;
-//   font-weight: 700;
-//   font-display: swap;
-//   src: url('/fonts/aino-bold.woff2') format('woff2');
-// }
+// DDS2 typeface: Aino (Brand Estonia; webfont files as served by brand.estonia.ee).
+// License: Brand Estonia non-exclusive license for promoting Estonia; no Medium
+// (500) cut exists in the web release, so weight 500 resolves to Regular per the
+// CSS font-matching algorithm.
+@font-face {
+  font-family: 'Aino';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/aino-regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Aino';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/aino-bold.woff2') format('woff2');
+}
 
 // Geist (Vercel, OFL) — the DDS2 body typeface. Open-source, so it IS shipped
 // (self-hosted under each app's public/fonts/). Latin subset covers Estonian

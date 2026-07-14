@@ -7,9 +7,6 @@ import { PreAdvisory } from './services/pre-advisory';
 import { ServicesList } from './services/services-list';
 import { ServiceDetail } from './services/service-detail';
 import { Toolaud } from './dashboard/toolaud';
-import { KupsusLanding } from './kupsus/kupsus-landing';
-import { KupsusHindamine } from './kupsus/kupsus-hindamine';
-import { KupsusTulemus } from './kupsus/kupsus-tulemus';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', component: Login },
@@ -26,9 +23,6 @@ export const routes: Routes = [
   },
   { path: 'services', component: ServicesList },
   { path: 'services/:id', component: ServiceDetail },
-  { path: 'maturity', component: KupsusLanding },
-  { path: 'maturity/assessment', component: KupsusHindamine },
-  { path: 'maturity/result', component: KupsusTulemus },
   { path: 'service', component: ServiceApplication },
   { path: 'programme', component: PreAdvisory },
 ];

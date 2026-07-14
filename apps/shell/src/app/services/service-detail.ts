@@ -11,7 +11,6 @@ import {
   ServiceDef,
   Verdict,
   money,
-  regionList,
   serviceById,
   verdict,
   verdictIcon,
@@ -566,13 +565,6 @@ export class ServiceDetail {
       { label: 'E-post', value: c?.email ?? null },
       { label: 'Telefon', value: c?.phone ?? null },
     ];
-    if (this.id() === 'start') {
-      fields.push({ label: 'Töötajate arv', value: p.employeeCount.value != null ? String(p.employeeCount.value) : null });
-      fields.push({
-        label: 'Tegevuspiirkond',
-        value: p.cards.operatingRegions.length ? regionList(p.cards.operatingRegions) : null,
-      });
-    }
     fields.push({ label: 'Pangakonto (IBAN)', value: this.primaryIban() });
     return fields;
   });

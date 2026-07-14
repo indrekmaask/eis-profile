@@ -5,6 +5,7 @@ export interface DdsStep {
 }
 
 /** Horizontal numbered stepper for the 4-step profile edit flow. */
+/** Horizontal numbered stepper — Figma pattern: label above a numbered circle, thin connector line through the circles. */
 @Component({
   selector: 'dds-stepper',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,6 +16,8 @@ export interface DdsStep {
           class="dds-stepper__item"
           [class.is-active]="i === active()"
           [class.is-done]="i < active()"
+          [class.is-first]="i === 0"
+          [class.is-last]="i === steps().length - 1"
         >
           <button
             type="button"
@@ -22,10 +25,8 @@ export interface DdsStep {
             [attr.aria-current]="i === active() ? 'step' : null"
             (click)="select.emit(i)"
           >
-            <span class="dds-stepper__marker">
-              @if (i < active()) { ✓ } @else { {{ i + 1 }} }
-            </span>
             <span class="dds-stepper__label">{{ step.label }}</span>
+            <span class="dds-stepper__marker">{{ i + 1 }}</span>
           </button>
         </li>
       }
@@ -36,7 +37,6 @@ export interface DdsStep {
     `
       .dds-stepper__list {
         display: flex;
-        gap: var(--dds-space-2);
         list-style: none;
         margin: 0;
         padding: 0;
@@ -44,49 +44,57 @@ export interface DdsStep {
       }
       .dds-stepper__item {
         flex: 1;
+        position: relative;
       }
+      /* connector line at circle mid-height */
+      .dds-stepper__item::before,
+      .dds-stepper__item::after {
+        content: '';
+        position: absolute;
+        bottom: 16px;
+        height: 1px;
+        background: var(--dds-color-border);
+      }
+      .dds-stepper__item::before { left: 0; right: calc(50% + 24px); }
+      .dds-stepper__item::after { left: calc(50% + 24px); right: 0; }
+      .is-first::before, .is-last::after { display: none; }
       .dds-stepper__btn {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: var(--dds-space-2);
+        gap: var(--dds-space-3);
         width: 100%;
         background: none;
         border: none;
-        border-top: 3px solid var(--dds-color-border);
-        padding: var(--dds-space-3) 0 0;
+        padding: 0;
         cursor: pointer;
         font: inherit;
-        text-align: left;
-        color: var(--dds-color-ink-subtle);
-      }
-      .is-active .dds-stepper__btn {
-        border-top-color: var(--dds-color-primary);
         color: var(--dds-color-ink-strong);
       }
-      .is-done .dds-stepper__btn {
-        border-top-color: var(--dds-color-primary);
-        color: var(--dds-color-ink-muted);
+      .dds-stepper__label {
+        font-size: var(--dds-font-size-md);
+        font-weight: var(--dds-font-weight-regular);
+      }
+      .is-active .dds-stepper__label {
+        font-weight: var(--dds-font-weight-bold);
       }
       .dds-stepper__marker {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
         border-radius: var(--dds-radius-pill);
         background: var(--dds-color-surface-alt);
+        border: 1px solid var(--dds-color-border);
         font-size: var(--dds-font-size-sm);
         font-weight: var(--dds-font-weight-bold);
         flex: none;
       }
-      .is-active .dds-stepper__marker,
-      .is-done .dds-stepper__marker {
+      .is-active .dds-stepper__marker {
         background: var(--dds-color-primary);
+        border-color: var(--dds-color-primary);
         color: var(--dds-color-primary-contrast);
-      }
-      .dds-stepper__label {
-        font-size: var(--dds-font-size-sm);
-        font-weight: var(--dds-font-weight-medium);
       }
       .dds-stepper__btn:focus-visible {
         outline: none;

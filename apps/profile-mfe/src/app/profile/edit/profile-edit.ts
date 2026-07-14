@@ -26,7 +26,6 @@ import {
   DdsStepper,
   DdsTagInput,
 } from '@dds/ui';
-import { derivePersonInfo } from '@eis/profile-api';
 import {
   BankAccountInput,
   ContactInput,
@@ -319,11 +318,6 @@ export class ProfileEdit {
 
   protected addBank(): void {
     this.bankAccounts.push(new FormControl('', { nonNullable: true }));
-  }
-
-  protected birthLabel(personCode: string): string | null {
-    const info = derivePersonInfo(personCode);
-    return info ? info.birthDateDisplay.replace(/(^|\.)0/g, '$1') : null;
   }
 
   protected go(i: number): void {

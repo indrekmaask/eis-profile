@@ -60,6 +60,13 @@
         <p>{{ pc.email }}</p>
         <p>{{ pc.phone }}</p>
       }
+      @if (operatingAddress() || legalAddress(); as addr) {
+        <p class="ov__contactpanel-addr">{{ addr }}</p>
+      }
+      @if (profile().website.value; as site) {
+        <a class="ov__contactpanel-web" [href]="'https://' + site.replace('https://', '').replace('http://', '')"
+          target="_blank" rel="noopener">{{ site }} ↗</a>
+      }
       @if (missingLabels(); as miss) {
         <p class="ov__contactpanel-miss">Lisamata: {{ miss }}</p>
       }

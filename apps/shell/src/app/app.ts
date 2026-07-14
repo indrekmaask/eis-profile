@@ -60,7 +60,7 @@ export class App {
         { label: 'Taotlused' },
         { label: 'Minu teenused', link: '/services' },
         { label: 'Arenguplaan' },
-        { label: 'Küpsusdiagnostika', link: '/maturity' },
+        { label: 'Küpsusdiagnostika' },
       ],
     },
     { label: 'Finantsid', icon: 'wallet' },

@@ -96,32 +96,6 @@ export function money(v: number | null | undefined): string {
 
 export const SERVICES: ServiceDef[] = [
   {
-    id: 'start',
-    name: 'Starditoetus',
-    sum: 'kuni 20 000 €',
-    configured: true,
-    eligibility: 'RULE_BASED',
-    booking: false,
-    intro:
-      'Toetus alustavale ettevõtjale. Kõlblikkuse eelhinnang põhineb ühel tingimusel: eelnenud majandusaasta müügitulu kuni 40 000 €. Muud tingimused (vanus, töötajad, tegevusala) hindab eelnõustamine.',
-    rules: (p) => {
-      const r = latest(p);
-      const ok = r.revenue <= 40000;
-      return [
-        {
-          icon: ok ? '✓' : '✗',
-          label: 'Müügitulu kuni 40 000 € (eelnenud majandusaasta)',
-          detail: `${r.year ?? '—'}: ${money(r.revenue)}${ok ? ' — sobib' : ' — ületab 40 000 € piiri, ei kvalifitseeru'}`,
-        },
-      ];
-    },
-    specificFields: [
-      { label: 'Projekti kirjeldus *', placeholder: 'Milleks toetust kasutad?' },
-      { label: 'Loodavate töökohtade arv *', placeholder: 'nt 1' },
-      { label: 'Taotletav summa', value: '20 000 €' },
-    ],
-  },
-  {
     id: 'dev',
     name: 'Ettevõtte arenguprogramm',
     sum: 'kuni 500 000 €',
@@ -156,55 +130,6 @@ export const SERVICES: ServiceDef[] = [
           detail: 'eeltäidetakse tulevikus riigiabi registrist (RAR) — praeguses mock-API-s pole, kontrollib menetleja',
         },
         { icon: '?', label: 'Panustab TAIE fookusvaldkonda', detail: 'projekti sisu — vali taotlusel' },
-      ];
-    },
-  },
-  {
-    id: 'digi',
-    name: 'Digitaliseerimise teekaardi toetus',
-    sum: 'kuni 15 000 €',
-    configured: false,
-    eligibility: 'MANUAL',
-    booking: false,
-    intro:
-      'Toetus ettevõtte digipöörde kavandamiseks. Selle teenuse kõlblikkusreegleid ei ole veel süsteemi konfigureeritud — hinda sobivust ise tingimuste järgi.',
-    selfRules: [
-      'Kahe viimase aasta keskmine müügitulu vähemalt 200 000 €',
-      'Ettevõte on tegutsenud vähemalt 3 aastat',
-      'Tegevusala ei kuulu välistatud sektorite hulka',
-      'Ei ole saanud sama toetust viimase 3 aasta jooksul',
-    ],
-  },
-  {
-    id: 'toit',
-    name: 'Toiduinnovatsiooni programm',
-    sum: 'programm · liitumine',
-    configured: false,
-    eligibility: 'OPEN',
-    booking: false,
-    intro:
-      'Programm ühendab EIS-i teenused toidu- ja biotehnoloogia sektori arendamiseks. Osaleda saavad kõik toiduvaldkonda panustavad ettevõtjad — tegevusvaldkondade piiranguteta. Kõlblikkust ei arvutata; liitumisvorm eeltäidetakse sinu profiilist.',
-    openInfo:
-      'Avatud kõigile — eeltingimusi ei kontrollita. Liitu lihtsa vormiga (eeltäidetud sinu profiilist).',
-  },
-  {
-    id: 'turism',
-    name: 'Turismiettevõtja arengutoetus',
-    sum: 'kuni 30 000 €',
-    configured: true,
-    eligibility: 'RULE_BASED',
-    booking: false,
-    intro:
-      'Toetus turismisektori ettevõtjatele. Kõlblikkus põhineb ühel tingimusel: tegevusala kuulub turismi (EMTAK 55/56/79).',
-    rules: (p) => {
-      const code = p.emtakCode.value ?? '';
-      const tourism = /^(55|56|79)/.test(code);
-      return [
-        {
-          icon: tourism ? '✓' : '✗',
-          label: 'Tegevusala kuulub turismi (EMTAK 55/56/79)',
-          detail: tourism ? `EMTAK ${code} — turism ✓` : `EMTAK ${code} — ei kuulu turismi`,
-        },
       ];
     },
   },

@@ -38,9 +38,6 @@ import { RadarChart } from '../shared/radar-chart';
           <div class="diag__text">
             <h2>Küpsusdiagnostika</h2>
             <p>Hinda ettevõtte küpsust seitsmes valdkonnas ja saa suunatud soovitused.</p>
-            <a dds-button variant="pill" size="sm" routerLink="/maturity/result">
-              Vaata rohkem →
-            </a>
           </div>
           <app-radar-chart [axes]="radarAxes" [values]="radarValues" [size]="260" />
         </section>

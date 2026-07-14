@@ -104,6 +104,13 @@
 }
 .ov__contactpanel-head h2 { margin: 0; font-size: var(--dds-font-size-xl); }
 .ov__contactpanel p { margin: 0; color: var(--dds-color-ink-strong); }
+.ov__contactpanel-addr { padding-top: var(--dds-space-3); }
+.ov__contactpanel-web {
+  color: var(--dds-color-accent);
+  font-weight: var(--dds-font-weight-bold);
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
 .ov__contactpanel-miss { margin-top: auto !important; color: var(--dds-color-ink-subtle); font-size: var(--dds-font-size-sm); }
 @media (max-width: 900px) {
   .ov__toprow { grid-template-columns: 1fr; }
