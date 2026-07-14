@@ -136,6 +136,7 @@
 }
 .sidenav__item--muted {
   color: var(--dds-color-ink-subtle);
+  opacity: 0.45;
   cursor: default;
 }
 .sidenav__item--muted:hover {
