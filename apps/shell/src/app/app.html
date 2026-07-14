@@ -10,16 +10,22 @@
         <button type="button" class="topbar__icon" aria-label="Otsi">🔍</button>
         <button type="button" class="topbar__lang">EST ▾</button>
         @if (identity.loggedIn()) {
-          <span class="topbar__user">
-            <span class="topbar__glyph" aria-hidden="true">◍</span>
-            @if (identity.personName()) {
-              <strong>{{ identity.personName() }}</strong>
+          <div class="topbar__usermenu">
+            <button type="button" class="topbar__user" (click)="userMenuOpen.set(!userMenuOpen())">
+              <span class="topbar__glyph" aria-hidden="true">◍</span>
+              @if (identity.personName()) {
+                <strong>{{ identity.personName() }}</strong>
+              }
+              @if (identity.activeCompany(); as c) {
+                <span class="topbar__sep">|</span> {{ c.name }} ▾
+              }
+            </button>
+            @if (userMenuOpen()) {
+              <div class="topbar__dropdown">
+                <button type="button" (click)="logout()">Logi välja</button>
+              </div>
             }
-            @if (identity.activeCompany(); as c) {
-              <span class="topbar__sep">|</span> {{ c.name }} ▾
-            }
-            <button type="button" class="topbar__logout" (click)="logout()">Logi välja</button>
-          </span>
+          </div>
         }
       </div>
     </header>

@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormArray,
   FormControl,
@@ -6,6 +17,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { concatMap, from } from 'rxjs';
 import {
   DdsButton,
   DdsInput,
@@ -15,11 +27,20 @@ import {
   DdsTagInput,
 } from '@dds/ui';
 import { derivePersonInfo } from '@eis/profile-api';
-import { CreateProfileRequest, PrefillView } from '../../models/profile.models';
-import { TARGET_MARKETS, formatEstonianDate } from '../../models/vocabulary';
+import {
+  BankAccountInput,
+  ContactInput,
+  CreateProfileRequest,
+  PrefillView,
+  ProfileView,
+  StepUpdateRequest,
+} from '../../models/profile.models';
+import { OPERATING_REGIONS, TARGET_MARKETS, formatEstonianDate } from '../../models/vocabulary';
+import { ProfileApiService } from '../../services/profile-api.service';
 
 type ContactGroup = FormGroup<{
-  fullName: FormControl<string>;
+  firstName: FormControl<string>;
+  lastName: FormControl<string>;
   role: FormControl<string>;
   email: FormControl<string>;
   phone: FormControl<string>;
@@ -33,7 +54,21 @@ interface PartySuggestion {
   roles: string;
 }
 
-/** Scenario 2: "Profiili loomine" — the 3-step creation wizard (v22 flows). */
+/** Splits a full name into first (everything but the last token) and last name. */
+export function splitName(full: string): { first: string; last: string } {
+  const parts = full.trim().split(/\s+/);
+  if (parts.length === 1) return { first: parts[0], last: '' };
+  return { first: parts.slice(0, -1).join(' '), last: parts[parts.length - 1] };
+}
+export function joinName(first: string, last: string): string {
+  return [first.trim(), last.trim()].filter(Boolean).join(' ');
+}
+
+/**
+ * "Profiili loomine" / "Profiili muutmine" — the 3-step wizard (v22 flows).
+ * `mode` toggles between creating a new profile (POST) and editing an existing
+ * one (sequential PATCH per step).
+ */
 @Component({
   selector: 'app-profile-edit',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,22 +77,32 @@ interface PartySuggestion {
   styleUrl: './profile-edit.scss',
 })
 export class ProfileEdit {
-  readonly mode = input<'create'>('create');
+  readonly mode = input<'create' | 'edit'>('create');
   readonly prefill = input<PrefillView | null>(null);
+  readonly profile = input<ProfileView | null>(null);
+  readonly initialStep = input(0);
   readonly saving = input(false);
   readonly errorMessage = input<string | null>(null);
 
   readonly createProfile = output<CreateProfileRequest>();
+  readonly saved = output<void>();
+  readonly refresh = output<void>();
   readonly cancel = output<void>();
 
+  private readonly api = inject(ProfileApiService);
+  private readonly destroyRef = inject(DestroyRef);
+
   protected readonly markets = TARGET_MARKETS;
+  protected readonly regions = OPERATING_REGIONS;
   protected readonly steps: DdsStep[] = [
     { label: 'Üldandmed' },
     { label: 'Kontaktisikud' },
-    { label: 'Muud andmed' },
+    { label: 'Muu' },
   ];
   protected readonly activeStep = signal(0);
   protected readonly contactsError = signal<string | null>(null);
+  protected readonly editSaving = signal(false);
+  protected readonly editError = signal<string | null>(null);
 
   protected readonly form = new FormGroup({
     operatingAddress: new FormControl('', { nonNullable: true }),
@@ -65,10 +110,33 @@ export class ProfileEdit {
     employeeCount: new FormControl('', { nonNullable: true }),
     contacts: new FormArray<ContactGroup>([]),
     targetMarkets: new FormControl<string[]>([], { nonNullable: true }),
+    operatingRegions: new FormControl<string[]>([], { nonNullable: true }),
+    bankAccounts: new FormArray<FormControl<string>>([]),
   });
 
-  protected readonly asOf = computed(() => formatEstonianDate(this.prefill()?.dataAsOfDate));
+  private readonly contactsVersion = signal(0);
+  private populated = false;
 
+  constructor() {
+    // Edit mode: prefill the form from the loaded profile once it arrives, then
+    // jump to the step the overview asked to edit.
+    effect(() => {
+      const p = this.profile();
+      if (this.mode() === 'edit' && p && !this.populated) {
+        this.populated = true;
+        this.prefillFromProfile(p);
+        this.activeStep.set(this.initialStep());
+      }
+    });
+  }
+
+  protected readonly asOf = computed(() =>
+    formatEstonianDate(
+      this.mode() === 'edit' ? this.profile()?.dataAsOfDate : this.prefill()?.dataAsOfDate,
+    ),
+  );
+
+  /** Tegevusala label for create (prefill-based). */
   protected readonly emtak = computed(() => {
     const pf = this.prefill();
     if (!pf) {
@@ -77,10 +145,27 @@ export class ProfileEdit {
     return pf.emtakName ? `${pf.emtakCode} — ${pf.emtakName}` : pf.emtakCode;
   });
 
+  /** Tegevusala label for edit (profile-based). */
+  protected readonly profileEmtak = computed(() => {
+    const p = this.profile();
+    if (!p) {
+      return null;
+    }
+    return p.emtakName.value ? `${p.emtakCode.value} — ${p.emtakName.value}` : p.emtakCode.value;
+  });
+
+  protected readonly profileLegalAddress = computed(
+    () => this.profile()?.addresses.find((a) => a.addressType === 'LEGAL')?.fullAddress ?? null,
+  );
+
   /** Natural persons from the register, offered as one-click contact suggestions. */
   protected readonly partySuggestions = computed<PartySuggestion[]>(() => {
+    const parties =
+      this.mode() === 'edit'
+        ? (this.profile()?.relatedParties ?? [])
+        : (this.prefill()?.relatedParties ?? []);
     const groups = new Map<string, PartySuggestion>();
-    for (const rp of this.prefill()?.relatedParties ?? []) {
+    for (const rp of parties) {
       const natural = rp.partyType === 'NATURAL' || rp.partyType === 'Füüsiline isik';
       if (!natural || !rp.registryCode) {
         continue;
@@ -101,38 +186,108 @@ export class ProfileEdit {
     return [...groups.values()].filter((s) => !used.has(s.personCode));
   });
 
-  /** Register-owned parties (read-only block under step 2). */
-  protected readonly relatedParties = computed(() => this.prefill()?.relatedParties ?? []);
-
-  private readonly contactsVersion = signal(0);
-
   get contacts(): FormArray<ContactGroup> {
     return this.form.controls.contacts;
   }
+  get bankAccounts(): FormArray<FormControl<string>> {
+    return this.form.controls.bankAccounts;
+  }
 
-  private contactValues(): { personCode: string }[] {
+  /** The primary contact group (step 1 edits its email/phone directly). */
+  protected primaryContact(): ContactGroup | null {
     this.contactsVersion();
-    return this.contacts.controls.map((g) => ({ personCode: g.controls.personCode.value }));
+    const arr = this.contacts.controls;
+    return arr.find((g) => g.controls.primary.value) ?? arr[0] ?? null;
+  }
+
+  protected contactValues(): ContactInput[] {
+    this.contactsVersion();
+    return this.contacts.controls.map((g) => ({
+      fullName: joinName(g.controls.firstName.value, g.controls.lastName.value),
+      role: g.controls.role.value || null,
+      email: g.controls.email.value || null,
+      phone: g.controls.phone.value || null,
+      personCode: g.controls.personCode.value || null,
+      primary: g.controls.primary.value,
+    }));
+  }
+
+  private bankAccountValues(): BankAccountInput[] {
+    return this.bankAccounts.controls
+      .map((c) => c.value.trim())
+      .filter(Boolean)
+      .map((iban, i) => ({ iban, bankName: null, primary: i === 0 }));
+  }
+
+  private prefillFromProfile(p: ProfileView): void {
+    this.form.controls.operatingAddress.setValue(
+      p.addresses.find((a) => a.addressType === 'OPERATING')?.fullAddress ?? '',
+    );
+    this.form.controls.website.setValue(p.website.value ?? '');
+    this.form.controls.employeeCount.setValue(
+      p.employeeCount.value != null ? String(p.employeeCount.value) : '',
+    );
+    this.form.controls.targetMarkets.setValue([...p.cards.targetMarkets]);
+    this.form.controls.operatingRegions.setValue([...(p.cards.operatingRegions ?? [])]);
+
+    this.contacts.clear();
+    p.contacts.forEach((c) => {
+      const { first, last } = splitName(c.fullName);
+      this.contacts.push(
+        this.contactGroup(first, last, c.role ?? '', c.email ?? '', c.phone ?? '', c.personCode ?? '', c.primary),
+      );
+    });
+    if (this.contacts.length && !this.contacts.controls.some((g) => g.controls.primary.value)) {
+      this.contacts.at(0).controls.primary.setValue(true);
+    }
+
+    this.bankAccounts.clear();
+    p.bankAccounts.forEach((b) =>
+      this.bankAccounts.push(new FormControl(b.iban, { nonNullable: true })),
+    );
+    if (!this.bankAccounts.length) {
+      this.bankAccounts.push(new FormControl('', { nonNullable: true }));
+    }
+    this.contactsVersion.update((v) => v + 1);
+  }
+
+  private contactGroup(
+    firstName: string,
+    lastName: string,
+    role: string,
+    email: string,
+    phone: string,
+    personCode: string,
+    primary: boolean,
+  ): ContactGroup {
+    return new FormGroup({
+      firstName: new FormControl(firstName, { nonNullable: true, validators: [Validators.required] }),
+      lastName: new FormControl(lastName, { nonNullable: true }),
+      role: new FormControl(role, { nonNullable: true }),
+      email: new FormControl(email, {
+        nonNullable: true,
+        validators: [Validators.required, Validators.email],
+      }),
+      phone: new FormControl(phone, { nonNullable: true }),
+      personCode: new FormControl(personCode, { nonNullable: true }),
+      primary: new FormControl(primary, { nonNullable: true }),
+    });
   }
 
   protected addContact(prefillFrom?: PartySuggestion): void {
+    const { first, last } = prefillFrom
+      ? splitName(prefillFrom.displayName)
+      : { first: '', last: '' };
     this.contacts.push(
-      new FormGroup({
-        fullName: new FormControl(prefillFrom?.displayName ?? '', {
-          nonNullable: true,
-          validators: [Validators.required],
-        }),
-        role: new FormControl(prefillFrom ? prefillFrom.roles.split(',')[0].trim() : '', {
-          nonNullable: true,
-        }),
-        email: new FormControl('', {
-          nonNullable: true,
-          validators: [Validators.required, Validators.email],
-        }),
-        phone: new FormControl('', { nonNullable: true }),
-        personCode: new FormControl(prefillFrom?.personCode ?? '', { nonNullable: true }),
-        primary: new FormControl(this.contacts.length === 0, { nonNullable: true }),
-      }),
+      this.contactGroup(
+        first,
+        last,
+        prefillFrom ? prefillFrom.roles.split(',')[0].trim() : '',
+        '',
+        '',
+        prefillFrom?.personCode ?? '',
+        this.contacts.length === 0,
+      ),
     );
     this.contactsVersion.update((v) => v + 1);
     this.contactsError.set(null);
@@ -147,17 +302,28 @@ export class ProfileEdit {
     this.contactsVersion.update((v) => v + 1);
   }
 
-  protected setPrimary(i: number): void {
-    this.contacts.controls.forEach((g, idx) => g.controls.primary.setValue(idx === i));
+  /** Dropdown "Lisa kontaktisik": a register person or "+ Lisage uus isik". */
+  protected onAddSelect(event: Event): void {
+    const sel = event.target as HTMLSelectElement;
+    const v = sel.value;
+    if (v === '__new__') {
+      this.addContact();
+    } else if (v) {
+      const s = this.partySuggestions().find((x) => x.personCode === v);
+      if (s) {
+        this.addContact(s);
+      }
+    }
+    sel.value = '';
+  }
+
+  protected addBank(): void {
+    this.bankAccounts.push(new FormControl('', { nonNullable: true }));
   }
 
   protected birthLabel(personCode: string): string | null {
     const info = derivePersonInfo(personCode);
     return info ? info.birthDateDisplay.replace(/(^|\.)0/g, '$1') : null;
-  }
-
-  protected isNatural(partyType: string | null): boolean {
-    return partyType === 'NATURAL' || partyType === 'Füüsiline isik';
   }
 
   protected go(i: number): void {
@@ -188,6 +354,12 @@ export class ProfileEdit {
     return true;
   }
 
+  private employeeCountValue(): number | null {
+    const raw = this.form.controls.employeeCount.value.trim();
+    const n = raw ? Number(raw) : null;
+    return n != null && Number.isFinite(n) ? n : null;
+  }
+
   protected onCreate(): void {
     if (!this.contactsValid()) {
       this.go(1);
@@ -197,26 +369,65 @@ export class ProfileEdit {
     if (!rc) {
       return;
     }
-    const raw = this.form.controls.employeeCount.value.trim();
-    const n = raw ? Number(raw) : null;
     const request: CreateProfileRequest = {
       registryCode: rc,
       website: this.form.controls.website.value || null,
-      employeeCount: n != null && Number.isFinite(n) ? n : null,
+      employeeCount: this.employeeCountValue(),
       operatingAddress: this.form.controls.operatingAddress.value || null,
-      contacts: this.contacts.controls.map((g) => ({
-        fullName: g.controls.fullName.value,
-        role: g.controls.role.value || null,
-        email: g.controls.email.value || null,
-        phone: g.controls.phone.value || null,
-        personCode: g.controls.personCode.value || null,
-        primary: g.controls.primary.value,
-      })),
-      bankAccounts: [],
+      contacts: this.contactValues(),
+      bankAccounts: this.bankAccountValues(),
       targetMarkets: this.form.controls.targetMarkets.value,
-      operatingRegions: [],
+      operatingRegions: this.form.controls.operatingRegions.value,
     };
     this.createProfile.emit(request);
+  }
+
+  /** Edit mode: PATCH each step sequentially, then let ProfilePage reload. */
+  protected onSave(): void {
+    if (!this.contactsValid()) {
+      this.go(1);
+      return;
+    }
+    const rc = this.profile()?.registryCode;
+    if (!rc) {
+      return;
+    }
+    const patches: { step: number; body: StepUpdateRequest }[] = [
+      {
+        step: 1,
+        body: {
+          operatingAddress: this.form.controls.operatingAddress.value || null,
+          website: this.form.controls.website.value || null,
+        },
+      },
+      { step: 2, body: { contacts: this.contactValues() } },
+      {
+        step: 3,
+        body: {
+          employeeCount: this.employeeCountValue(),
+          targetMarkets: this.form.controls.targetMarkets.value,
+          operatingRegions: this.form.controls.operatingRegions.value,
+          bankAccounts: this.bankAccountValues(),
+        },
+      },
+    ];
+    this.editSaving.set(true);
+    this.editError.set(null);
+    from(patches)
+      .pipe(
+        concatMap((p) => this.api.updateStep(rc, p.step, p.body)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        error: () => {
+          this.editSaving.set(false);
+          this.editError.set('Salvestamine ebaõnnestus. Proovi uuesti.');
+        },
+        complete: () => {
+          this.editSaving.set(false);
+          this.saved.emit();
+        },
+      });
   }
 
   protected showError(control: { invalid: boolean; touched: boolean }): boolean {

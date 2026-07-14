@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-export type DdsButtonVariant = 'primary' | 'secondary' | 'ghost';
+export type DdsButtonVariant = 'primary' | 'secondary' | 'ghost' | 'pill' | 'accent';
 export type DdsButtonSize = 'md' | 'sm';
 
 @Component({
@@ -22,11 +22,12 @@ export type DdsButtonSize = 'md' | 'sm';
         gap: var(--dds-space-2);
         font-family: var(--dds-font-family);
         font-weight: var(--dds-font-weight-medium);
-        border-radius: var(--dds-radius-control);
+        border-radius: var(--dds-radius-pill);
         border: 1px solid transparent;
         cursor: pointer;
         transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
         white-space: nowrap;
+        text-decoration: none;
       }
       :host(.dds-btn--md) {
         font-size: var(--dds-font-size-md);
@@ -59,6 +60,20 @@ export type DdsButtonSize = 'md' | 'sm';
       }
       :host(.dds-btn--ghost:hover) {
         background: var(--dds-color-surface-alt);
+      }
+      :host(.dds-btn--pill) {
+        background: #e2e8f0;
+        color: var(--dds-color-ink-strong);
+      }
+      :host(.dds-btn--pill:hover) {
+        background: #d3dce8;
+      }
+      :host(.dds-btn--accent) {
+        background: var(--dds-color-registry-accent);
+        color: #fff;
+      }
+      :host(.dds-btn--accent:hover) {
+        background: #013a8f;
       }
       :host(:focus-visible) {
         outline: none;

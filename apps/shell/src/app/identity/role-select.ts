@@ -27,7 +27,7 @@ const DEMO_REGISTRY_CODES: Record<string, string[]> = {
           Iseteenindusse sisse logimiseks peab sul olema Eestis registreeritud ettevõte ning pead
           olema selle ettevõtte juhatuse liige või ettevõtte volitatud esindaja.
         </p>
-        <button dds-button variant="secondary" (click)="back()">
+        <button dds-button variant="pill" (click)="back()">
           ‹ Katkesta ja tagasi avalehele
         </button>
       </div>
@@ -41,7 +41,7 @@ const DEMO_REGISTRY_CODES: Record<string, string[]> = {
             @for (e of entries(); track e.registryCode) {
               <li>
                 <button type="button" class="roles__company" (click)="choose(e)">
-                  <dds-icon name="building" />
+                  <dds-icon name="briefcase" />
                   <span>{{ e.businessName }}</span>
                 </button>
               </li>
@@ -188,9 +188,7 @@ export class RoleSelect {
 
   protected choose(e: AccessEntry): void {
     this.identity.selectCompany(e.registryCode, e.businessName);
-    this.router.navigate(['/profile'], {
-      queryParams: { rc: e.registryCode, person: this.identity.personCode() },
-    });
+    this.router.navigate(['/dashboard']);
   }
 
   protected back(): void {

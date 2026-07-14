@@ -33,9 +33,13 @@
                 "output": "."
               }
             ],
-            "styles": ["apps/shell/src/styles.scss"],
+            "styles": [
+              "apps/shell/src/styles.scss"
+            ],
             "stylePreprocessorOptions": {
-              "includePaths": ["libs"]
+              "includePaths": [
+                "libs"
+              ]
             },
             "scripts": [],
             "extraWebpackConfig": "apps/shell/webpack.config.js",
@@ -82,7 +86,8 @@
           "options": {
             "port": 4200,
             "publicHost": "http://localhost:4200",
-            "extraWebpackConfig": "apps/shell/webpack.config.js"
+            "extraWebpackConfig": "apps/shell/webpack.config.js",
+            "proxyConfig": "apps/shell/proxy.conf.json"
           }
         },
         "test": {
@@ -117,9 +122,13 @@
                 "output": "."
               }
             ],
-            "styles": ["apps/profile-mfe/src/styles.scss"],
+            "styles": [
+              "apps/profile-mfe/src/styles.scss"
+            ],
             "stylePreprocessorOptions": {
-              "includePaths": ["libs"]
+              "includePaths": [
+                "libs"
+              ]
             },
             "scripts": [],
             "extraWebpackConfig": "apps/profile-mfe/webpack.config.js",
@@ -166,7 +175,10 @@
           "options": {
             "port": 4201,
             "publicHost": "http://localhost:4201",
-            "extraWebpackConfig": "apps/profile-mfe/webpack.config.js"
+            "extraWebpackConfig": "apps/profile-mfe/webpack.config.js",
+            "headers": {
+              "Access-Control-Allow-Origin": "*"
+            }
           }
         },
         "test": {

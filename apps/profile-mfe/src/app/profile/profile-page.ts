@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { DdsButton, DdsCard } from '@dds/ui';
-import { CreateProfileRequest, StepUpdateRequest } from '../models/profile.models';
+import { CreateProfileRequest } from '../models/profile.models';
 import { DEFAULT_REGISTRY_CODE, ProfileContextService } from '../services/profile-context.service';
 import { ProfileStore } from '../services/profile-store';
 import { ProfileEdit } from './edit/profile-edit';
@@ -21,6 +21,8 @@ export class ProfilePage {
   protected readonly store = inject(ProfileStore);
 
   protected readonly editing = signal(false);
+  /** Non-null when editing an existing profile via the stepper (holds the initial step). */
+  protected readonly editStep = signal<number | null>(null);
   private readonly pendingCreate = signal(false);
 
   constructor() {
@@ -61,6 +63,7 @@ export class ProfilePage {
     if (rc !== this.context.registryCode() || this.store.status() === 'idle') {
       this.context.setCompany(rc);
       this.editing.set(false);
+      this.editStep.set(null);
       this.store.load(rc);
     }
   }
@@ -74,8 +77,12 @@ export class ProfilePage {
   protected onRefresh(): void {
     this.store.refresh(this.context.registryCode());
   }
-  protected onSaveSection(e: { step: number; body: StepUpdateRequest }): void {
-    this.store.updateStep(this.context.registryCode(), e.step, e.body);
+  protected onEditRequested(step: number): void {
+    this.editStep.set(step);
+  }
+  protected onEditSaved(): void {
+    this.editStep.set(null);
+    this.store.load(this.context.registryCode());
   }
   protected onCreate(req: CreateProfileRequest): void {
     this.pendingCreate.set(true);

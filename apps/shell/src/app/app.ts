@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter, map } from 'rxjs';
@@ -47,6 +47,8 @@ export class App {
     person: this.identity.personCode(),
   }));
 
+  protected readonly userMenuOpen = signal(false);
+
   protected readonly navGroups: NavGroup[] = [
     {
       label: 'Peamine',
@@ -54,10 +56,10 @@ export class App {
       expanded: true,
       items: [
         { label: 'Töölaud', link: '/dashboard' },
+        { label: 'Ettevõtte profiil', link: '/profile' },
         { label: 'Taotlused' },
         { label: 'Minu teenused', link: '/services' },
         { label: 'Arenguplaan' },
-        { label: 'Ettevõtte profiil', link: '/profile' },
         { label: 'Küpsusdiagnostika', link: '/maturity' },
       ],
     },
@@ -68,6 +70,7 @@ export class App {
   ];
 
   protected logout(): void {
+    this.userMenuOpen.set(false);
     this.identity.logout();
     this.router.navigate(['/']);
   }

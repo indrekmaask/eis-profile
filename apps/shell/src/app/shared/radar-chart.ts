@@ -82,9 +82,14 @@ export class RadarChart {
   private readonly radius = computed(() => this.size() / 2 - 44);
   private readonly levels = 4;
 
-  private point(valueRatio: number, index: number, count: number): { x: number; y: number } {
+  private point(
+    valueRatio: number,
+    index: number,
+    count: number,
+    extraPx = 0,
+  ): { x: number; y: number } {
     const angle = -Math.PI / 2 + (index * 2 * Math.PI) / count;
-    const r = this.radius() * valueRatio;
+    const r = this.radius() * valueRatio + extraPx;
     return {
       x: this.center() + r * Math.cos(angle),
       y: this.center() + r * Math.sin(angle),
@@ -119,10 +124,13 @@ export class RadarChart {
     }).join(' ');
   });
 
+  /** Extra px beyond the axis vertex, clear of the outer ring and chart edge. */
+  private readonly labelOffset = 28;
+
   protected readonly labels = computed(() => {
     const n = this.axes().length;
     return this.axes().map((text, i) => {
-      const p = this.point(1.16, i, n);
+      const p = this.point(1, i, n, this.labelOffset);
       const dx = p.x - this.center();
       const anchor = Math.abs(dx) < 4 ? 'middle' : dx > 0 ? 'start' : 'end';
       return { text, x: p.x, y: p.y, anchor };

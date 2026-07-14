@@ -51,14 +51,25 @@
 
   @default {
     @if (store.profile(); as profile) {
-      <app-profile-overview
-        [profile]="profile"
-        [unavailable]="store.status() === 'unavailable'"
-        [unavailableMessage]="store.errorMessage()"
-        [saving]="store.saving()"
-        (saveSection)="onSaveSection($event)"
-        (refresh)="onRefresh()"
-      />
+      @if (editStep() !== null) {
+        <app-profile-edit
+          mode="edit"
+          [profile]="profile"
+          [initialStep]="editStep()!"
+          (saved)="onEditSaved()"
+          (cancel)="editStep.set(null)"
+          (refresh)="onRefresh()"
+        />
+      } @else {
+        <app-profile-overview
+          [profile]="profile"
+          [unavailable]="store.status() === 'unavailable'"
+          [unavailableMessage]="store.errorMessage()"
+          [saving]="store.saving()"
+          (editRequested)="onEditRequested($event)"
+          (refresh)="onRefresh()"
+        />
+      }
     }
   }
 }

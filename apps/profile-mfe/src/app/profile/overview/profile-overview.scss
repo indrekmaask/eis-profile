@@ -39,41 +39,14 @@
   max-width: 60ch;
 }
 
-/* Täituvus pill (header, PDF-style) */
-.ov__meter {
-  display: flex;
-  align-items: center;
-  gap: var(--dds-space-3);
-  background: var(--dds-color-surface);
-  border: 1px solid var(--dds-color-border);
-  border-radius: var(--dds-radius-pill);
-  padding: var(--dds-space-2) var(--dds-space-3);
-  font-size: var(--dds-font-size-sm);
+.ov__cta {
+  display: flex; align-items: center; gap: var(--dds-space-4);
+  padding: var(--dds-space-3) var(--dds-space-3) var(--dds-space-3) var(--dds-space-5);
+  font-size: var(--dds-font-size-md);
+  color: var(--dds-color-ink-strong);
 }
-.ov__meter-label {
-  color: var(--dds-color-ink-muted);
-  white-space: nowrap;
-}
-.ov__meter-track {
-  width: 90px;
-  height: 6px;
-  border-radius: var(--dds-radius-pill);
-  background: var(--dds-color-surface-alt);
-  overflow: hidden;
-}
-.ov__meter-bar {
-  display: block;
-  height: 100%;
-  background: var(--dds-color-primary);
-  border-radius: var(--dds-radius-pill);
-}
-.ov__meter-pct {
-  font-weight: var(--dds-font-weight-bold);
-}
-.ov__meter-done {
-  color: var(--dds-color-success, #067647);
-  font-weight: var(--dds-font-weight-bold);
-}
+.ov__cta-done { color: var(--dds-color-success); font-weight: var(--dds-font-weight-bold); }
+.ov__sub strong { color: var(--dds-color-ink-strong); }
 
 .ov__notice {
   border-radius: var(--dds-radius-control);
@@ -93,19 +66,6 @@
   color: var(--dds-color-registry-accent);
 }
 
-/* Registry data bar */
-.ov__regbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--dds-space-4);
-  background: var(--dds-color-surface-alt);
-  border-radius: var(--dds-radius-control);
-  padding: var(--dds-space-3) var(--dds-space-4);
-  font-size: var(--dds-font-size-sm);
-  color: var(--dds-color-ink-muted);
-}
-
 .card {
   background: var(--dds-color-surface);
   border-radius: var(--dds-radius-card);
@@ -113,46 +73,48 @@
   padding: var(--dds-space-5);
 }
 
+.ov__toprow {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0;
+}
+.ov__general { border-radius: var(--dds-radius-card) 0 0 var(--dds-radius-card); }
+.ov__general h2 { margin: 0 0 var(--dds-space-5); font-size: var(--dds-font-size-xl); }
+.ov__pairs { margin: 0; }
+.ov__pair {
+  display: grid; grid-template-columns: 160px 1fr;
+  gap: var(--dds-space-4);
+  padding: var(--dds-space-4) 0;
+}
+.ov__pair dt { font-weight: var(--dds-font-weight-bold); color: var(--dds-color-ink-strong); }
+.ov__pair dd { margin: 0; }
+.ov__prov {
+  border-bottom: 2px solid #d8e1ee;   /* provenance underline like Figma */
+  padding-bottom: var(--dds-space-2);
+}
+.ov__contactpanel {
+  background: var(--dds-color-registry-highlight);
+  border-radius: 0 var(--dds-radius-card) var(--dds-radius-card) 0;
+  padding: var(--dds-space-5);
+  display: flex; flex-direction: column; gap: var(--dds-space-2);
+}
+.ov__contactpanel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: var(--dds-space-3);
+}
+.ov__contactpanel-head h2 { margin: 0; font-size: var(--dds-font-size-xl); }
+.ov__contactpanel p { margin: 0; color: var(--dds-color-ink-strong); }
+.ov__contactpanel-miss { margin-top: auto !important; color: var(--dds-color-ink-subtle); font-size: var(--dds-font-size-sm); }
+@media (max-width: 900px) {
+  .ov__toprow { grid-template-columns: 1fr; }
+  .ov__general, .ov__contactpanel { border-radius: var(--dds-radius-card); }
+}
+
 /* ---- Sections ---- */
-.ov__section-card h2 {
-  margin: 0;
-  font-size: var(--dds-font-size-xl);
-  font-weight: var(--dds-font-weight-bold);
-}
-.ov__section-head {
-  display: flex;
-  align-items: center;
-  gap: var(--dds-space-3);
-  margin-bottom: var(--dds-space-4);
-}
-.ov__section-head button {
-  margin-left: auto;
-}
-.ov__src {
-  color: var(--dds-color-ink-subtle);
-  font-size: var(--dds-font-size-xs);
-  white-space: nowrap;
-}
 .ov__src-inline {
   color: var(--dds-color-ink-subtle);
   font-size: var(--dds-font-size-xs);
   margin-left: var(--dds-space-2);
-}
-.ov__grouplabel {
-  display: block;
-  font-size: var(--dds-font-size-xs);
-  font-weight: var(--dds-font-weight-bold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--dds-color-ink-subtle);
-  margin-bottom: var(--dds-space-3);
-}
-.ov__footnote {
-  margin: var(--dds-space-4) 0 0;
-  padding-top: var(--dds-space-3);
-  border-top: 1px solid var(--dds-color-border);
-  color: var(--dds-color-ink-subtle);
-  font-size: var(--dds-font-size-sm);
 }
 .ov__optional {
   font-weight: var(--dds-font-weight-regular);
@@ -164,46 +126,6 @@
   font-style: italic;
 }
 
-.ov__rows {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-}
-.ov__row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--dds-space-4);
-  padding: var(--dds-space-3) 0;
-  border-top: 1px solid var(--dds-color-border);
-}
-.ov__row:first-child {
-  border-top: none;
-}
-.ov__row dt {
-  color: var(--dds-color-ink-muted);
-  font-weight: var(--dds-font-weight-medium);
-  white-space: nowrap;
-}
-.ov__row dd {
-  margin: 0;
-  text-align: right;
-}
-.ov__row--input dd {
-  flex: 1;
-  max-width: 520px;
-}
-.ov__row--input dds-input {
-  display: block;
-  text-align: left;
-}
-
-.ov__actions {
-  display: flex;
-  gap: var(--dds-space-3);
-  margin-top: var(--dds-space-4);
-}
-
 .ov__link {
   background: none;
   border: none;
@@ -213,48 +135,20 @@
   font-weight: var(--dds-font-weight-bold);
   color: var(--dds-color-primary);
 }
-.ov__link--danger {
-  color: var(--dds-color-danger, #b42318);
-}
-
 /* ---- Kontaktisikud ---- */
-.ov__contacts {
-  display: flex;
-  flex-direction: column;
-  gap: var(--dds-space-3);
+.ov__block { display: flex; flex-direction: column; gap: var(--dds-space-4); }
+.ov__blockhead { display: flex; align-items: center; justify-content: space-between; }
+.ov__blockhead h2 { margin: 0; font-size: var(--dds-font-size-xl); font-weight: var(--dds-font-weight-medium); }
+.ov__people { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--dds-space-4); }
+.ov__person { display: flex; flex-direction: column; gap: var(--dds-space-2); align-items: flex-start; }
+.ov__person-name { font-weight: var(--dds-font-weight-medium); font-size: var(--dds-font-size-md); }
+.ov__person-role {
+  background: #e2e8f0; border-radius: var(--dds-radius-pill);
+  padding: 2px var(--dds-space-3); font-size: var(--dds-font-size-sm);
 }
-.ov__contact {
-  border: 1px solid var(--dds-color-border);
-  border-radius: var(--dds-radius-control);
-  padding: var(--dds-space-3) var(--dds-space-4);
-}
-.ov__contact-top {
-  display: flex;
-  align-items: center;
-  gap: var(--dds-space-3);
-}
-.ov__contact-name {
-  font-weight: var(--dds-font-weight-bold);
-}
-.ov__contact-role {
-  margin-left: auto;
-  color: var(--dds-color-ink-muted);
-  font-size: var(--dds-font-size-sm);
-}
-.ov__contact-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--dds-space-2) var(--dds-space-5);
-  margin-top: var(--dds-space-2);
-  font-size: var(--dds-font-size-sm);
-}
-.ov__meta-k {
-  color: var(--dds-color-ink-subtle);
-  font-size: var(--dds-font-size-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-right: var(--dds-space-1);
-}
+.ov__person p { margin: 0; color: var(--dds-color-ink-muted); font-size: var(--dds-font-size-sm); }
+@media (max-width: 900px) { .ov__people { grid-template-columns: 1fr; } }
+
 .ov__pill {
   background: var(--dds-color-surface-alt);
   color: var(--dds-color-ink-strong);
@@ -263,62 +157,13 @@
   font-size: var(--dds-font-size-xs);
   white-space: nowrap;
 }
-.ov__pill--blue {
-  background: var(--dds-color-registry-highlight);
-  color: var(--dds-color-primary);
-  font-weight: var(--dds-font-weight-medium);
-}
-
-.ov__contact-forms {
-  display: flex;
-  flex-direction: column;
-  gap: var(--dds-space-4);
-  align-items: flex-start;
-}
-.ov__contact-form {
-  width: 100%;
-  border: 1px solid var(--dds-color-border);
-  border-radius: var(--dds-radius-control);
-  padding: var(--dds-space-4);
-  background: var(--dds-color-surface-alt);
-  display: flex;
-  flex-direction: column;
-  gap: var(--dds-space-3);
-}
-.ov__grid2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--dds-space-3) var(--dds-space-4);
-}
-.ov__birth {
-  margin: 0;
-  font-size: var(--dds-font-size-sm);
-  color: var(--dds-color-success, #067647);
-}
-.ov__contact-form-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.ov__radio {
-  display: flex;
-  align-items: center;
-  gap: var(--dds-space-2);
-  font-size: var(--dds-font-size-sm);
-  cursor: pointer;
-}
-
 /* ---- Muud andmed ---- */
-.ov__section {
-  margin: var(--dds-space-2) 0 var(--dds-space-2);
-  font-size: var(--dds-font-size-xl);
-  font-weight: var(--dds-font-weight-bold);
-}
 .ov__cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--dds-space-4);
 }
+.ov__cards--3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--dds-space-4); }
 .mcard {
   position: relative;
   display: flex;
@@ -336,22 +181,11 @@
 .mcard--action:hover {
   outline: 2px solid var(--dds-color-primary);
 }
-.mcard__chevron {
-  position: absolute;
-  top: var(--dds-space-4);
-  right: var(--dds-space-4);
-  color: var(--dds-color-ink-subtle);
-  font-size: var(--dds-font-size-lg);
-}
 .mcard__icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  width: 56px; height: 56px; border-radius: 50%;
   border: 1px solid var(--dds-color-ink-strong);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--dds-color-ink-strong);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: var(--dds-space-4);
 }
 .mcard__icon dds-icon {
   width: 22px;
@@ -361,11 +195,6 @@
   margin: var(--dds-space-1) 0 0;
   font-size: var(--dds-font-size-md);
   font-weight: var(--dds-font-weight-bold);
-}
-.mcard__src {
-  font-weight: var(--dds-font-weight-regular);
-  color: var(--dds-color-ink-subtle);
-  font-size: var(--dds-font-size-xs);
 }
 .mcard__value {
   margin: 0;
@@ -377,15 +206,19 @@
   flex-wrap: wrap;
   gap: var(--dds-space-2);
 }
-
-.ov__other-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--dds-space-4);
-  max-width: 520px;
+.mcard__go {
+  position: absolute; right: var(--dds-space-4); bottom: var(--dds-space-4);
+  width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dds-color-ink-strong);
+}
+.ov__chip {
+  background: #e2e8f0; border-radius: var(--dds-radius-pill);
+  padding: 2px var(--dds-space-3); font-size: var(--dds-font-size-sm);
+  color: var(--dds-color-ink-strong);
 }
 
-/* ---- Majandusnäitajad ---- */
+/* ---- Finantsnäitajad ---- */
 .ov__fingrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -393,43 +226,16 @@
   align-items: start;
   margin-top: var(--dds-space-4);
 }
-.ov__cardh-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--dds-space-4);
-}
 .ov__cardh {
   margin: 0;
   font-size: var(--dds-font-size-md);
   font-weight: var(--dds-font-weight-bold);
 }
-.colchart {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--dds-space-6);
-  height: 160px;
-  padding: 0 var(--dds-space-4);
-}
-.colchart__item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--dds-space-2);
-  height: 100%;
-  width: 48px;
-}
-.colchart__bar {
-  display: block;
-  width: 40px;
-  background: var(--dds-color-primary);
-  border-radius: 2px 2px 0 0;
-}
-.colchart__year {
-  color: var(--dds-color-ink-muted);
-  font-size: var(--dds-font-size-sm);
-}
+.hbars { display: flex; flex-direction: column; gap: var(--dds-space-3); }
+.hbars__row { display: grid; grid-template-columns: 48px 1fr 90px; align-items: center; gap: var(--dds-space-3); }
+.hbars__track { height: 8px; border-radius: 4px; background: #e8edf4; overflow: hidden; }
+.hbars__bar { display: block; height: 100%; border-radius: 4px; background: var(--dds-color-primary); }
+.hbars__label { font-weight: var(--dds-font-weight-bold); white-space: nowrap; text-align: right; }
 
 /* ---- Seotud isikud modal ---- */
 .ov__overlay {
@@ -505,8 +311,8 @@
 
 @media (max-width: 900px) {
   .ov__cards,
-  .ov__fingrid,
-  .ov__grid2 {
+  .ov__cards--3,
+  .ov__fingrid {
     grid-template-columns: 1fr;
   }
 }

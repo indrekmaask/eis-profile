@@ -1,26 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
-import {
-  FormArray,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { DdsButton, DdsIcon, DdsInput, DdsPhoneInput, DdsTagInput } from '@dds/ui';
+import { DdsButton, DdsIcon } from '@dds/ui';
 import { derivePersonInfo } from '@eis/profile-api';
-import { ProfileView, StepUpdateRequest } from '../../models/profile.models';
+import { ProfileView } from '../../models/profile.models';
 import { TARGET_MARKETS, formatEstonianDate, labelFor } from '../../models/vocabulary';
-
-type ContactGroup = FormGroup<{
-  fullName: FormControl<string>;
-  role: FormControl<string>;
-  email: FormControl<string>;
-  phone: FormControl<string>;
-  personCode: FormControl<string>;
-  primary: FormControl<boolean>;
-}>;
-
-type Section = 'general' | 'contacts' | 'other';
 
 interface PartyGroup {
   displayName: string;
@@ -33,7 +15,7 @@ interface PartyGroup {
 @Component({
   selector: 'app-profile-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DdsButton, DdsIcon, DdsInput, DdsPhoneInput, DdsTagInput],
+  imports: [DdsButton, DdsIcon],
   templateUrl: './profile-overview.html',
   styleUrl: './profile-overview.scss',
 })
@@ -43,11 +25,10 @@ export class ProfileOverview {
   readonly unavailableMessage = input<string | null>(null);
   readonly saving = input(false);
 
-  readonly saveSection = output<{ step: number; body: StepUpdateRequest }>();
+  /** Which stepper step the overview asks to edit: general → 0, contacts → 1, other → 2. */
+  readonly editRequested = output<number>();
   readonly refresh = output<void>();
 
-  protected readonly markets = TARGET_MARKETS;
-  protected readonly editing = signal<Section | null>(null);
   protected readonly partiesOpen = signal(false);
 
   protected readonly asOf = computed(() => formatEstonianDate(this.profile().dataAsOfDate));
@@ -67,6 +48,24 @@ export class ProfileOverview {
   protected readonly marketLabels = computed(() =>
     this.profile().cards.targetMarkets.map((c) => labelFor(TARGET_MARKETS, c)),
   );
+
+  protected primaryContact() {
+    const p = this.profile();
+    return p.contacts.find((c) => c.primary) ?? p.contacts[0] ?? null;
+  }
+
+  protected missingLabels(): string {
+    const map: Record<string, string> = {
+      primaryContactEmail: 'kontakti e-post',
+      primaryContactPhone: 'kontakti telefon',
+      employeeCount: 'töötajate arv',
+      marketRegion: 'sihtturud',
+      website: 'veebileht',
+    };
+    return this.profile()
+      .completeness.missing.map((m) => map[m] ?? m)
+      .join(', ');
+  }
 
   /** Related parties grouped per person/company, roles as pills (PDF modal + card). */
   protected readonly partyGroups = computed<PartyGroup[]>(() => {
@@ -94,18 +93,26 @@ export class ProfileOverview {
 
   protected readonly latestReport = computed(() => this.profile().annualReports[0] ?? null);
 
-  /** Vertical-column data for the Müügitulu areng chart (totals incl. export). */
-  protected readonly revenueColumns = computed(() => {
-    const rows = this.profile().annualReports;
-    const max = Math.max(1, ...rows.map((r) => this.totalRevenue(r)));
-    return rows
-      .slice()
-      .sort((a, b) => a.reportYear - b.reportYear)
-      .map((r) => ({
-        year: r.reportYear,
-        pct: Math.round((this.totalRevenue(r) / max) * 100),
-      }));
-  });
+  protected regionLabels(): string[] {
+    return this.profile().cards.operatingRegions ?? [];
+  }
+
+  protected paymentLabel(): string {
+    const p = this.profile();
+    if (p.cards.paymentBehaviour) return p.cards.paymentBehaviour;
+    return p.cards.taxDebt > 0 ? this.money(p.cards.taxDebt) : 'Väga hea';
+  }
+
+  protected revenueRows(): { year: number; pct: number; label: string }[] {
+    const reports = [...this.profile().annualReports].sort((a, b) => b.reportYear - a.reportYear);
+    const totals = reports.map((r) => ({ year: r.reportYear, total: this.totalRevenue(r) ?? 0 }));
+    const max = Math.max(1, ...totals.map((t) => t.total));
+    return totals.map((t) => ({
+      year: t.year,
+      pct: Math.round((t.total / max) * 100),
+      label: `${(t.total / 1_000_000).toFixed(1).replace('.', ',')}M EUR`,
+    }));
+  }
 
   /** Revenue growth (totals) between the last two years; null with fewer than 2 reports. */
   protected readonly growth = computed(() => {
@@ -129,123 +136,6 @@ export class ProfileOverview {
     }
     return `${g >= 0 ? '+' : '−'}${Math.abs(g).toFixed(1)}%`;
   });
-
-  // --- section edit forms -----------------------------------------------
-
-  protected readonly generalForm = new FormGroup({
-    operatingAddress: new FormControl('', { nonNullable: true }),
-    website: new FormControl('', { nonNullable: true }),
-  });
-
-  protected readonly contactForms = new FormArray<ContactGroup>([]);
-
-  protected readonly otherForm = new FormGroup({
-    employeeCount: new FormControl('', { nonNullable: true }),
-    targetMarkets: new FormControl<string[]>([], { nonNullable: true }),
-  });
-
-  protected open(section: Section): void {
-    const p = this.profile();
-    if (section === 'general') {
-      this.generalForm.setValue({
-        operatingAddress: this.operatingAddress() ?? '',
-        website: p.website.value ?? '',
-      });
-    } else if (section === 'contacts') {
-      this.contactForms.clear();
-      p.contacts.forEach((c) =>
-        this.contactForms.push(
-          this.contactGroup(c.fullName, c.role ?? '', c.email ?? '', c.phone ?? '', c.personCode ?? '', c.primary),
-        ),
-      );
-    } else {
-      this.otherForm.setValue({
-        employeeCount: p.employeeCount.value != null ? String(p.employeeCount.value) : '',
-        targetMarkets: [...p.cards.targetMarkets],
-      });
-    }
-    this.editing.set(section);
-  }
-
-  protected close(): void {
-    this.editing.set(null);
-  }
-
-  protected saveGeneral(): void {
-    this.saveSection.emit({
-      step: 1,
-      body: {
-        operatingAddress: this.generalForm.controls.operatingAddress.value || null,
-        website: this.generalForm.controls.website.value || null,
-      },
-    });
-    this.close();
-  }
-
-  protected saveContacts(): void {
-    if (this.contactForms.invalid) {
-      this.contactForms.markAllAsTouched();
-      return;
-    }
-    this.saveSection.emit({
-      step: 2,
-      body: {
-        contacts: this.contactForms.controls.map((g) => ({
-          fullName: g.controls.fullName.value,
-          role: g.controls.role.value || null,
-          email: g.controls.email.value || null,
-          phone: g.controls.phone.value || null,
-          personCode: g.controls.personCode.value || null,
-          primary: g.controls.primary.value,
-        })),
-      },
-    });
-    this.close();
-  }
-
-  protected saveOther(): void {
-    const raw = this.otherForm.controls.employeeCount.value.trim();
-    const n = raw ? Number(raw) : null;
-    this.saveSection.emit({
-      step: 4,
-      body: {
-        employeeCount: n != null && Number.isFinite(n) ? n : null,
-        targetMarkets: this.otherForm.controls.targetMarkets.value,
-      },
-    });
-    this.close();
-  }
-
-  protected addContact(): void {
-    this.contactForms.push(this.contactGroup('', '', '', '', '', this.contactForms.length === 0));
-  }
-  protected removeContact(i: number): void {
-    this.contactForms.removeAt(i);
-  }
-  protected setPrimary(i: number): void {
-    this.contactForms.controls.forEach((g, idx) => g.controls.primary.setValue(idx === i));
-  }
-
-  private contactGroup(
-    fullName: string,
-    role: string,
-    email: string,
-    phone: string,
-    personCode: string,
-    primary: boolean,
-  ): ContactGroup {
-    return new FormGroup({
-      fullName: new FormControl(fullName, { nonNullable: true, validators: [Validators.required] }),
-      role: new FormControl(role, { nonNullable: true }),
-      email: new FormControl(email, {
-        nonNullable: true,
-        validators: [Validators.required, Validators.email],
-      }),
-      phone: new FormControl(phone, { nonNullable: true }),
-      personCode: new FormControl(personCode, { nonNullable: true }),
-      primary: new FormControl(primary, { nonNullable: true }),
-    });
-  }
 
   // --- helpers ------------------------------------------------------------
 
@@ -287,9 +177,5 @@ export class ProfileOverview {
 
   protected pct(value: number): string {
     return new Intl.NumberFormat('et-EE', { maximumFractionDigits: 2 }).format(value);
-  }
-
-  protected showError(control: { invalid: boolean; touched: boolean }): boolean {
-    return control.invalid && control.touched;
   }
 }

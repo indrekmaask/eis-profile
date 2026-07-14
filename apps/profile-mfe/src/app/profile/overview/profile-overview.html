@@ -1,29 +1,23 @@
 @let p = profile();
 
 <div class="ov">
-  <nav class="ov__crumb">Iseteenindus / Profiil</nav>
+  <nav class="ov__crumb">Peamine / Ettevõtte profiil</nav>
 
   <header class="ov__head">
     <div>
       <h1>{{ p.businessName.value || p.registryCode }}</h1>
-      <p class="ov__sub">Registreerimise nr. {{ p.registryCode }}</p>
+      <p class="ov__sub"><strong>Registrikood</strong> {{ p.registryCode }}</p>
     </div>
-    <div class="ov__meter" role="group" aria-label="Profiili täituvus">
-      <span class="ov__meter-label">Profiili täituvus</span>
-      <span class="ov__meter-track"><span class="ov__meter-bar" [style.width.%]="p.completeness.percent"></span></span>
-      <span class="ov__meter-pct">{{ p.completeness.percent }}%</span>
+    <div class="ov__cta card" role="group" aria-label="Profiili täituvus">
       @if (p.completeness.percent < 100) {
-        <button dds-button variant="primary" size="sm" (click)="open('general')">Täienda</button>
+        <span>Profiili peaaegu täidetud</span>
+        <button dds-button variant="accent" (click)="editRequested.emit(0)">Jätka täitmisega →</button>
       } @else {
-        <span class="ov__meter-done" aria-label="Profiil on täielik">✓</span>
+        <span>Profiil täidetud</span>
+        <span class="ov__cta-done" aria-label="Profiil on täielik">✓</span>
       }
     </div>
   </header>
-
-  <p class="ov__lead">
-    EIS toob registriandmed automaatselt (lukus). Sina haldad ainult välju, mida registris pole —
-    muuda sektsioonide kaupa.
-  </p>
 
   @if (unavailable()) {
     <div class="ov__notice ov__notice--warn" role="status">
@@ -37,265 +31,153 @@
     </div>
   }
 
-  <div class="ov__regbar">
-    <span>🔒 Registriandmed Äriregistrist@if (asOf()) { · viimati uuendatud {{ asOf() }}}</span>
-    <button dds-button variant="secondary" size="sm" (click)="refresh.emit()">
-      ↻ Värskenda registriandmed
-    </button>
-  </div>
-
   <!-- Üldandmed -->
-  <section class="card ov__section-card">
-    <div class="ov__section-head">
+  <div class="ov__toprow">
+    <section class="card ov__general">
       <h2>Üldandmed</h2>
-      <span class="ov__src">🔒 osaliselt Äriregistrist</span>
-      @if (editing() !== 'general') {
-        <button dds-button variant="secondary" size="sm" (click)="open('general')">Muuda</button>
-      }
-    </div>
-
-    @if (editing() === 'general') {
-      <form [formGroup]="generalForm" class="ov__rows">
-        <div class="ov__row"><dt>Registrikood</dt><dd>{{ p.registryCode }}</dd></div>
-        <div class="ov__row"><dt>Juriidiline aadress</dt><dd>{{ legalAddress() || '—' }}</dd></div>
-        <div class="ov__row ov__row--input">
-          <dt>Tegevusaadress <span class="ov__optional">(vabatahtlik)</span></dt>
-          <dd>
-            <dds-input
-              label=""
-              placeholder="Lisa, kui tegevuskoht erineb juriidilisest — muidu jäta tühjaks"
-              formControlName="operatingAddress"
-            />
-          </dd>
+      <dl class="ov__pairs">
+        <div class="ov__pair">
+          <dt>Aadress</dt>
+          <dd class="ov__prov">{{ legalAddress() || '—' }}</dd>
         </div>
-        <div class="ov__row"><dt>Tegevusala</dt><dd>{{ emtak() }}</dd></div>
-        <div class="ov__row"><dt>Osakapital</dt><dd>{{ money(p.capitalSize.value) }}</dd></div>
-        <div class="ov__row ov__row--input">
-          <dt>Veebileht</dt>
-          <dd><dds-input label="" placeholder="nt firma.ee" formControlName="website" /></dd>
+        <div class="ov__pair">
+          <dt>Tegevusala</dt>
+          <dd class="ov__prov">{{ emtak() }}</dd>
         </div>
-        <div class="ov__actions">
-          <button dds-button variant="primary" size="sm" [disabled]="saving()" (click)="saveGeneral()">Salvesta</button>
-          <button dds-button variant="secondary" size="sm" (click)="close()">Loobu</button>
-        </div>
-      </form>
-    } @else {
-      <dl class="ov__rows">
-        <div class="ov__row"><dt>Registrikood</dt><dd>{{ p.registryCode }}</dd></div>
-        <div class="ov__row"><dt>Juriidiline aadress</dt><dd>{{ legalAddress() || '—' }}</dd></div>
-        <div class="ov__row">
-          <dt>Tegevusaadress</dt>
-          <dd>
-            @if (operatingAddress(); as oa) {
-              {{ oa }} <span class="ov__src-inline">✎ sinu lisatud</span>
-            } @else {
-              <span class="ov__muted-italic">pole lisatud — taotlustes kasutatakse juriidilist aadressi</span>
-            }
-          </dd>
-        </div>
-        <div class="ov__row"><dt>Tegevusala</dt><dd>{{ emtak() }}</dd></div>
-        <div class="ov__row"><dt>Osakapital</dt><dd>{{ money(p.capitalSize.value) }}</dd></div>
-        <div class="ov__row">
-          <dt>Veebileht</dt>
-          <dd>
-            @if (p.website.value) {
-              {{ p.website.value }} <span class="ov__src-inline">✎ sinu lisatud</span>
-            } @else {
-              <span class="ov__muted-italic">pole lisatud</span>
-            }
-          </dd>
+        <div class="ov__pair">
+          <dt>Osakapital</dt>
+          <dd class="ov__prov">{{ money(p.capitalSize.value) }}</dd>
         </div>
       </dl>
-    }
-    <p class="ov__footnote">
-      Registriväljad on lukus — parandused tehakse Äriregistris. Tegevusaadress ja veebileht on
-      sinu hallatavad.
-    </p>
-  </section>
+    </section>
+
+    <aside class="ov__contactpanel">
+      <div class="ov__contactpanel-head">
+        <h2>Kontaktandmed</h2>
+        <button dds-button variant="pill" size="sm" (click)="editRequested.emit(0)">Muuda ✎</button>
+      </div>
+      @if (primaryContact(); as pc) {
+        <p>{{ pc.email }}</p>
+        <p>{{ pc.phone }}</p>
+      }
+      @if (missingLabels(); as miss) {
+        <p class="ov__contactpanel-miss">Lisamata: {{ miss }}</p>
+      }
+    </aside>
+  </div>
 
   <!-- Kontaktisikud -->
-  <section class="card ov__section-card">
-    <div class="ov__section-head">
+  <section class="ov__block">
+    <div class="ov__blockhead">
       <h2>Kontaktisikud</h2>
-      <span class="ov__src">✎ sinu hallatav</span>
-      @if (editing() !== 'contacts') {
-        <button dds-button variant="secondary" size="sm" (click)="open('contacts')">Muuda</button>
+      <button dds-button variant="pill" size="sm" (click)="editRequested.emit(1)">Muuda ✎</button>
+    </div>
+    <div class="ov__people">
+      @for (c of p.contacts; track c.id) {
+        <div class="card ov__person">
+          <span class="ov__person-name">{{ c.fullName }}</span>
+          @if (c.role) { <span class="ov__person-role">{{ c.role }}</span> }
+          @if (c.email) { <p>{{ c.email }}</p> }
+          @if (c.phone) { <p>{{ c.phone }}</p> }
+        </div>
+      } @empty {
+        <p class="ov__muted-italic">Kontaktisik puudub. Lisa see profiili muutmisel.</p>
       }
     </div>
-
-    <span class="ov__grouplabel">Kontaktisikud</span>
-
-    @if (editing() === 'contacts') {
-      <div class="ov__contact-forms">
-        @for (c of contactForms.controls; track $index; let i = $index) {
-          <div class="ov__contact-form" [formGroup]="c">
-            <div class="ov__grid2">
-              <dds-input label="Nimi" [required]="true" formControlName="fullName"
-                [error]="showError(c.controls.fullName) ? 'Nimi on kohustuslik' : ''" />
-              <dds-input label="Roll" formControlName="role" />
-              <dds-input label="E-post" type="email" [required]="true" formControlName="email"
-                [error]="showError(c.controls.email) ? 'Sisesta korrektne e-post' : ''" />
-              <dds-phone-input label="Telefon" formControlName="phone" />
-            </div>
-            <dds-input label="Isikukood (vabatahtlik)" formControlName="personCode" />
-            @if (birthLabel(c.controls.personCode.value); as b) {
-              <p class="ov__birth">✓ sünnikuupäev: {{ b }}</p>
-            }
-            <div class="ov__contact-form-foot">
-              <label class="ov__radio">
-                <input type="radio" name="primaryContact" [checked]="c.controls.primary.value" (change)="setPrimary(i)" />
-                peamine kontakt
-              </label>
-              <button type="button" class="ov__link ov__link--danger" (click)="removeContact(i)">×</button>
-            </div>
-          </div>
-        }
-        <button type="button" dds-button variant="secondary" size="sm" (click)="addContact()">
-          + Lisa uus kontaktisik
-        </button>
-        <div class="ov__actions">
-          <button dds-button variant="primary" size="sm" [disabled]="saving()" (click)="saveContacts()">Salvesta</button>
-          <button dds-button variant="secondary" size="sm" (click)="close()">Loobu</button>
-        </div>
-      </div>
-    } @else {
-      <div class="ov__contacts">
-        @for (c of p.contacts; track c.id) {
-          <div class="ov__contact">
-            <div class="ov__contact-top">
-              <span class="ov__contact-name">{{ c.fullName }}</span>
-              @if (c.primary) { <span class="ov__pill ov__pill--blue">peamine kontakt</span> }
-              <span class="ov__contact-role">{{ c.role }}</span>
-            </div>
-            <div class="ov__contact-meta">
-              @if (c.email) { <span><span class="ov__meta-k">E-post</span> {{ c.email }}</span> }
-              @if (c.phone) { <span><span class="ov__meta-k">Telefon</span> {{ c.phone }}</span> }
-              @if (c.personCode) {
-                <span>
-                  <span class="ov__meta-k">Isikukood</span> {{ c.personCode }}
-                  @if (birthLabel(c.personCode); as b) { <span class="ov__pill">sünd {{ b }}</span> }
-                </span>
-              }
-            </div>
-          </div>
-        } @empty {
-          <p class="ov__muted-italic">Kontaktisik puudub. Lisa see sektsiooni muutmisel.</p>
-        }
-      </div>
-    }
-    <p class="ov__footnote">E-post ja telefon käivad isiku all. Peamine kontakt läheb vaikimisi taotlustele.</p>
   </section>
 
   <!-- Muud andmed -->
-  <section class="card ov__section-card">
-    <div class="ov__section-head">
+  <section class="ov__block">
+    <div class="ov__blockhead">
       <h2>Muud andmed</h2>
-      @if (editing() !== 'other') {
-        <button dds-button variant="secondary" size="sm" (click)="open('other')">Muuda</button>
-      }
+      <button dds-button variant="pill" size="sm" (click)="editRequested.emit(2)">Muuda ✎</button>
     </div>
-
-    @if (editing() === 'other') {
-      <form [formGroup]="otherForm" class="ov__other-form">
-        <dds-input label="Töötajate arv" inputmode="numeric" formControlName="employeeCount" />
-        <dds-tag-input
-          label="Sihtturud"
-          placeholder="+ lisa sihtriik…"
-          [options]="markets"
-          formControlName="targetMarkets"
-        />
-        <div class="ov__actions">
-          <button dds-button variant="primary" size="sm" [disabled]="saving()" (click)="saveOther()">Salvesta</button>
-          <button dds-button variant="secondary" size="sm" (click)="close()">Loobu</button>
-        </div>
-      </form>
-    } @else {
-      <div class="ov__cards">
-        <button type="button" class="card mcard mcard--action" (click)="partiesOpen.set(true)">
-          <span class="mcard__icon"><dds-icon name="users" /></span>
-          <span class="mcard__chevron">›</span>
-          <h3>Seotud isikud <span class="mcard__src">registrist</span></h3>
-          <p class="mcard__value">{{ partyGroups().length }}</p>
-          <p class="ov__muted">{{ naturalCount() }} füüsilist · {{ legalCount() }} juriidilist</p>
-        </button>
-
-        <div class="card mcard">
-          <span class="mcard__icon"><dds-icon name="file-text" /></span>
-          <h3>Kinnisvara <span class="mcard__src">registrist</span></h3>
-          <p class="mcard__value">{{ p.cards.realEstateCount }}</p>
-          <p class="ov__muted">objekti registris</p>
-        </div>
-
-        <div class="card mcard">
-          <span class="mcard__icon"><dds-icon name="euro" /></span>
-          <h3>Maksuvõlg <span class="mcard__src">registrist</span></h3>
-          <p class="mcard__value">{{ money(p.cards.taxDebt) }}</p>
-        </div>
-
-        <div class="card mcard">
-          <span class="mcard__icon"><dds-icon name="user" /></span>
-          <h3>Töötajate arv <span class="mcard__src">sinu lisatud</span></h3>
-          <p class="mcard__value">{{ p.employeeCount.value ?? '—' }}</p>
-        </div>
-
-        <div class="card mcard">
-          <span class="mcard__icon"><dds-icon name="globe" /></span>
-          <h3>Sihtturud <span class="mcard__src">sinu lisatud</span></h3>
-          @if (marketLabels().length) {
-            <div class="mcard__pills">
-              @for (m of marketLabels(); track m) { <span class="ov__pill ov__pill--blue">{{ m }}</span> }
-            </div>
-          } @else { <p class="ov__muted">—</p> }
-        </div>
+    <div class="ov__cards ov__cards--3">
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="building" /></span>
+        <h3>Töötajate arv</h3>
+        @if (p.employeeCount.value != null) {
+          <p class="mcard__value">{{ p.employeeCount.value }}</p>
+        } @else {
+          <p class="ov__muted-italic">Sisestamata</p>
+        }
       </div>
-    }
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="globe" /></span>
+        <h3>Sihtturud</h3>
+        @if (marketLabels().length) {
+          <div class="mcard__pills">
+            @for (m of marketLabels(); track m) { <span class="ov__chip">{{ m }}</span> }
+          </div>
+        } @else { <p class="ov__muted-italic">Sisestamata</p> }
+      </div>
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="map-pin" /></span>
+        <h3>Tegevuspiirkond</h3>
+        @if (regionLabels().length) {
+          <div class="mcard__pills">
+            @for (r of regionLabels(); track r) { <span class="ov__chip">{{ r }}</span> }
+          </div>
+        } @else { <p class="ov__muted-italic">Sisestamata</p> }
+      </div>
+    </div>
   </section>
 
-  <!-- Majandusnäitajad -->
+  <!-- Finantsnäitajad -->
   @if (p.annualReports.length) {
-    <section>
-      <h2 class="ov__section">Majandusnäitajad</h2>
-      <p class="ov__lead">
-        Majandusaasta aruannetest (Äriregister). {{ p.annualReports.length }}
-        {{ p.annualReports.length === 1 ? 'aastat' : 'aastat' }}.
-      </p>
+    <section class="ov__block">
+      <div class="ov__blockhead"><h2>Finantsnäitajad</h2></div>
       <div class="ov__fingrid">
         <div class="card">
-          <div class="ov__cardh-row">
-            <h3 class="ov__cardh">Müügitulu areng</h3>
-            <span class="ov__src">🔒 register</span>
-          </div>
-          <div class="colchart">
-            @for (c of revenueColumns(); track c.year) {
-              <div class="colchart__item">
-                <span class="colchart__bar" [style.height.%]="c.pct"></span>
-                <span class="colchart__year">{{ c.year }}</span>
+          <h3 class="ov__cardh">Müügitulu</h3>
+          <div class="hbars">
+            @for (r of revenueRows(); track r.year) {
+              <div class="hbars__row">
+                <span class="hbars__year">{{ r.year }}</span>
+                <span class="hbars__track"><span class="hbars__bar" [style.width.%]="r.pct"></span></span>
+                <span class="hbars__label">{{ r.label }}</span>
               </div>
             }
           </div>
-          <p class="ov__footnote">
-            Kasv {{ growthLabel() }} · viimane puhaskasum {{ money(latestReport()?.netProfit) }}
-          </p>
         </div>
-
         @if (latestReport(); as r) {
           <div class="card">
-            <div class="ov__cardh-row">
-              <h3 class="ov__cardh">Viimane aasta ({{ r.reportYear }})</h3>
-              <span class="ov__src">🔒 register</span>
-            </div>
-            <dl class="ov__rows">
-              <div class="ov__row"><dt>Müügitulu kokku</dt><dd>{{ money(totalRevenue(r)) }}</dd></div>
-              <div class="ov__row"><dt>Sh eksport</dt><dd>{{ money(exportRevenue(r)) }}</dd></div>
-              <div class="ov__row"><dt>Puhaskasum</dt><dd>{{ money(r.netProfit) }}</dd></div>
-              <div class="ov__row"><dt>Bilansimaht</dt><dd>{{ money(r.balanceSheetTotal) }}</dd></div>
-              <div class="ov__row"><dt>Omakapital</dt><dd>{{ money(r.equity) }}</dd></div>
+            <h3 class="ov__cardh">Viimane majandusaasta ({{ r.reportYear }})</h3>
+            <dl class="ov__pairs">
+              <div class="ov__pair"><dt>Müügitulu kokku</dt><dd class="ov__prov">{{ money(totalRevenue(r)) }}</dd></div>
+              <div class="ov__pair"><dt>Puhaskasum</dt><dd class="ov__prov">{{ money(r.netProfit) }}</dd></div>
+              <div class="ov__pair"><dt>Bilansimaht</dt><dd class="ov__prov">{{ money(r.balanceSheetTotal) }}</dd></div>
             </dl>
           </div>
         }
       </div>
     </section>
   }
+
+  <!-- Registrite andmed -->
+  <section class="ov__block">
+    <div class="ov__blockhead"><h2>Registrite andmed</h2></div>
+    <div class="ov__cards ov__cards--3">
+      <button type="button" class="card mcard mcard--action" (click)="partiesOpen.set(true)">
+        <span class="mcard__icon"><dds-icon name="users" /></span>
+        <h3>Seotud isikud</h3>
+        <p class="mcard__value">{{ partyGroups().length }}</p>
+        <span class="mcard__go" aria-hidden="true">→</span>
+      </button>
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="building" /></span>
+        <h3>Kinnisvara</h3>
+        <p class="mcard__value">{{ p.cards.realEstateCount }}</p>
+        <span class="mcard__go" aria-hidden="true">→</span>
+      </div>
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="landmark" /></span>
+        <h3>Maksekäitumine</h3>
+        <p class="mcard__value">{{ paymentLabel() }}</p>
+        <span class="mcard__go" aria-hidden="true">→</span>
+      </div>
+    </div>
+  </section>
 </div>
 
 <!-- Seotud isikud modal -->
