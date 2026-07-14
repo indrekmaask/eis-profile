@@ -47,23 +47,23 @@
           <div class="edit__stack">
             <div class="edit__field">
               <span class="edit__flabel">Tegevusaadress</span>
-              <dds-input label="" formControlName="operatingAddress" />
+              <dds-input label="" ariaLabel="Tegevusaadress" formControlName="operatingAddress" />
             </div>
             @if (primaryContact(); as pc) {
               <div class="edit__grid">
                 <div class="edit__field">
                   <span class="edit__flabel">E-post *</span>
-                  <dds-input label="" type="email" [formControl]="pc.controls.email" />
+                  <dds-input label="" ariaLabel="E-post" type="email" [formControl]="pc.controls.email" />
                 </div>
                 <div class="edit__field">
                   <span class="edit__flabel">Telefoninumber *</span>
-                  <dds-phone-input label="" [formControl]="pc.controls.phone" />
+                  <dds-phone-input label="" ariaLabel="Telefoninumber" [formControl]="pc.controls.phone" />
                 </div>
               </div>
             }
             <div class="edit__field">
               <span class="edit__flabel">Veebileht</span>
-              <dds-input label="" placeholder="https://" formControlName="website" />
+              <dds-input label="" ariaLabel="Veebileht" placeholder="https://" formControlName="website" />
             </div>
           </div>
 
@@ -86,29 +86,29 @@
                 <div class="edit__grid">
                   <div class="edit__field">
                     <span class="edit__flabel">Eesnimi *</span>
-                    <dds-input label="" formControlName="firstName"
+                    <dds-input label="" ariaLabel="Eesnimi" formControlName="firstName"
                       [error]="showError(c.controls.firstName) ? 'Eesnimi on kohustuslik' : ''" />
                   </div>
                   <div class="edit__field">
                     <span class="edit__flabel">Perekonnanimi *</span>
-                    <dds-input label="" formControlName="lastName" />
+                    <dds-input label="" ariaLabel="Perekonnanimi" formControlName="lastName" />
                   </div>
                   <div class="edit__field">
                     <span class="edit__flabel">Ametinimetus *</span>
-                    <dds-input label="" formControlName="role" />
+                    <dds-input label="" ariaLabel="Ametinimetus" formControlName="role" />
                   </div>
                   <div class="edit__field">
                     <span class="edit__flabel">Isikukood</span>
-                    <dds-input label="" formControlName="personCode" />
+                    <dds-input label="" ariaLabel="Isikukood" formControlName="personCode" />
                   </div>
                   <div class="edit__field">
                     <span class="edit__flabel">E-post *</span>
-                    <dds-input label="" type="email" formControlName="email"
+                    <dds-input label="" ariaLabel="E-post" type="email" formControlName="email"
                       [error]="showError(c.controls.email) ? 'Sisesta korrektne e-post' : ''" />
                   </div>
                   <div class="edit__field">
                     <span class="edit__flabel">Telefoninumber *</span>
-                    <dds-phone-input label="" formControlName="phone" />
+                    <dds-phone-input label="" ariaLabel="Telefoninumber" formControlName="phone" />
                   </div>
                 </div>
                 <button type="button" dds-button variant="pill" size="sm" (click)="removeContact(i)">
@@ -120,7 +120,7 @@
 
           <div class="edit__field">
             <span class="edit__flabel">Lisa kontaktisik</span>
-            <select class="edit__select" (change)="onAddSelect($event)">
+            <select class="edit__select" aria-label="Lisa kontaktisik" (change)="onAddSelect($event)">
               <option value="" selected>Vali isik</option>
               @for (s of partySuggestions(); track s.personCode) {
                 <option [value]="s.personCode">{{ s.displayName }} — {{ s.roles }}</option>
@@ -143,6 +143,7 @@
               <span class="edit__flabel">Tegevuspiirkond <span class="edit__srcbadge">👤 Kasutaja</span></span>
               <dds-tag-input
                 label=""
+                ariaLabel="Tegevuspiirkond"
                 placeholder="+ lisa piirkond…"
                 [options]="regions"
                 formControlName="operatingRegions"
@@ -152,6 +153,7 @@
               <span class="edit__flabel">Sihtturud <span class="edit__srcbadge">👤 Kasutaja</span></span>
               <dds-tag-input
                 label=""
+                ariaLabel="Sihtturud"
                 placeholder="+ lisa sihtriik…"
                 [options]="markets"
                 formControlName="targetMarkets"
@@ -159,7 +161,7 @@
             </div>
             <div class="edit__field edit__field--short">
               <span class="edit__flabel">Töötajate arv <span class="edit__srcbadge">👤 Kasutaja</span></span>
-              <dds-input label="" inputmode="numeric" formControlName="employeeCount" />
+              <dds-input label="" ariaLabel="Töötajate arv" inputmode="numeric" formControlName="employeeCount" />
             </div>
           </div>
 
@@ -168,7 +170,7 @@
             @for (b of bankAccounts.controls; track $index; let i = $index) {
               <div class="edit__field edit__field--short">
                 <span class="edit__flabel">IBAN {{ i + 1 }}</span>
-                <dds-input label="" placeholder="EE.." [formControlName]="i" />
+                <dds-input label="" ariaLabel="IBAN" placeholder="EE.." [formControlName]="i" />
               </div>
             }
           </div>

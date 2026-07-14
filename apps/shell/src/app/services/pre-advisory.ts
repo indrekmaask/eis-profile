@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DdsButton, DdsCard } from '@dds/ui';
@@ -33,6 +34,11 @@ export class PreAdvisory {
   protected readonly submitAttempted = signal(false);
 
   protected readonly participant = new FormControl('', { nonNullable: true });
+  private readonly participantId = toSignal(this.participant.valueChanges, { initialValue: '' });
+
+  protected readonly selectedContact = computed(
+    () => this.profile()?.contacts.find((c) => c.id === this.participantId()) ?? null,
+  );
 
   protected readonly exportLabel = computed(() => {
     const r = this.profile()?.annualReports[0];

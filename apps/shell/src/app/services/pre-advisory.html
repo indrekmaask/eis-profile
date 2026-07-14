@@ -47,6 +47,24 @@
           </select>
           <span class="adv__chevron" aria-hidden="true">▾</span>
         </div>
+
+        @if (selectedContact(); as sc) {
+          <div class="adv__contactgrid">
+            <div class="adv__contactfield">
+              <span class="adv__label">Kontaktisiku e-posti aadress *</span>
+              <div class="adv__readonly">
+                <span class="adv__readonly-icon" aria-hidden="true">✉</span>
+                <span>{{ sc.email || '—' }}</span>
+              </div>
+            </div>
+            <div class="adv__contactfield">
+              <span class="adv__label">Telefoninumber *</span>
+              <div class="adv__readonly">
+                <span>{{ sc.phone || '—' }}</span>
+              </div>
+            </div>
+          </div>
+        }
       </section>
 
       <section>

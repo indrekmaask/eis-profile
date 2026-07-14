@@ -36,6 +36,7 @@ const DEFAULT_PREFIXES = ['+372', '+371', '+370', '+358', '+46', '+47', '+45', '
           [value]="number()"
           [disabled]="disabled()"
           [placeholder]="placeholder()"
+          [attr.aria-label]="label() ? null : ariaLabel() || null"
           (input)="onNumber($event)"
           (blur)="onTouched()"
         />
@@ -107,6 +108,7 @@ const DEFAULT_PREFIXES = ['+372', '+371', '+370', '+358', '+46', '+47', '+45', '
 })
 export class DdsPhoneInput implements ControlValueAccessor {
   readonly label = input<string>('');
+  readonly ariaLabel = input<string>('');
   readonly placeholder = input<string>('');
   readonly required = input(false);
   readonly error = input<string>('');

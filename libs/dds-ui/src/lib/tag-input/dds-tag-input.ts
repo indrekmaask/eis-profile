@@ -38,6 +38,7 @@ import { DdsOption } from '../dropdown/dds-dropdown';
           <select
             class="dds-field__control"
             [disabled]="disabled()"
+            [attr.aria-label]="label() || ariaLabel() || null"
             (change)="add($event)"
           >
             <option value="" selected hidden>{{ selectedOptions().length ? '' : placeholder() || 'Lisa…' }}</option>
@@ -128,6 +129,7 @@ import { DdsOption } from '../dropdown/dds-dropdown';
 })
 export class DdsTagInput implements ControlValueAccessor {
   readonly label = input<string>('');
+  readonly ariaLabel = input<string>('');
   readonly placeholder = input<string>('');
   readonly options = input<DdsOption[]>([]);
   readonly required = input(false);

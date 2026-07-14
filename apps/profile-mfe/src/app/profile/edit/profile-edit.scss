@@ -146,20 +146,17 @@
 .edit__rorows {
   display: flex;
   flex-direction: column;
-  gap: var(--dds-space-6);
 }
 .edit__rorow {
-  display: flex;
-  flex-direction: column;
-  gap: var(--dds-space-1);
-  border-left: 2px solid #d8e1ee;
-  padding-left: var(--dds-space-4);
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--dds-space-4);
+  align-items: baseline;
+  padding: var(--dds-space-3) 0;
+  border-bottom: 2px solid #d8e1ee;
 }
 .edit__rok {
-  font-size: var(--dds-font-size-xs);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: var(--dds-font-weight-bold);
   color: var(--dds-color-ink-strong);
 }
 

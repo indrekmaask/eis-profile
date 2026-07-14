@@ -312,7 +312,7 @@ const DEMO_PEOPLE = [
       .tara__reseed-link {
         background: none;
         border: none;
-        color: #7a8699;
+        color: #4b5563;
         font-size: 13px;
         cursor: pointer;
         text-decoration: underline;

@@ -27,6 +27,7 @@ let uid = 0;
         [placeholder]="placeholder()"
         [disabled]="disabled()"
         [attr.inputmode]="inputmode()"
+        [attr.aria-label]="label() ? null : ariaLabel() || null"
         [attr.aria-invalid]="!!error()"
         (input)="onInput($event)"
         (blur)="onTouched()"
@@ -89,6 +90,7 @@ let uid = 0;
 export class DdsInput implements ControlValueAccessor {
   readonly id = `dds-input-${uid++}`;
   readonly label = input<string>('');
+  readonly ariaLabel = input<string>('');
   readonly description = input<string>('');
   readonly placeholder = input<string>('');
   readonly type = input<string>('text');
