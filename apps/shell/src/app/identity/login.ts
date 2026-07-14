@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { IdentityService } from './identity.service';
 
 const DEMO_PEOPLE = [
-  { code: '48505150220', name: 'Eva Tamm', label: 'Eva Tamm — Biomarket OÜ & Karu Koobas OÜ' },
+  { code: '48505150220', name: 'Eva Tamm', label: 'Eva Tamm — Biomarket, Porgand & Karu Koobas OÜ' },
 ];
 
 /**

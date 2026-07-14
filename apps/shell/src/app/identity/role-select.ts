@@ -11,7 +11,7 @@ import { IdentityService } from './identity.service';
  * registry code only — the company data itself is fetched from the register (mock API).
  */
 const DEMO_REGISTRY_CODES: Record<string, string[]> = {
-  '48505150220': ['16890123'],
+  '48505150220': ['16789012', '16890123'],
 };
 
 /** "Vali roll": lists companies the logged-in person may act for (via profile_access). */
