@@ -8,6 +8,8 @@ EIS Central Customer Profile (procurement trial work): a cross-application compa
 
 **Language convention:** UI strings are Estonian (product language); code, docs and commit messages are in English.
 
+**Comments:** keep them minimal — only for hacks, workarounds, or non-obvious/complex logic (the *why*). Do not add comments that narrate what the code already says.
+
 ## Commands
 
 ### Full stack (Docker, the canonical way to run)

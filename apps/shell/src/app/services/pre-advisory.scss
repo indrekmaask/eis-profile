@@ -105,22 +105,6 @@ h1 {
   display: flex;
   flex-direction: column;
 }
-.adv__readonly {
-  display: flex;
-  align-items: center;
-  gap: var(--dds-space-2);
-  min-height: 48px;
-  padding: var(--dds-space-3) var(--dds-space-4);
-  background: var(--dds-color-surface);
-  border: 1px solid var(--dds-color-border);
-  border-radius: var(--dds-radius-control);
-  color: var(--dds-color-ink-strong);
-  font-size: var(--dds-font-size-md);
-}
-.adv__readonly-icon {
-  color: var(--dds-color-ink-muted);
-}
-
 @media (max-width: 640px) {
   .adv__contactgrid {
     grid-template-columns: 1fr;

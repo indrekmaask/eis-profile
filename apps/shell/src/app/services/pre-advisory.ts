@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { DdsButton, DdsCard } from '@dds/ui';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DdsButton, DdsCard, DdsInput, DdsPhoneInput } from '@dds/ui';
 import { ProfileApiService, ProfileView } from '@eis/profile-api';
 import { IdentityService } from '../identity/identity.service';
 import { exportRevenue, money } from './services.data';
@@ -20,7 +20,7 @@ const MARKET_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-pre-advisory',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, DdsButton, DdsCard],
+  imports: [ReactiveFormsModule, RouterLink, DdsButton, DdsCard, DdsInput, DdsPhoneInput],
   templateUrl: './pre-advisory.html',
   styleUrl: './pre-advisory.scss',
 })
@@ -36,9 +36,25 @@ export class PreAdvisory {
   protected readonly participant = new FormControl('', { nonNullable: true });
   private readonly participantId = toSignal(this.participant.valueChanges, { initialValue: '' });
 
+  protected readonly newPerson = new FormGroup({
+    firstName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    phone: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+  });
+
+  protected readonly isNew = computed(() => this.participantId() === '__new__');
+
   protected readonly selectedContact = computed(
     () => this.profile()?.contacts.find((c) => c.id === this.participantId()) ?? null,
   );
+
+  // Editable copy of the picked contact's details — local to this form; edits here
+  // never write back to the profile.
+  protected readonly contactEdit = new FormGroup({
+    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    phone: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+  });
 
   protected readonly exportLabel = computed(() => {
     const r = this.profile()?.annualReports[0];
@@ -55,11 +71,25 @@ export class PreAdvisory {
     if (company) {
       this.api.getProfile(company.registryCode).subscribe((p) => this.profile.set(p));
     }
+    effect(() => {
+      const sc = this.selectedContact();
+      if (sc) {
+        this.contactEdit.setValue({ email: sc.email ?? '', phone: sc.phone ?? '' });
+      }
+    });
   }
 
   protected submit(): void {
     this.submitAttempted.set(true);
     if (!this.participant.value) {
+      return;
+    }
+    if (this.isNew() && this.newPerson.invalid) {
+      this.newPerson.markAllAsTouched();
+      return;
+    }
+    if (!this.isNew() && this.contactEdit.invalid) {
+      this.contactEdit.markAllAsTouched();
       return;
     }
     this.done.set(true);

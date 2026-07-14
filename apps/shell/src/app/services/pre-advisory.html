@@ -44,24 +44,45 @@
             @for (c of p.contacts; track c.id) {
               <option [value]="c.id">{{ c.fullName }} — {{ c.role }}</option>
             }
+            <option value="__new__">Lisage uus isik</option>
           </select>
           <span class="adv__chevron" aria-hidden="true">▾</span>
         </div>
 
-        @if (selectedContact(); as sc) {
-          <div class="adv__contactgrid">
+        @if (isNew()) {
+          <div class="adv__contactgrid" [formGroup]="newPerson">
+            <div class="adv__contactfield">
+              <span class="adv__label">Eesnimi *</span>
+              <dds-input label="" ariaLabel="Eesnimi" formControlName="firstName"
+                [error]="submitAttempted() && newPerson.controls.firstName.invalid ? 'Eesnimi on kohustuslik' : ''" />
+            </div>
+            <div class="adv__contactfield">
+              <span class="adv__label">Perekonnanimi *</span>
+              <dds-input label="" ariaLabel="Perekonnanimi" formControlName="lastName"
+                [error]="submitAttempted() && newPerson.controls.lastName.invalid ? 'Perekonnanimi on kohustuslik' : ''" />
+            </div>
             <div class="adv__contactfield">
               <span class="adv__label">Kontaktisiku e-posti aadress *</span>
-              <div class="adv__readonly">
-                <span class="adv__readonly-icon" aria-hidden="true">✉</span>
-                <span>{{ sc.email || '—' }}</span>
-              </div>
+              <dds-input label="" ariaLabel="E-post" type="email" formControlName="email"
+                [error]="submitAttempted() && newPerson.controls.email.invalid ? 'Sisesta korrektne e-post' : ''" />
             </div>
             <div class="adv__contactfield">
               <span class="adv__label">Telefoninumber *</span>
-              <div class="adv__readonly">
-                <span>{{ sc.phone || '—' }}</span>
-              </div>
+              <dds-phone-input label="" ariaLabel="Telefoninumber" formControlName="phone"
+                [error]="submitAttempted() && newPerson.controls.phone.invalid ? 'Telefoninumber on kohustuslik' : ''" />
+            </div>
+          </div>
+        } @else if (selectedContact()) {
+          <div class="adv__contactgrid" [formGroup]="contactEdit">
+            <div class="adv__contactfield">
+              <span class="adv__label">Kontaktisiku e-posti aadress *</span>
+              <dds-input label="" ariaLabel="Kontaktisiku e-posti aadress" type="email" formControlName="email"
+                [error]="submitAttempted() && contactEdit.controls.email.invalid ? 'Sisesta korrektne e-post' : ''" />
+            </div>
+            <div class="adv__contactfield">
+              <span class="adv__label">Telefoninumber *</span>
+              <dds-phone-input label="" ariaLabel="Telefoninumber" formControlName="phone"
+                [error]="submitAttempted() && contactEdit.controls.phone.invalid ? 'Telefoninumber on kohustuslik' : ''" />
             </div>
           </div>
         }
