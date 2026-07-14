@@ -188,7 +188,22 @@ export class RoleSelect {
 
   protected choose(e: AccessEntry): void {
     this.identity.selectCompany(e.registryCode, e.businessName);
-    this.router.navigate(['/dashboard']);
+    // No profile yet (register-only company) → land on the profile page, not the dashboard.
+    this.api
+      .getProfile(e.registryCode)
+      .pipe(
+        map(() => true),
+        catchError(() => of(false)),
+      )
+      .subscribe((hasProfile) => {
+        if (hasProfile) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.router.navigate(['/profile'], {
+            queryParams: { rc: e.registryCode, person: this.identity.personCode() },
+          });
+        }
+      });
   }
 
   protected back(): void {
