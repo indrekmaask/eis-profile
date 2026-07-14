@@ -48,6 +48,11 @@
   flex-direction: column;
   gap: var(--dds-space-3);
 }
+/* Pill actions are fit-content in Figma, not stretched by the column flex. */
+.edit__step > [dds-button],
+.edit__contactcard > [dds-button] {
+  align-self: flex-start;
+}
 .edit__step-head {
   display: flex;
   align-items: center;

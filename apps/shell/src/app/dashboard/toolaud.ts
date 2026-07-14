@@ -94,7 +94,7 @@ import { RadarChart } from '../shared/radar-chart';
         </span>
         <div class="empty__text">
           <strong>Arenguplaan pole veel loodud</strong>
-          <p>Arenguplaan seob sinu eesmärgid ja EIS teenused üheks teekonnaks.</p>
+          <p>Arenguplaan seob sinu eesmärgid ja EIS teenused üheks teekonnaks. Loo plaan, et saada konkreetseid soovitusi.</p>
         </div>
         <button dds-button variant="pill">Loo arenguplaan →</button>
       </div>

@@ -23,6 +23,7 @@ services:
       CORS_ORIGIN: http://localhost:4200
     ports:
       - "3000:3000"
+    restart: on-failure
     depends_on:
       mock-api-db:
         condition: service_healthy
@@ -59,6 +60,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eis}
     ports:
       - "8080:8080"
+    restart: on-failure
     depends_on:
       postgres:
         condition: service_healthy

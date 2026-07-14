@@ -41,13 +41,15 @@
 
 .page__intro {
   width: 100%;
-  max-width: var(--dds-width-block, 960px);
-  margin: 0 auto;
-  padding: var(--dds-space-6);
   display: flex;
   flex-direction: column;
   gap: var(--dds-space-4);
   align-items: flex-start;
+}
+
+.page__crumb {
+  color: var(--dds-color-ink-muted);
+  font-size: var(--dds-font-size-sm);
 }
 
 .page__eyebrow {
@@ -60,7 +62,7 @@
 
 .page__intro h1 {
   margin: 0;
-  font-size: var(--dds-font-size-xl);
+  font-size: var(--dds-font-size-2xl);
   font-weight: var(--dds-font-weight-bold);
 }
 
@@ -71,6 +73,9 @@
 
 .page__sub {
   color: var(--dds-color-ink-muted);
+}
+.page__sub strong {
+  color: var(--dds-color-ink-strong);
 }
 
 .page__empty {

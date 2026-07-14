@@ -53,6 +53,7 @@ const DEMO_PEOPLE = [
         </div>
 
         <div class="tara__card">
+          <div class="tara__inner">
           <h2>Mobiil-ID</h2>
           <p>
             Teenusesse <strong>Riigi autentimisteenuse iseteenindus</strong> sisselogimiseks on vaja
@@ -76,14 +77,15 @@ const DEMO_PEOPLE = [
             <span></span>
             <button type="button" class="tara__submit" (click)="submit()">Jätka</button>
           </div>
+          </div>
         </div>
 
-        <p class="tara__demo-note">
-          Näidiskeskkond — päris TARA-t ei kasutata.
+        <div class="tara__demo">
+          <span class="tara__demo-note">Näidiskeskkond — päris TARA-t ei kasutata. Logi sisse testkasutajana:</span>
           @for (p of demoPeople; track p.code) {
-            <button type="button" class="tara__demo-link" (click)="pick(p.code)">{{ p.label }}</button>
+            <button type="button" class="tara__demo-link" (click)="pick(p.code)">{{ p.label }} →</button>
           }
-        </p>
+        </div>
 
         <div class="tara__links">
           <a href="#" (click)="$event.preventDefault()">Tagasi teenusepakkuja juurde</a>
@@ -167,7 +169,7 @@ const DEMO_PEOPLE = [
       }
       .tara__tabs,
       .tara__card,
-      .tara__demo-note,
+      .tara__demo,
       .tara__links {
         max-width: 1030px;
         margin-left: auto;
@@ -180,7 +182,9 @@ const DEMO_PEOPLE = [
         margin-bottom: 24px;
       }
       .tara__tab {
-        flex: 1;
+        flex: none;
+        width: 192px;
+        box-sizing: border-box;
         background: #fff;
         text-align: center;
         padding: 16px;
@@ -196,7 +200,11 @@ const DEMO_PEOPLE = [
       .tara__card {
         background: #fff;
         border-radius: 12px;
-        padding: 48px;
+        padding: 48px 48px 56px;
+      }
+      .tara__inner {
+        max-width: 760px;
+        margin: 0 auto;
       }
       .tara__card h2 {
         margin: 0 0 16px;
@@ -259,20 +267,34 @@ const DEMO_PEOPLE = [
         background: #176228;
       }
 
+      .tara__demo {
+        margin-top: 24px;
+        background: #eaf2fb;
+        border: 1px solid #b9d2ec;
+        border-radius: 12px;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+      }
       .tara__demo-note {
-        text-align: center;
-        color: #666;
-        font-size: 13px;
-        margin: 16px 0 0;
+        color: #24405e;
+        font-size: 14px;
       }
       .tara__demo-link {
-        background: none;
+        background: #015a96;
         border: none;
-        color: #015a96;
-        text-decoration: underline;
+        color: #fff;
+        border-radius: 999px;
         cursor: pointer;
-        font-size: 13px;
-        padding: 0 4px;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 10px 20px;
+      }
+      .tara__demo-link:hover {
+        background: #003168;
       }
 
       .tara__links {
@@ -326,6 +348,7 @@ export class Login {
 
   protected pick(code: string): void {
     this.code.setValue(code);
+    this.submit();
   }
 
   protected submit(): void {

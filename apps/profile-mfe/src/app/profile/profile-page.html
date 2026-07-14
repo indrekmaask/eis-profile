@@ -31,10 +31,9 @@
       />
     } @else {
       <div class="page__intro">
-        <h1>Ettevõtte profiil</h1>
-        <p class="page__sub">
-          {{ store.prefill()?.businessName }} · {{ store.prefill()?.registryCode }}
-        </p>
+        <nav class="page__crumb">Peamine / Ettevõtte profiil</nav>
+        <h1>{{ store.prefill()?.businessName }}</h1>
+        <p class="page__sub"><strong>Registrikood</strong> {{ store.prefill()?.registryCode }}</p>
         <div class="page__empty card">
           <span class="page__empty-icon" aria-hidden="true">✎</span>
           <h2>Profiili pole veel koostatud</h2>

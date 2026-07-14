@@ -19,39 +19,35 @@ import { DdsOption } from '../dropdown/dds-dropdown';
           {{ label() }}@if (required()) {<span class="dds-field__req" aria-hidden="true">*</span>}
         </span>
       }
-      @if (selectedOptions().length) {
-        <ul class="dds-tags">
-          @for (opt of selectedOptions(); track opt.value) {
-            <li class="dds-tags__chip">
-              <span>{{ opt.label }}</span>
-              <button
-                type="button"
-                class="dds-tags__remove"
-                [attr.aria-label]="'Eemalda ' + opt.label"
-                [disabled]="disabled()"
-                (click)="remove(opt.value)"
-              >
-                ×
-              </button>
-            </li>
-          }
-        </ul>
-      }
-      @if (available().length) {
-        <div class="dds-field__wrap">
+      <div class="dds-field__box">
+        @for (opt of selectedOptions(); track opt.value) {
+          <span class="dds-tags__chip">
+            <span>{{ opt.label }}</span>
+            <button
+              type="button"
+              class="dds-tags__remove"
+              [attr.aria-label]="'Eemalda ' + opt.label"
+              [disabled]="disabled()"
+              (click)="remove(opt.value)"
+            >
+              ×
+            </button>
+          </span>
+        }
+        @if (available().length) {
           <select
             class="dds-field__control"
             [disabled]="disabled()"
             (change)="add($event)"
           >
-            <option value="" selected hidden>{{ placeholder() || 'Lisa…' }}</option>
+            <option value="" selected hidden>{{ selectedOptions().length ? '' : placeholder() || 'Lisa…' }}</option>
             @for (opt of available(); track opt.value) {
               <option [value]="opt.value">{{ opt.label }}</option>
             }
           </select>
           <span class="dds-field__chevron" aria-hidden="true">▾</span>
-        </div>
-      }
+        }
+      </div>
     </label>
   `,
   styles: [
@@ -70,13 +66,21 @@ import { DdsOption } from '../dropdown/dds-dropdown';
         color: var(--dds-color-error);
         margin-left: 2px;
       }
-      .dds-tags {
+      .dds-field__box {
+        position: relative;
         display: flex;
         flex-wrap: wrap;
+        align-items: center;
         gap: var(--dds-space-2);
-        list-style: none;
-        margin: 0;
-        padding: 0;
+        background: var(--dds-color-surface);
+        border: 1px solid var(--dds-color-border);
+        border-radius: var(--dds-radius-control);
+        padding: var(--dds-space-2) var(--dds-space-6) var(--dds-space-2) var(--dds-space-3);
+        min-height: 48px;
+      }
+      .dds-field__box:focus-within {
+        border-color: var(--dds-color-primary-strong);
+        box-shadow: var(--dds-focus-ring);
       }
       .dds-tags__chip {
         display: inline-flex;
@@ -97,26 +101,19 @@ import { DdsOption } from '../dropdown/dds-dropdown';
         color: var(--dds-color-registry-accent);
         padding: 0 var(--dds-space-1);
       }
-      .dds-field__wrap {
-        position: relative;
-        max-width: 320px;
-      }
       .dds-field__control {
         appearance: none;
-        width: 100%;
+        flex: 1;
+        min-width: 120px;
         font-family: inherit;
         font-size: var(--dds-font-size-md);
-        background: var(--dds-color-surface);
-        border: 1px solid var(--dds-color-border);
-        border-radius: var(--dds-radius-control);
-        padding: var(--dds-space-3) var(--dds-space-6) var(--dds-space-3) var(--dds-space-4);
-        min-height: 48px;
+        background: transparent;
+        border: none;
+        padding: var(--dds-space-2) 0;
         color: var(--dds-color-ink-muted);
       }
       .dds-field__control:focus {
         outline: none;
-        border-color: var(--dds-color-primary-strong);
-        box-shadow: var(--dds-focus-ring);
       }
       .dds-field__chevron {
         position: absolute;

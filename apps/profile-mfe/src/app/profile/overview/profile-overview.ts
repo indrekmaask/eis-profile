@@ -172,7 +172,7 @@ export class ProfileOverview {
       maximumFractionDigits: 0,
       useGrouping: 'always' as unknown as boolean,
     }).format(Math.abs(value));
-    return `${value < 0 ? '−' : ''}${abs} €`;
+    return `${value < 0 ? '−' : ''}${abs} EUR`;
   }
 
   protected pct(value: number): string {
