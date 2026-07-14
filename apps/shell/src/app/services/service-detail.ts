@@ -48,7 +48,7 @@ interface Field {
             <a dds-button variant="primary" size="sm" routerLink="/profile" [queryParams]="profileParams()">Koosta profiil →</a>
           </div>
         } @else if (profile()) {
-          <div class="sd__cols">
+          <div class="sd__cols" [class.sd__cols--split]="s.booking">
             <div class="sd__main">
               @if (s.booking) {
                 <div class="card card--booking">
@@ -207,7 +207,7 @@ interface Field {
       h1 {
         margin: var(--dds-space-2) 0 0;
         font-size: var(--dds-font-size-2xl);
-        font-weight: var(--dds-font-weight-bold);
+        font-weight: var(--dds-font-weight-regular);
       }
       .sd__lead {
         margin: var(--dds-space-2) 0 var(--dds-space-3);
@@ -222,6 +222,24 @@ interface Field {
         grid-template-columns: 1fr 320px;
         gap: var(--dds-space-4);
         align-items: start;
+      }
+      /* Booking view: white content + blue precheck as one flush split card (Figma). */
+      .sd__cols--split {
+        gap: 0;
+        align-items: stretch;
+        background: var(--dds-color-surface);
+        border-radius: 32px;
+        box-shadow: var(--dds-shadow-card);
+        overflow: hidden;
+      }
+      .sd__cols--split .card--booking {
+        box-shadow: none;
+        border-radius: 0;
+      }
+      .sd__cols--split .qual {
+        border-radius: 32px;
+        margin-left: var(--dds-space-3);
+        height: 100%;
       }
       .sd__main {
         display: flex;
@@ -246,7 +264,7 @@ interface Field {
       .card--booking__title {
         margin: 0;
         font-size: var(--dds-font-size-xl);
-        font-weight: var(--dds-font-weight-bold);
+        font-weight: var(--dds-font-weight-regular);
       }
       .card--booking p {
         margin: 0;
@@ -368,11 +386,12 @@ interface Field {
         background: var(--dds-color-registry-highlight);
         border-radius: var(--dds-radius-card);
         padding: var(--dds-space-5);
+        height: 100%;
       }
       .qual__head {
         margin: 0 0 var(--dds-space-4);
         font-size: var(--dds-font-size-lg);
-        font-weight: var(--dds-font-weight-medium);
+        font-weight: var(--dds-font-weight-regular);
         color: var(--dds-color-ink-strong);
       }
       .qrow {

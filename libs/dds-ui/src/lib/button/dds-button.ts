@@ -21,7 +21,7 @@ export type DdsButtonSize = 'md' | 'sm';
         justify-content: center;
         gap: var(--dds-space-2);
         font-family: var(--dds-font-family);
-        font-weight: var(--dds-font-weight-medium);
+        font-weight: var(--dds-font-weight-bold);
         border-radius: var(--dds-radius-pill);
         border: 1px solid transparent;
         cursor: pointer;

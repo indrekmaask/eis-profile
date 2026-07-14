@@ -15,7 +15,8 @@ export type DdsIconName =
   | 'leaf'
   | 'cpu'
   | 'lightbulb'
-  | 'briefcase';
+  | 'briefcase'
+  | 'lock';
 
 /** Lucide-style line icon set (matches the DDS2/Figma icon family). */
 @Component({
@@ -39,6 +40,10 @@ export type DdsIconName =
         }
         @case ('trending-up') {
           <path d="M16 7h6v6" /><path d="m22 7-8.5 8.5-5-5L2 17" />
+        }
+        @case ('lock') {
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         }
         @case ('compass') {
           <circle cx="12" cy="12" r="10" />

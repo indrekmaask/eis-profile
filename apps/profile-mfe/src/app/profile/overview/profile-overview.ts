@@ -33,6 +33,21 @@ export class ProfileOverview {
 
   protected readonly asOf = computed(() => formatEstonianDate(this.profile().dataAsOfDate));
 
+  /** dd.MM.yyyy HH:mm for the register provenance bar (Figma shows date + time). */
+  protected readonly asOfDateTime = computed(() => {
+    const iso = this.profile().dataAsOfDate;
+    if (!iso) {
+      return '—';
+    }
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) {
+      return iso;
+    }
+    return new Intl.DateTimeFormat('et-EE', {
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    }).format(d).replace(',', '');
+  });
+
   protected readonly legalAddress = computed(
     () => this.profile().addresses.find((a) => a.addressType === 'LEGAL')?.fullAddress ?? null,
   );

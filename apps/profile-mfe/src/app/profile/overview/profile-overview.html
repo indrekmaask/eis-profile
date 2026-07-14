@@ -11,10 +11,10 @@
     <div class="ov__cta card" role="group" aria-label="Profiili täituvus">
       @if (p.completeness.percent < 100) {
         <span>Profiili peaaegu täidetud</span>
-        <button dds-button variant="accent" (click)="editRequested.emit(0)">Jätka täitmisega →</button>
+        <button dds-button variant="primary" (click)="editRequested.emit(0)">Jätka täitmisega</button>
       } @else {
-        <span>Profiil täidetud</span>
-        <span class="ov__cta-done" aria-label="Profiil on täielik">✓</span>
+        <span>Profiili täielikult täidetud</span>
+        <button dds-button variant="pill" (click)="editRequested.emit(0)">Muuda profiili</button>
       }
     </div>
   </header>
@@ -34,7 +34,7 @@
   <!-- Üldandmed -->
   <div class="ov__toprow">
     <section class="card ov__general">
-      <h2>Üldandmed</h2>
+      <h2>Üldandmed <dds-icon class="ov__lock" name="lock" /></h2>
       <dl class="ov__pairs">
         <div class="ov__pair">
           <dt>Aadress</dt>
@@ -83,7 +83,10 @@
       @for (c of p.contacts; track c.id) {
         <div class="card ov__person">
           <span class="ov__person-name">{{ c.fullName }}</span>
-          @if (c.role) { <span class="ov__person-role">{{ c.role }}</span> }
+          <span class="ov__person-pills">
+            @if (c.role) { <span class="ov__person-role">{{ c.role }}</span> }
+            @if (c.primary) { <span class="ov__person-primary">Peamine kontaktisik</span> }
+          </span>
           @if (c.email) { <p>{{ c.email }}</p> }
           @if (c.phone) { <p>{{ c.phone }}</p> }
         </div>
@@ -130,10 +133,35 @@
     </div>
   </section>
 
+  <!-- Taustaandmed (registrite andmed) -->
+  <section class="ov__block">
+    <div class="ov__blockhead"><h2>Taustaandmed <dds-icon class="ov__lock" name="lock" /></h2></div>
+    <div class="ov__cards ov__cards--3">
+      <button type="button" class="card mcard mcard--action" (click)="partiesOpen.set(true)">
+        <span class="mcard__icon"><dds-icon name="users" /></span>
+        <h3>Seotud isikud</h3>
+        <p class="mcard__value">{{ partyGroups().length }}</p>
+        <span class="mcard__go" aria-hidden="true">→</span>
+      </button>
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="building" /></span>
+        <h3>Kinnisvara</h3>
+        <p class="mcard__value">{{ p.cards.realEstateCount }}</p>
+        <span class="mcard__go" aria-hidden="true">→</span>
+      </div>
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="landmark" /></span>
+        <h3>Maksekäitumine</h3>
+        <p class="mcard__value">{{ paymentLabel() }}</p>
+        <span class="mcard__go" aria-hidden="true">→</span>
+      </div>
+    </div>
+  </section>
+
   <!-- Finantsnäitajad -->
   @if (p.annualReports.length) {
     <section class="ov__block">
-      <div class="ov__blockhead"><h2>Finantsnäitajad</h2></div>
+      <div class="ov__blockhead"><h2>Finantsnäitajad <dds-icon class="ov__lock" name="lock" /></h2></div>
       <div class="ov__fingrid">
         <div class="card">
           <h3 class="ov__cardh">Müügitulu</h3>
@@ -161,30 +189,12 @@
     </section>
   }
 
-  <!-- Registrite andmed -->
-  <section class="ov__block">
-    <div class="ov__blockhead"><h2>Registrite andmed</h2></div>
-    <div class="ov__cards ov__cards--3">
-      <button type="button" class="card mcard mcard--action" (click)="partiesOpen.set(true)">
-        <span class="mcard__icon"><dds-icon name="users" /></span>
-        <h3>Seotud isikud</h3>
-        <p class="mcard__value">{{ partyGroups().length }}</p>
-        <span class="mcard__go" aria-hidden="true">→</span>
-      </button>
-      <div class="card mcard">
-        <span class="mcard__icon"><dds-icon name="building" /></span>
-        <h3>Kinnisvara</h3>
-        <p class="mcard__value">{{ p.cards.realEstateCount }}</p>
-        <span class="mcard__go" aria-hidden="true">→</span>
-      </div>
-      <div class="card mcard">
-        <span class="mcard__icon"><dds-icon name="landmark" /></span>
-        <h3>Maksekäitumine</h3>
-        <p class="mcard__value">{{ paymentLabel() }}</p>
-        <span class="mcard__go" aria-hidden="true">→</span>
-      </div>
-    </div>
-  </section>
+  <!-- Register provenance + refresh -->
+  <div class="card ov__refreshbar">
+    <span>Andmed pärinevad registritest: {{ asOfDateTime() }} seisuga.</span>
+    <button dds-button variant="pill" size="sm" (click)="refresh.emit()">Värskenda andmeid</button>
+  </div>
+
 </div>
 
 <!-- Seotud isikud modal -->
