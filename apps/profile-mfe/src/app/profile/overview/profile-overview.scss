@@ -25,7 +25,7 @@
 .ov__head h1 {
   margin: 0;
   font-size: var(--dds-font-size-2xl);
-  font-weight: var(--dds-font-weight-bold);
+  font-weight: var(--dds-font-weight-regular);
 }
 .ov__sub {
   margin: var(--dds-space-1) 0 0;
@@ -77,7 +77,7 @@
   gap: 0;
 }
 .ov__general { border-radius: var(--dds-radius-card) 0 0 var(--dds-radius-card); }
-.ov__general h2 { margin: 0 0 var(--dds-space-5); font-size: var(--dds-font-size-xl); }
+.ov__general h2 { margin: 0 0 var(--dds-space-5); font-size: var(--dds-font-size-xl); font-weight: var(--dds-font-weight-regular); }
 .ov__pairs { margin: 0; }
 .ov__pair {
   display: grid; grid-template-columns: 160px 1fr;
@@ -100,7 +100,7 @@
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: var(--dds-space-3);
 }
-.ov__contactpanel-head h2 { margin: 0; font-size: var(--dds-font-size-xl); }
+.ov__contactpanel-head h2 { margin: 0; font-size: var(--dds-font-size-xl); font-weight: var(--dds-font-weight-regular); }
 .ov__contactpanel p { margin: 0; color: var(--dds-color-ink-strong); }
 .ov__contactpanel-addr { padding-top: var(--dds-space-3); }
 .ov__contactpanel-web {
@@ -160,7 +160,7 @@
   font-size: var(--dds-font-size-sm);
   color: var(--dds-color-ink-strong);
 }
-.ov__blockhead h2 { margin: 0; font-size: var(--dds-font-size-xl); font-weight: var(--dds-font-weight-medium); }
+.ov__blockhead h2 { margin: 0; font-size: var(--dds-font-size-xl); font-weight: var(--dds-font-weight-regular); }
 .ov__people { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--dds-space-4); }
 .ov__person { display: flex; flex-direction: column; gap: var(--dds-space-2); align-items: flex-start; }
 .ov__person-name { font-weight: var(--dds-font-weight-medium); font-size: var(--dds-font-size-md); }
@@ -345,4 +345,69 @@
   .ov__fingrid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Seotud isikud page */
+.ov__crumblink {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.ov__crumblink:hover {
+  text-decoration: underline;
+}
+.ov__partiesh1 {
+  margin: 0;
+  font-size: var(--dds-font-size-2xl);
+  font-weight: var(--dds-font-weight-regular);
+}
+.ov__partiescard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-6);
+}
+.pgroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-3);
+}
+.pgroup__head {
+  margin: 0 0 var(--dds-space-1);
+  font-size: var(--dds-font-size-xl);
+  font-weight: var(--dds-font-weight-regular);
+  color: var(--dds-color-ink-strong);
+}
+.prow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dds-space-4);
+  padding: var(--dds-space-4) var(--dds-space-5);
+  border-radius: var(--dds-radius-card);
+  background: var(--dds-color-surface-alt);
+}
+.prow--owner {
+  background: var(--dds-color-registry-highlight);
+}
+.prow__id {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dds-space-1);
+}
+.prow__name {
+  font-size: var(--dds-font-size-md);
+  font-weight: var(--dds-font-weight-medium);
+  color: var(--dds-color-ink-strong);
+}
+.prow__sub {
+  font-size: var(--dds-font-size-sm);
+  color: var(--dds-color-ink-muted);
+}
+.prow__pct {
+  font-size: var(--dds-font-size-2xl);
+  font-weight: var(--dds-font-weight-regular);
+  color: var(--dds-color-ink-strong);
 }

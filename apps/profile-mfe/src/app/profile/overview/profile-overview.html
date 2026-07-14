@@ -1,5 +1,31 @@
 @let p = profile();
 
+@if (partiesOpen()) {
+  <div class="ov ov--parties">
+    <nav class="ov__crumb">
+      Peamine /
+      <button type="button" class="ov__crumblink" (click)="partiesOpen.set(false)">Ettevõtte profiil</button>
+      / Seotud isikud
+    </nav>
+    <h1 class="ov__partiesh1">Seotud isikud</h1>
+    <div class="card ov__partiescard">
+      @for (grp of partiesByRole(); track grp.role) {
+        <section class="pgroup">
+          <h2 class="pgroup__head">{{ grp.heading }}</h2>
+          @for (r of grp.rows; track $index) {
+            <div class="prow" [class.prow--owner]="grp.isOwner">
+              <div class="prow__id">
+                <span class="prow__name">{{ r.displayName }}</span>
+                <span class="prow__sub">{{ r.subtypeLabel }}</span>
+              </div>
+              @if (r.pct) { <span class="prow__pct">{{ r.pct }}</span> }
+            </div>
+          }
+        </section>
+      }
+    </div>
+  </div>
+} @else {
 <div class="ov">
   <nav class="ov__crumb">Peamine / Ettevõtte profiil</nav>
 
@@ -196,37 +222,4 @@
   </div>
 
 </div>
-
-<!-- Seotud isikud modal -->
-@if (partiesOpen()) {
-  <div class="ov__overlay" (click)="partiesOpen.set(false)">
-    <div class="ov__modal" role="dialog" aria-modal="true" aria-label="Seotud isikud" (click)="$event.stopPropagation()">
-      <div class="ov__modal-head">
-        <h2>Seotud isikud</h2>
-        <button type="button" class="ov__link" aria-label="Sulge" (click)="partiesOpen.set(false)">✕</button>
-      </div>
-      <div class="ov__notice ov__notice--info">
-        🔒 Äriregistrist — osanikud, juhatus, kasusaajad. Neid ei muudeta iseteeninduses.
-      </div>
-      <ul class="ov__party-list">
-        @for (g of partyGroups(); track g.displayName) {
-          <li>
-            <div class="ov__party-top">
-              <span class="ov__party-name">{{ g.displayName }}</span>
-              <span class="ov__muted">
-                {{ isNatural(g.partyType) ? 'isikukood' : 'reg' }} {{ g.registryCode }}
-              </span>
-            </div>
-            <div class="mcard__pills">
-              @for (role of g.roles; track role) { <span class="ov__pill">{{ role }}</span> }
-            </div>
-          </li>
-        }
-      </ul>
-      <p class="ov__nb">
-        NB (kontseptsioon): isikukood on isikuandmed — päris süsteemis nõuab kuvamine õiguslikku
-        alust; proovitöös testandmed.
-      </p>
-    </div>
-  </div>
 }

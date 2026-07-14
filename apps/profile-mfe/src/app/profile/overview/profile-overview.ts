@@ -11,6 +11,22 @@ interface PartyGroup {
   roles: string[];
 }
 
+interface PartyRoleGroup {
+  role: string;
+  heading: string;
+  isOwner: boolean;
+  rows: { displayName: string; subtypeLabel: string; pct: string | null }[];
+}
+
+/** Section headings per register role (plural per Figma "Seotud isikud" page). */
+const ROLE_HEADINGS: Record<string, string> = {
+  Osanik: 'Osanikud',
+  Kasusaaja: 'Kasusaajad',
+  'Juhatuse liige': 'Juhatuse liige',
+  Asutaja: 'Asutajad',
+  'Osade registripidaja': 'Osade registripidaja',
+};
+
 /** Profile overview per the v22 flows: locked registry sections, per-section editing. */
 @Component({
   selector: 'app-profile-overview',
@@ -98,6 +114,35 @@ export class ProfileOverview {
     }
     return [...groups.values()];
   });
+
+  /** Related parties grouped by role for the "Seotud isikud" page (Osanik shows ownership %). */
+  protected readonly partiesByRole = computed<PartyRoleGroup[]>(() => {
+    const order: string[] = [];
+    const map = new Map<string, PartyRoleGroup>();
+    for (const rp of this.profile().relatedParties) {
+      let g = map.get(rp.role);
+      if (!g) {
+        g = {
+          role: rp.role,
+          heading: ROLE_HEADINGS[rp.role] ?? rp.role,
+          isOwner: rp.role === 'Osanik',
+          rows: [],
+        };
+        map.set(rp.role, g);
+        order.push(rp.role);
+      }
+      g.rows.push({
+        displayName: rp.displayName,
+        subtypeLabel: `${this.partyTypeLabel(rp.partyType)}: ${rp.registryCode}`,
+        pct: g.isOwner && rp.ownershipPct != null ? `${this.pct(rp.ownershipPct)}%` : null,
+      });
+    }
+    return order.map((r) => map.get(r)!);
+  });
+
+  protected partyTypeLabel(partyType: string | null): string {
+    return this.isNatural(partyType) ? 'Füüsiline isik' : 'Juriidiline isik';
+  }
 
   protected readonly naturalCount = computed(
     () => this.partyGroups().filter((g) => this.isNatural(g.partyType)).length,
