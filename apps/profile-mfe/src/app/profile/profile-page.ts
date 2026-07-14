@@ -21,7 +21,6 @@ export class ProfilePage {
   protected readonly store = inject(ProfileStore);
 
   protected readonly editing = signal(false);
-  /** Non-null when editing an existing profile via the stepper (holds the initial step). */
   protected readonly editStep = signal<number | null>(null);
   private readonly pendingCreate = signal(false);
   /** Set from ?create=1 (e.g. the "Koosta profiil" link on Minu teenused) → open the form directly. */
@@ -38,7 +37,6 @@ export class ProfilePage {
       )
       .subscribe(() => this.applyFromUrl());
 
-    // Leave the create flow once the profile has been created.
     effect(() => {
       if (this.store.status() === 'loaded' && untracked(() => this.pendingCreate())) {
         this.pendingCreate.set(false);
@@ -54,7 +52,6 @@ export class ProfilePage {
       }
     });
 
-    // Auto-dismiss the save toast.
     effect((onCleanup) => {
       if (this.store.toast()) {
         const t = setTimeout(() => this.store.clearToast(), 3500);

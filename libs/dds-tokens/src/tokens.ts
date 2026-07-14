@@ -18,7 +18,6 @@ export const ddsColors = {
   error: '#C0392B',
 } as const;
 
-/** Ordered palette for multi-series financial charts (Finantsnäitajad). */
 export const ddsChartPalette = ['#0030DE', '#0062F5', '#5B8DEF', '#9DBDF0', '#002D72'] as const;
 
 export const ddsSpace = {

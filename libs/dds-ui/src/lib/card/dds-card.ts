@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-/** Generic surface card used across the profile blocks (Muud andmed, Finantsnäitajad). */
 @Component({
   selector: 'dds-card',
   changeDetection: ChangeDetectionStrategy.OnPush,

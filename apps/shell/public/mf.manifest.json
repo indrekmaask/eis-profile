@@ -1,3 +1,4 @@
 {
-  "profileMfe": "http://localhost:4201/remoteEntry.js"
+  "profileMfe": "http://localhost:4201/remoteEntry.js",
+  "preadvisoryMfe": "http://localhost:4202/remoteEntry.js"
 }

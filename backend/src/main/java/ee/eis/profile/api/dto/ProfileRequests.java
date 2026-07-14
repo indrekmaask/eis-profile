@@ -2,7 +2,6 @@ package ee.eis.profile.api.dto;
 
 import java.util.List;
 
-/** Request bodies for creating and updating a profile (used by the create flow and the edit stepper). */
 public final class ProfileRequests {
 
     private ProfileRequests() {}

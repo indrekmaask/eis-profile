@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
-/** "Profiili täituvus" progress indicator with a continue action. */
 @Component({
   selector: 'dds-completeness',
   changeDetection: ChangeDetectionStrategy.OnPush,

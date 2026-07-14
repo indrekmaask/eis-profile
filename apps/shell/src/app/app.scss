@@ -12,7 +12,6 @@
   gap: var(--dds-space-3);
 }
 
-/* ---- Top bar ---- */
 .topbar {
   display: flex;
   align-items: center;
@@ -75,6 +74,7 @@
 }
 .topbar__dropdown {
   position: absolute; right: 0; top: calc(100% + 8px); z-index: 30;
+  min-width: 180px;
   background: var(--dds-color-surface); border-radius: var(--dds-radius-control);
   box-shadow: var(--dds-shadow-card); border: 1px solid var(--dds-color-border);
   padding: var(--dds-space-2);
@@ -84,12 +84,17 @@
 }
 .topbar__dropdown button {
   background: none; border: none; cursor: pointer; font: inherit;
-  color: var(--dds-color-primary); padding: var(--dds-space-2) var(--dds-space-4);
+  color: var(--dds-color-ink-strong);
+  font-size: var(--dds-font-size-md);
+  padding: var(--dds-space-2) var(--dds-space-3);
+  border-radius: var(--dds-radius-control);
   white-space: nowrap;
   text-align: left;
 }
+.topbar__dropdown button:hover {
+  background: var(--dds-color-surface-alt);
+}
 
-/* ---- Body: sidebar + main ---- */
 .portal__body {
   display: grid;
   grid-template-columns: 260px 1fr;
@@ -165,7 +170,6 @@
   padding-top: var(--dds-space-3);
 }
 
-/* ---- Main + footer ---- */
 .portal__main {
   display: flex;
   flex-direction: column;

@@ -14,7 +14,6 @@ const DEMO_REGISTRY_CODES: Record<string, string[]> = {
   '48505150220': ['16789012', '16890123'],
 };
 
-/** "Vali roll": lists companies the logged-in person may act for (via profile_access). */
 @Component({
   selector: 'app-role-select',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -157,7 +156,6 @@ export class RoleSelect {
       .subscribe((list) => this.resolveDemoCompanies(list));
   }
 
-  /** Registry-only demo companies: fetch their data from the register (mock API). */
   private resolveDemoCompanies(list: AccessEntry[]): void {
     const missing = (DEMO_REGISTRY_CODES[this.identity.personCode()] ?? []).filter(
       (code) => !list.some((e) => e.registryCode === code),

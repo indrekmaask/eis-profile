@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
-/** Register client backed by the mock API over HTTP. */
 @Component
 public class RestRegistryClient implements RegistryClient {
 

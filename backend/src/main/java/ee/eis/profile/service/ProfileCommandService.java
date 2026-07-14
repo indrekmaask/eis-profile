@@ -35,7 +35,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-/** Write side: create, edit-step updates, and register refresh. */
 @Service
 @Transactional
 public class ProfileCommandService {
@@ -196,7 +195,6 @@ public class ProfileCommandService {
                 .map(d -> new ProfileView.Discrepancy(d.field(), d.storedValue(), d.registryValue()))
                 .toList();
 
-        // Merge register-owned scalars honouring USER ownership.
         var bn = resolver.mergeRegistry(profile.getBusinessName(), profile.getBusinessNameSource(), fresh.businessName());
         profile.setBusinessName(bn.value());
         profile.setBusinessNameSource(bn.source());
@@ -228,8 +226,6 @@ public class ProfileCommandService {
         writeSnapshot(id, registryCode, fresh);
         return queryService.assemble(profiles.findById(id).orElseThrow(), discrepancies);
     }
-
-    // --- helpers ---
 
     private void writeSnapshot(UUID profileId, String registryCode, CompanyResponse company) {
         try {

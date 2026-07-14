@@ -4,8 +4,6 @@ export interface DdsStep {
   label: string;
 }
 
-/** Horizontal numbered stepper for the 4-step profile edit flow. */
-/** Horizontal numbered stepper — Figma pattern: label above a numbered circle, thin connector line through the circles. */
 @Component({
   selector: 'dds-stepper',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,7 +44,6 @@ export interface DdsStep {
         flex: 1;
         position: relative;
       }
-      /* connector line at circle mid-height */
       .dds-stepper__item::before,
       .dds-stepper__item::after {
         content: '';

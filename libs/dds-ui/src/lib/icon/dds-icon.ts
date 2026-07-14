@@ -18,7 +18,6 @@ export type DdsIconName =
   | 'briefcase'
   | 'lock';
 
-/** Lucide-style line icon set (matches the DDS2/Figma icon family). */
 @Component({
   selector: 'dds-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,

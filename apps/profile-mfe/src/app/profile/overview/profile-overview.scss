@@ -87,7 +87,7 @@
 .ov__pair dt { font-weight: var(--dds-font-weight-bold); color: var(--dds-color-ink-strong); }
 .ov__pair dd { margin: 0; }
 .ov__prov {
-  border-bottom: 2px solid #d8e1ee;   /* provenance underline like Figma */
+  border-bottom: 2px solid #d8e1ee;
   padding-bottom: var(--dds-space-2);
 }
 .ov__contactpanel {
@@ -115,7 +115,6 @@
   .ov__general, .ov__contactpanel { border-radius: var(--dds-radius-card); }
 }
 
-/* ---- Sections ---- */
 .ov__src-inline {
   color: var(--dds-color-ink-subtle);
   font-size: var(--dds-font-size-xs);
@@ -140,7 +139,6 @@
   font-weight: var(--dds-font-weight-bold);
   color: var(--dds-color-primary);
 }
-/* ---- Kontaktisikud ---- */
 .ov__block { display: flex; flex-direction: column; gap: var(--dds-space-4); }
 .ov__blockhead { display: flex; align-items: center; justify-content: space-between; }
 .ov__lock {
@@ -149,7 +147,7 @@
   height: 22px;
   vertical-align: -3px;
   margin-left: var(--dds-space-2);
-  color: #7c8ca1; // Figma lock stroke tone
+  color: #7c8ca1;
 }
 .ov__refreshbar {
   display: flex;
@@ -187,7 +185,6 @@
   font-size: var(--dds-font-size-xs);
   white-space: nowrap;
 }
-/* ---- Muud andmed ---- */
 .ov__cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -248,7 +245,6 @@
   color: var(--dds-color-ink-strong);
 }
 
-/* ---- Finantsnäitajad ---- */
 .ov__fingrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -267,7 +263,6 @@
 .hbars__bar { display: block; height: 100%; border-radius: 4px; background: var(--dds-color-primary); }
 .hbars__label { font-weight: var(--dds-font-weight-bold); white-space: nowrap; text-align: right; }
 
-/* ---- Seotud isikud modal ---- */
 .ov__overlay {
   position: fixed;
   inset: 0;
@@ -347,7 +342,6 @@
   }
 }
 
-/* Seotud isikud page */
 .ov__crumblink {
   background: none;
   border: none;

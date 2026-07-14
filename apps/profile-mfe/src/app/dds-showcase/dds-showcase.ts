@@ -17,7 +17,6 @@ import {
   DdsTagInput,
 } from '@dds/ui';
 
-/** Phase 3 component gallery — validates DDS2 tokens + components render per Figma. */
 @Component({
   selector: 'app-dds-showcase',
   changeDetection: ChangeDetectionStrategy.OnPush,

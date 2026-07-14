@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
-/**
- * Provenance line for register-owned data:
- * "Andmed pärinevad registritest (seisuga <date>). Värskenda andmeid".
- */
 @Component({
   selector: 'dds-registry-provenance',
   changeDetection: ChangeDetectionStrategy.OnPush,

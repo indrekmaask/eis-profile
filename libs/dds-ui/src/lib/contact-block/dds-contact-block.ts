@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-/** Highlighted contact block (#CEE2FD) — the "Kontaktandmed" section fill. */
 @Component({
   selector: 'dds-contact-block',
   changeDetection: ChangeDetectionStrategy.OnPush,

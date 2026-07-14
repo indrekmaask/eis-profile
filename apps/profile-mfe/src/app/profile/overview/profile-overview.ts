@@ -18,7 +18,6 @@ interface PartyRoleGroup {
   rows: { displayName: string; subtypeLabel: string; pct: string | null }[];
 }
 
-/** Section headings per register role (plural per Figma "Seotud isikud" page). */
 const ROLE_HEADINGS: Record<string, string> = {
   Osanik: 'Osanikud',
   Kasusaaja: 'Kasusaajad',
@@ -27,7 +26,6 @@ const ROLE_HEADINGS: Record<string, string> = {
   'Osade registripidaja': 'Osade registripidaja',
 };
 
-/** Profile overview per the v22 flows: locked registry sections, per-section editing. */
 @Component({
   selector: 'app-profile-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,7 +47,6 @@ export class ProfileOverview {
 
   protected readonly asOf = computed(() => formatEstonianDate(this.profile().dataAsOfDate));
 
-  /** dd.MM.yyyy HH:mm for the register provenance bar (Figma shows date + time). */
   protected readonly asOfDateTime = computed(() => {
     const iso = this.profile().dataAsOfDate;
     if (!iso) {
@@ -98,7 +95,6 @@ export class ProfileOverview {
       .join(', ');
   }
 
-  /** Related parties grouped per person/company, roles as pills (PDF modal + card). */
   protected readonly partyGroups = computed<PartyGroup[]>(() => {
     const groups = new Map<string, PartyGroup>();
     for (const rp of this.profile().relatedParties) {
@@ -115,7 +111,6 @@ export class ProfileOverview {
     return [...groups.values()];
   });
 
-  /** Related parties grouped by role for the "Seotud isikud" page (Osanik shows ownership %). */
   protected readonly partiesByRole = computed<PartyRoleGroup[]>(() => {
     const order: string[] = [];
     const map = new Map<string, PartyRoleGroup>();
@@ -174,7 +169,6 @@ export class ProfileOverview {
     }));
   }
 
-  /** Revenue growth (totals) between the last two years; null with fewer than 2 reports. */
   protected readonly growth = computed(() => {
     const rows = this.profile()
       .annualReports.slice()
@@ -196,8 +190,6 @@ export class ProfileOverview {
     }
     return `${g >= 0 ? '+' : '−'}${Math.abs(g).toFixed(1)}%`;
   });
-
-  // --- helpers ------------------------------------------------------------
 
   protected isNatural(partyType: string | null): boolean {
     return partyType === 'NATURAL' || partyType === 'Füüsiline isik';

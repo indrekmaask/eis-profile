@@ -10,11 +10,9 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-/** Maps a register response into profile fields and register-owned child entities (source REGISTRY). */
 @Component
 public class RegistryMapper {
 
-    /** Applies register-owned base fields onto a profile, tagging each with source REGISTRY. */
     public void applyRegistryFields(CustomerProfile profile, CompanyResponse c) {
         profile.setRegistryCode(c.registryCode());
         profile.setBusinessName(c.businessName());

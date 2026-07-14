@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-/** Scenario-2 support: fetch register data to pre-fill a new profile. */
 @Service
 public class ProfileLookupService {
 

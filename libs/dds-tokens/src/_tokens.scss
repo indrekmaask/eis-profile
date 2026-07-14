@@ -3,27 +3,22 @@
 // them at runtime without importing SCSS. JS/TS mirror: tokens.ts.
 
 :root {
-  // --- Brand / primary ---
   --dds-color-primary: #0030de;
   --dds-color-primary-strong: #0062f5;
   --dds-color-primary-contrast: #ffffff;
 
-  // --- Registry provenance (read-only, register-owned) ---
-  --dds-color-registry-highlight: #cee2fd; // contact/registry block fill
-  --dds-color-registry-accent: #002d72; // left border + label tint
+  --dds-color-registry-highlight: #cee2fd;
+  --dds-color-registry-accent: #002d72;
   --dds-color-registry-border: #9dbdf0;
 
-  // --- Ink / text ---
   --dds-color-ink-strong: #0e172a;
   --dds-color-ink-muted: #3d4b5e;
   --dds-color-ink-subtle: #575a5d;
 
-  // --- Surface / structure ---
   --dds-color-border: #e5e5e5;
   --dds-color-surface: #ffffff;
   --dds-color-surface-alt: #f1f5f9;
 
-  // --- Feedback / states ---
   --dds-color-success: #0f8a4f;
   --dds-color-success-bg: #e6f4ec;
   --dds-color-warning: #b45309;
@@ -31,12 +26,10 @@
   --dds-color-error: #c0392b;
   --dds-color-error-bg: #fdecea;
 
-  // --- Radii ---
   --dds-radius-control: 8px;
   --dds-radius-card: 16px;
   --dds-radius-pill: 9999px;
 
-  // --- Spacing (8px grid) ---
   --dds-space-1: 4px;
   --dds-space-2: 8px;
   --dds-space-3: 12px;
@@ -45,11 +38,9 @@
   --dds-space-6: 32px;
   --dds-space-7: 48px;
 
-  // --- Layout widths ---
   --dds-width-form: 640px;
   --dds-width-block: 920px;
 
-  // --- Typography ---
   --dds-font-family: 'Aino', 'Geist', 'Helvetica Neue', 'Arial', system-ui, sans-serif;
   --dds-font-weight-regular: 400;
   --dds-font-weight-medium: 500;
@@ -65,7 +56,6 @@
   --dds-line-height-tight: 1.2;
   --dds-line-height-normal: 1.5;
 
-  // --- Elevation ---
   --dds-shadow-card: 0 1px 2px rgba(14, 23, 42, 0.06), 0 1px 8px rgba(14, 23, 42, 0.04);
   --dds-focus-ring: 0 0 0 3px rgba(0, 98, 245, 0.35);
 }

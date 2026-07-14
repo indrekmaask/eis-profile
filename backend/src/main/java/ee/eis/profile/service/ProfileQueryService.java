@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-/** Read side: assembles the profile overview and the "Vali roll" access list. */
 @Service
 @Transactional(readOnly = true)
 public class ProfileQueryService {

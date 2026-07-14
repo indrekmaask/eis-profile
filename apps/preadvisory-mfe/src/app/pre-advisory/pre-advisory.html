@@ -9,7 +9,7 @@
       </p>
       <button dds-button variant="primary" (click)="toDashboard()">Tagasi töölauale</button>
     </div>
-  } @else if (!identity.activeCompany()) {
+  } @else if (!registryCode()) {
     <dds-card heading="Vali esmalt ettevõte">
       <button dds-button variant="primary" size="sm" (click)="toRoles()">Vali roll</button>
     </dds-card>

@@ -21,7 +21,6 @@ export interface ServiceDef {
   configured: boolean;
   eligibility: Eligibility;
   intro: string;
-  /** Title/description overrides for the "Minu teenused" list card (Figma copy). */
   listTitle?: string;
   listIntro?: string;
   booking: boolean;
@@ -110,7 +109,6 @@ export const SERVICES: ServiceDef[] = [
     listTitle: 'Ettevõtte arenguprogrammi eelnõustamine',
     listIntro:
       'Arenguprogramm on mitmeetapiline teekond (eelnõustamine → olukorra kaardistamine → arenguplaani ettevalmistamine → elluviimine → tulemuste hindamine). Kohustuslik esimene samm on eelnõustamine, kus sulle määratakse kliendihaldur.',
-    // Automatic pre-check computed from real data (Figma frame 251:10793 shows four criteria).
     rules: (p) => {
       const years = p.annualReports.length;
       const exp = latest(p).exportRevenue;
@@ -158,7 +156,6 @@ export function verdict(rows: RuleRow[]): Verdict {
   return { txt: 'Eelhinnang: sobid. Lõpliku otsuse teeb menetleja', kind: 'ok' };
 }
 
-/** List-level verdict for a service against a profile. */
 export function evaluate(p: ProfileView, s: ServiceDef): Verdict {
   if (s.eligibility === 'OPEN') {
     return { txt: 'Avatud kõigile — eeltingimusi ei kontrollita', kind: 'open' };

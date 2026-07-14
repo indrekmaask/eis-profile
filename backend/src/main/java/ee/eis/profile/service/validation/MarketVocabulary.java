@@ -16,7 +16,6 @@ public class MarketVocabulary {
 
     private static final Set<String> COUNTRIES = Set.of(Locale.getISOCountries());
 
-    /** Predefined operating regions (extend as needed). */
     public static final Set<String> OPERATING_REGIONS = Set.of(
             "TALLINN", "TARTU", "PARNU", "NARVA", "VILJANDI",
             "RIGA", "VILNIUS", "HELSINKI", "STOCKHOLM");

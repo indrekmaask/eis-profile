@@ -6,11 +6,6 @@ import { ProfileApiService, ProfileView } from '@eis/profile-api';
 import { IdentityService } from '../identity/identity.service';
 import { SERVICES, evaluate } from './services.data';
 
-/**
- * "Minu teenused" — available services computed from the company's profile,
- * laid out per the Figma frame: available-services cards + active-applications
- * empty state.
- */
 @Component({
   selector: 'app-services-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -221,7 +216,6 @@ export class ServicesList {
   protected readonly profileMissing = signal(false);
   private readonly profile = signal<ProfileView | null>(null);
 
-  /** No active company or no profile yet → centered empty card (matches the profile page). */
   protected readonly showEmpty = computed(
     () => !this.identity.activeCompany() || this.profileMissing(),
   );

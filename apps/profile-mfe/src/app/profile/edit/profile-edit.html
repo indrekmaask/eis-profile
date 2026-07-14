@@ -21,7 +21,6 @@
 
   <form class="edit__form" [formGroup]="form">
     @switch (activeStep()) {
-      <!-- Step 1: Üldandmed -->
       @case (0) {
         @if (editMode) {
           <section class="edit__step card">
@@ -118,7 +117,6 @@
         }
       }
 
-      <!-- Step 2: Kontaktisikud -->
       @case (1) {
         <section class="edit__step card">
           <h2>Kontaktisikud</h2>
@@ -178,7 +176,6 @@
         </section>
       }
 
-      <!-- Step 3: Muu -->
       @case (2) {
         <section class="edit__step card">
           <h2>Muu info</h2>

@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-/**
- * Static SVG radar/spider chart for the maturity-diagnostics demo screens
- * (Töölaud + Küpsusdiagnostika results). Values are 0..1 per axis.
- */
 @Component({
   selector: 'app-radar-chart',
   changeDetection: ChangeDetectionStrategy.OnPush,

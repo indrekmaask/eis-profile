@@ -3,7 +3,6 @@ package ee.eis.profile.integration;
 import ee.eis.profile.integration.dto.CompanyResponse;
 import java.util.Optional;
 
-/** Reads company data from the Estonian Business Register (mock API / RIK simulation). */
 public interface RegistryClient {
 
     /**

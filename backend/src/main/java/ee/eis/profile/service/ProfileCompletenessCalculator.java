@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProfileCompletenessCalculator {
 
-    /** Presence of each checklist item. */
     public record Input(
             boolean primaryContactEmail,
             boolean primaryContactPhone,

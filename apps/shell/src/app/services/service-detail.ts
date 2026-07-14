@@ -62,7 +62,7 @@ interface Field {
                     Kogu teekonda ja tingimusi vaata
                     <a class="card--booking__link" href="https://eis.ee" target="_blank" rel="noopener">eis.ee arenguprogrammi lehelt</a>
                   </p>
-                  <a dds-button variant="primary" routerLink="/programme" class="card--booking__cta">Broneeri nõustamine →</a>
+                  <a dds-button variant="primary" routerLink="/programme" [queryParams]="profileParams()" class="card--booking__cta">Broneeri nõustamine →</a>
                 </div>
               } @else {
                 <div class="zone">
@@ -223,7 +223,6 @@ interface Field {
         gap: var(--dds-space-4);
         align-items: start;
       }
-      /* Booking view: white content + blue precheck as one flush split card (Figma). */
       .sd__cols--split {
         gap: 0;
         align-items: stretch;
@@ -381,7 +380,6 @@ interface Field {
         background: var(--dds-color-registry-highlight);
         color: var(--dds-color-registry-accent);
       }
-      /* eligibility panel */
       .qual {
         background: var(--dds-color-registry-highlight);
         border-radius: var(--dds-radius-card);
@@ -465,7 +463,6 @@ interface Field {
         margin: 0;
         font-size: var(--dds-font-size-xl);
       }
-      /* review overlay */
       .overlay {
         position: fixed;
         inset: 0;

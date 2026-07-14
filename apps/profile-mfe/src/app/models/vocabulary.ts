@@ -33,12 +33,10 @@ export const OPERATING_REGIONS: DdsOption[] = [
   { value: 'STOCKHOLM', label: 'Stockholm' },
 ];
 
-/** Human label for a market/region code, falling back to the code itself. */
 export function labelFor(options: DdsOption[], code: string): string {
   return options.find((o) => o.value === code)?.label ?? code;
 }
 
-/** Formats a register ISO date/timestamp as dd.MM.yyyy (et-EE); returns null on bad input. */
 export function formatEstonianDate(iso: string | null | undefined): string | null {
   if (!iso) {
     return null;

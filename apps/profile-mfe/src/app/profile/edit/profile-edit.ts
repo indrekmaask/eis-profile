@@ -53,7 +53,6 @@ interface PartySuggestion {
   roles: string;
 }
 
-/** Splits a full name into first (everything but the last token) and last name. */
 export function splitName(full: string): { first: string; last: string } {
   const parts = full.trim().split(/\s+/);
   if (parts.length === 1) return { first: parts[0], last: '' };
@@ -63,11 +62,6 @@ export function joinName(first: string, last: string): string {
   return [first.trim(), last.trim()].filter(Boolean).join(' ');
 }
 
-/**
- * "Profiili loomine" / "Profiili muutmine" — the 3-step wizard (v22 flows).
- * `mode` toggles between creating a new profile (POST) and editing an existing
- * one (sequential PATCH per step).
- */
 @Component({
   selector: 'app-profile-edit',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -117,8 +111,6 @@ export class ProfileEdit {
   private populated = false;
 
   constructor() {
-    // Edit mode: prefill the form from the loaded profile once it arrives, then
-    // jump to the step the overview asked to edit.
     effect(() => {
       const p = this.profile();
       if (this.mode() === 'edit' && p && !this.populated) {
@@ -135,7 +127,6 @@ export class ProfileEdit {
     ),
   );
 
-  /** Tegevusala label for create (prefill-based). */
   protected readonly emtak = computed(() => {
     const pf = this.prefill();
     if (!pf) {
@@ -144,7 +135,6 @@ export class ProfileEdit {
     return pf.emtakName ? `${pf.emtakCode} — ${pf.emtakName}` : pf.emtakCode;
   });
 
-  /** Tegevusala label for edit (profile-based). */
   protected readonly profileEmtak = computed(() => {
     const p = this.profile();
     if (!p) {
@@ -157,7 +147,6 @@ export class ProfileEdit {
     () => this.profile()?.addresses.find((a) => a.addressType === 'LEGAL')?.fullAddress ?? null,
   );
 
-  /** Natural persons from the register, offered as one-click contact suggestions. */
   protected readonly partySuggestions = computed<PartySuggestion[]>(() => {
     const parties =
       this.mode() === 'edit'
@@ -180,7 +169,6 @@ export class ProfileEdit {
         });
       }
     }
-    // Hide people already added as contacts.
     const used = new Set(this.contactValues().map((c) => c.personCode));
     return [...groups.values()].filter((s) => !used.has(s.personCode));
   });
@@ -192,7 +180,6 @@ export class ProfileEdit {
     return this.form.controls.bankAccounts;
   }
 
-  /** The primary contact group (step 1 edits its email/phone directly). */
   protected primaryContact(): ContactGroup | null {
     this.contactsVersion();
     const arr = this.contacts.controls;
@@ -313,7 +300,6 @@ export class ProfileEdit {
     this.contactsVersion.update((v) => v + 1);
   }
 
-  /** Dropdown "Lisa kontaktisik": a register person or "+ Lisage uus isik". */
   protected onAddSelect(event: Event): void {
     const sel = event.target as HTMLSelectElement;
     const v = sel.value;
@@ -388,7 +374,6 @@ export class ProfileEdit {
     this.createProfile.emit(request);
   }
 
-  /** Edit mode: PATCH each step sequentially, then let ProfilePage reload. */
   protected onSave(): void {
     if (!this.contactsValid()) {
       this.go(1);

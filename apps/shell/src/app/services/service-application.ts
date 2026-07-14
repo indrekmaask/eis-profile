@@ -4,10 +4,6 @@ import { DdsBadge, DdsButton, DdsCard, DdsRegistryField } from '@dds/ui';
 import { ProfileApiService, ProfileView } from '@eis/profile-api';
 import { IdentityService } from '../identity/identity.service';
 
-/**
- * Once-only reuse (P5-3): a service application pre-filled entirely from the saved
- * profile. The applicant re-enters nothing — every field is "Eeltäidetud profiilist".
- */
 @Component({
   selector: 'app-service-application',
   changeDetection: ChangeDetectionStrategy.OnPush,

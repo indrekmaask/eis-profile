@@ -41,7 +41,6 @@ public class ProfileController {
         return queryService.getProfile(registryCode);
     }
 
-    /** Scenario 2: register data to pre-fill a new profile. */
     @GetMapping("/profiles/{registryCode}/prefill")
     public PrefillView prefill(@PathVariable String registryCode) {
         return lookupService.prefill(registryCode);

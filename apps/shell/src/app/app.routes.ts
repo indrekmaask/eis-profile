@@ -3,7 +3,6 @@ import { loadRemoteModule } from '@angular-architects/module-federation';
 import { Login } from './identity/login';
 import { RoleSelect } from './identity/role-select';
 import { ServiceApplication } from './services/service-application';
-import { PreAdvisory } from './services/pre-advisory';
 import { ServicesList } from './services/services-list';
 import { ServiceDetail } from './services/service-detail';
 import { Dashboard } from './dashboard/dashboard';
@@ -24,5 +23,13 @@ export const routes: Routes = [
   { path: 'services', component: ServicesList },
   { path: 'services/:id', component: ServiceDetail },
   { path: 'service', component: ServiceApplication },
-  { path: 'programme', component: PreAdvisory },
+  {
+    path: 'programme',
+    loadComponent: () =>
+      loadRemoteModule({
+        type: 'manifest',
+        remoteName: 'preadvisoryMfe',
+        exposedModule: './Component',
+      }).then((m) => m.App),
+  },
 ];
