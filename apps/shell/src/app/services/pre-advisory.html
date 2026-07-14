@@ -1,6 +1,5 @@
 <div class="adv">
   @if (done()) {
-    <a class="adv__back" routerLink="/services/dev">‹ tagasi teenuse juurde</a>
     <div class="adv__done card">
       <span class="adv__done-icon" aria-hidden="true">✓</span>
       <h2>Eelnõustamisele registreerutud!</h2>
@@ -15,153 +14,63 @@
       <button dds-button variant="primary" size="sm" (click)="toRoles()">Vali roll</button>
     </dds-card>
   } @else if (profile(); as p) {
-    <a class="adv__back" routerLink="/services/dev">‹ tagasi teenuse juurde</a>
-    <h1>Registreeru eelnõustamisele</h1>
+    <nav class="adv__crumb">Peamine / Minu teenused / Registreeru nõustamisele</nav>
+    <h1>Ettevõtte arenguprogrammi eelnõustamine</h1>
     <p class="adv__lead">
-      Ettevõtte arenguprogramm · kohustuslik esimene samm. Kliendihaldur võtab sinuga ühendust
-      ja lepib kokku eelnõustamise (2 h) aja. Taotlus esitatakse hiljem, arenguplaani valmides.
+      Arenguprogramm on mitmeetapiline teekond (eelnõustamine → olukorra kaardistamine →
+      arenguplaani ettevalmistamine → elluviimine → tulemuste hindamine). Kohustuslik esimene
+      samm on eelnõustamine, kus sulle määratakse kliendihaldur.
     </p>
 
-    <!-- Ettevõte -->
-    <section class="card">
-      <div class="card__head">
+    <div class="card">
+      <section>
         <h3>Ettevõte</h3>
-        <span class="adv__src">🔒 profiilist · registriväljad lukus</span>
-      </div>
-      <div class="adv__row"><span class="adv__k">Ettevõtte nimi *</span><span>{{ p.businessName.value }}</span></div>
-      <div class="adv__row"><span class="adv__k">Registrikood *</span><span>{{ p.registryCode }}</span></div>
-      <div class="adv__row adv__row--input">
-        <span class="adv__k">Kodulehe aadress *</span>
-        <input class="adv__input" [formControl]="website" [class.adv__input--error]="invalid(website)" />
-      </div>
-    </section>
+        <div class="adv__row"><span class="adv__k">Ettevõtte nimi</span><span class="adv__v">{{ p.businessName.value }}</span></div>
+        <div class="adv__row"><span class="adv__k">Registreerimiskood</span><span class="adv__v">{{ p.registryCode }}</span></div>
+        <div class="adv__row"><span class="adv__k">Kodulehe aadress</span><span class="adv__v">{{ p.website.value || '—' }}</span></div>
+      </section>
 
-    <!-- Kontaktisik -->
-    <section class="card">
-      <div class="card__head">
+      <section>
         <h3>Kontaktisik</h3>
-        <span class="adv__src">profiilist · saad muuta</span>
-      </div>
-      <p class="adv__picker-label">
-        <strong>Kes osaleb nõustamisel?</strong> Vali profiilist — peamine on ette valitud.
-      </p>
-      <div class="adv__chips">
-        @for (c of p.contacts; track c.id) {
-          <button
-            type="button"
-            class="adv__chip"
-            [class.adv__chip--active]="selectedKey() === c.id"
-            (click)="pick(c.id)"
+        <label class="adv__label" for="participant">Nõustamisel osaleja *</label>
+        <div class="adv__selectwrap">
+          <select
+            id="participant"
+            class="adv__select"
+            [formControl]="participant"
+            [class.adv__select--error]="submitAttempted() && !participant.value"
           >
-            <span class="adv__chip-name">{{ c.fullName }}</span>
-            <span class="adv__chip-sub">{{ c.role }}@if (c.primary) { · peamine}</span>
-          </button>
-        }
-        <button
-          type="button"
-          class="adv__chip"
-          [class.adv__chip--active]="selectedKey() === 'new'"
-          (click)="pick('new')"
-        >
-          <span class="adv__chip-name">+ Keegi teine</span>
-          <span class="adv__chip-sub">sisesta käsitsi</span>
-        </button>
-      </div>
-
-      @if (selectedContact(); as c) {
-        <div class="adv__row">
-          <span class="adv__k">Kontaktisik *</span>
-          <span>{{ c.fullName }} <span class="adv__from">🔒 profiilist</span></span>
-        </div>
-        @if (birthDate(); as b) {
-          <div class="adv__row">
-            <span class="adv__k">Sünnikuupäev</span>
-            <span>{{ b }} <span class="adv__from">🔒 isikukoodist</span></span>
-          </div>
-        }
-      } @else {
-        <div class="adv__row adv__row--input">
-          <span class="adv__k">Kontaktisik *</span>
-          <input class="adv__input" [formControl]="newName" [class.adv__input--error]="invalid(newName)" />
-        </div>
-      }
-      <div class="adv__row adv__row--input">
-        <span class="adv__k">E-post *</span>
-        <input class="adv__input" type="email" [formControl]="email" [class.adv__input--error]="invalid(email)" />
-      </div>
-      <div class="adv__row adv__row--input">
-        <span class="adv__k">Telefon *</span>
-        <input class="adv__input" type="tel" placeholder="+372 …" [formControl]="phone" [class.adv__input--error]="invalid(phone)" />
-      </div>
-    </section>
-
-    <!-- Arenguprogrammi taust -->
-    <section class="card">
-      <div class="card__head">
-        <h3>Arenguprogrammi taust</h3>
-        <span class="adv__src">profiilist · saad muuta</span>
-      </div>
-      <div class="adv__row">
-        <span class="adv__k">Viimase majandusaasta ekspordikäive (EUR) *</span>
-        <span>{{ exportLabel() }} <span class="adv__from">🔒 Äriregistrist</span></span>
-      </div>
-      <div class="adv__row adv__row--input">
-        <span class="adv__k">Peamised sihtturud *</span>
-        <div class="adv__markets">
-          <div class="adv__pills">
-            @for (m of markets(); track m) {
-              <span class="adv__pill">
-                {{ marketLabel(m) }}
-                <button type="button" class="adv__pill-x" [attr.aria-label]="'Eemalda ' + marketLabel(m)" (click)="removeMarket(m)">×</button>
-              </span>
-            }
-          </div>
-          <select class="adv__input adv__select" #marketSel (change)="addMarket(marketSel.value); marketSel.value = ''">
-            <option value="">+ lisa sihtriik…</option>
-            @for (o of marketOptions(); track o[0]) {
-              <option [value]="o[0]">{{ o[1] }}</option>
+            <option value="" selected hidden>Valige isik</option>
+            @for (c of p.contacts; track c.id) {
+              <option [value]="c.id">{{ c.fullName }} — {{ c.role }}</option>
             }
           </select>
+          <span class="adv__chevron" aria-hidden="true">▾</span>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Arenguprogrammi sisu -->
-    <section class="card">
-      <div class="card__head">
-        <h3>Arenguprogrammi sisu</h3>
-        <span class="adv__src">käsitsi · ei salvestu profiili</span>
-      </div>
-      @for (q of questions; track $index; let i = $index) {
-        <div class="adv__area">
-          <label class="adv__area-label" [for]="'q' + i">{{ q }}</label>
-          <textarea
-            class="adv__input adv__textarea"
-            [id]="'q' + i"
-            rows="3"
-            [formControl]="answers[i]"
-            [class.adv__input--error]="invalid(answers[i])"
-          ></textarea>
+      <section>
+        <h3>Arenguprogrammi taust</h3>
+        <div class="adv__row">
+          <span class="adv__k">Eelmise MA eksportkäive</span>
+          <span class="adv__v">{{ exportLabel() }}</span>
+          <span class="adv__chip">🔗 Profiilist</span>
         </div>
-      }
-      <div class="adv__row adv__row--input">
-        <span class="adv__k">TAIE fookusvaldkond *</span>
-        <select class="adv__input adv__select" [formControl]="taie" [class.adv__input--error]="submitAttempted() && !taie.value">
-          <option value="">— vali —</option>
-          @for (o of taieOptions; track o) {
-            <option [value]="o">{{ o }}</option>
-          }
-        </select>
-      </div>
-    </section>
+        <div class="adv__row">
+          <span class="adv__k">Peamised sihtturud</span>
+          <span class="adv__v">{{ marketsLabel() }}</span>
+          <span class="adv__chip">🔗 Profiilist</span>
+        </div>
+      </section>
+    </div>
 
-    @if (submitAttempted()) {
-      <p class="adv__error" role="alert">Täida kõik tärniga (*) väljad.</p>
+    @if (submitAttempted() && !participant.value) {
+      <p class="adv__error" role="alert">Vali nõustamisel osaleja.</p>
     }
 
     <footer class="adv__footer">
-      <a dds-button variant="secondary" routerLink="/services/dev">Loobu</a>
-      <button dds-button variant="primary" (click)="submit()">Registreeru eelnõustamisele</button>
+      <a dds-button variant="pill" routerLink="/services/dev">← Tagasi</a>
+      <button dds-button variant="primary" (click)="submit()">Registreeru →</button>
     </footer>
   } @else {
     <p class="adv__muted">Laen profiili…</p>

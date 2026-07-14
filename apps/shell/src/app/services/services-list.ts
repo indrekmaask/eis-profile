@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DdsButton } from '@dds/ui';
 import { ProfileApiService, ProfileView } from '@eis/profile-api';
 import { IdentityService } from '../identity/identity.service';
-import { SERVICES } from './services.data';
+import { SERVICES, evaluate } from './services.data';
 
 /**
  * "Minu teenused" — available services computed from the company's profile,
@@ -52,7 +52,7 @@ import { SERVICES } from './services.data';
 
         <h2 class="svc__section">Sulle saada olevad teenused</h2>
         <div class="svc__list">
-          @for (s of services; track s.id) {
+          @for (s of services(); track s.id) {
             <a class="svc__row card" [routerLink]="['/services', s.id]">
               <span class="svc__ico" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -67,6 +67,11 @@ import { SERVICES } from './services.data';
               </span>
               <dds-button variant="pill" size="sm" class="svc__cta">Vaata lähemalt →</dds-button>
             </a>
+          } @empty {
+            <p class="svc__muted">
+              Eelhinnangu põhjal ei sobi praegu ükski teenus — täienda profiili või pöördu
+              kliendihalduri poole.
+            </p>
           }
         </div>
 
@@ -197,7 +202,14 @@ export class ServicesList {
   private readonly api = inject(ProfileApiService);
   private readonly router = inject(Router);
 
-  protected readonly services = SERVICES;
+  /** Only services whose automatic pre-check doesn't fail — the heading promises an eelhinnang. */
+  protected readonly services = computed(() => {
+    const p = this.profile();
+    if (!p) {
+      return [];
+    }
+    return SERVICES.filter((s) => evaluate(p, s).kind !== 'no');
+  });
   protected readonly loading = signal(true);
   protected readonly profileMissing = signal(false);
   private readonly profile = signal<ProfileView | null>(null);

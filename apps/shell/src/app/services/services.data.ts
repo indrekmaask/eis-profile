@@ -106,11 +106,11 @@ export const SERVICES: ServiceDef[] = [
     eligibility: 'RULE_BASED',
     booking: true,
     intro:
-      'Toetus arenguplaani elluviimiseks. Sobivuse eelkontroll tehakse automaatselt profiili ja registriandmete põhjal. Kohustuslik esimene samm on eelnõustamine, kus kliendihaldur täpsustab sobivust ja aitab taotluse ette valmistada.',
+      'Toetus arenguplaani elluviimiseks. Kohustuslik eelnõustamine (EIS), seejärel taotlus e-toetuse keskkonnas.',
     listTitle: 'Ettevõtte arenguprogrammi eelnõustamine',
     listIntro:
       'Arenguprogramm on mitmeetapiline teekond (eelnõustamine → olukorra kaardistamine → arenguplaani ettevalmistamine → elluviimine → tulemuste hindamine). Kohustuslik esimene samm on eelnõustamine, kus sulle määratakse kliendihaldur.',
-    // Automaatne eelkontroll — arvutatud päris andmetest. VTA jääk ja TAIE = "?" (andmeid pole / sõltub taotlusest).
+    // Automatic pre-check computed from real data (Figma frame 251:10793 shows four criteria).
     rules: (p) => {
       const years = p.annualReports.length;
       const exp = latest(p).exportRevenue;
@@ -118,24 +118,21 @@ export const SERVICES: ServiceDef[] = [
       const emp = p.employeeCount.value;
       const growthOrExport = (g != null && g >= 5) || exp >= 50000;
       return [
-        { icon: '✓', label: 'Ettevõte on Eesti äriregistris', detail: 'profiil põhineb registrikandel' },
-        { icon: years >= 2 ? '✓' : '✗', label: 'Tegutsenud vähemalt 2 aastat', detail: `aruandeid ${years}` },
+        { icon: '✓', label: 'Ettevõte on Eesti äriregistris', detail: 'Profiil põhineb registrikandel' },
+        { icon: years >= 2 ? '✓' : '✗', label: 'Tegutsenud vähemalt 2 aastat', detail: `Aruandeid ${years}` },
         {
           icon: growthOrExport ? '✓' : '✗',
-          label: 'Kasv ≥ 5%/a VÕI eksport ≥ 50 000 €',
-          detail: `kasv ${g == null ? '—' : (g >= 0 ? '+' : '') + g.toFixed(1) + '%'}, eksport ${money(exp)} — ${growthOrExport ? 'VÕI täidetud' : 'kumbki ei täidetud'}`,
+          label: 'Kasv üle 5% aastas või eksport üle 50 000 EUR',
+          detail:
+            exp >= 50000
+              ? `Eksport ${money(exp)}`
+              : `Kasv ${g == null ? '—' : (g >= 0 ? '+' : '') + g.toFixed(1) + '%'}, eksport ${money(exp)}`,
         },
         {
           icon: emp != null ? (emp >= 8 ? '✓' : '✗') : '?',
           label: 'Vähemalt 8 töötajat',
-          detail: emp != null ? `profiilis: ${emp}` : 'lisa töötajate arv profiilile',
+          detail: emp != null ? `Profiilis ${emp}` : 'Lisa töötajate arv profiilile',
         },
-        {
-          icon: '?',
-          label: 'VTA vaba jääk piisav (kuni 300 000 € / 3 a)',
-          detail: 'eeltäidetakse tulevikus riigiabi registrist (RAR) — praeguses mock-API-s pole, kontrollib menetleja',
-        },
-        { icon: '?', label: 'Panustab TAIE fookusvaldkonda', detail: 'projekti sisu — vali taotlusel' },
       ];
     },
   },

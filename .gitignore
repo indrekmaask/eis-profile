@@ -34,6 +34,6 @@ build/
 # office lock files
 .~lock.*#
 
-# source/deliverable docs (kept out of git)
-docs/
+# source/deliverable docs (kept out of git), except tracked project docs
+docs/*
 .serena/

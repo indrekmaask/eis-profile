@@ -17,7 +17,6 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { concatMap, from } from 'rxjs';
 import {
   DdsButton,
   DdsInput,
@@ -27,6 +26,7 @@ import {
   DdsTagInput,
 } from '@dds/ui';
 import {
+  BankAccount,
   BankAccountInput,
   ContactInput,
   CreateProfileRequest,
@@ -211,11 +211,22 @@ export class ProfileEdit {
     }));
   }
 
+  private originalBanks: BankAccount[] = [];
+
   private bankAccountValues(): BankAccountInput[] {
-    return this.bankAccounts.controls
-      .map((c) => c.value.trim())
-      .filter(Boolean)
-      .map((iban, i) => ({ iban, bankName: null, primary: i === 0 }));
+    const ibans = this.bankAccounts.controls.map((c) => c.value.trim()).filter(Boolean);
+    // Preserve bankName/primary of unchanged accounts — the wizard only edits IBANs.
+    const keepsPrimary = ibans.some(
+      (iban) => this.originalBanks.find((o) => o.iban === iban)?.primary,
+    );
+    return ibans.map((iban, i) => {
+      const orig = this.originalBanks.find((o) => o.iban === iban);
+      return {
+        iban,
+        bankName: orig?.bankName ?? null,
+        primary: keepsPrimary ? !!orig?.primary : i === 0,
+      };
+    });
   }
 
   private prefillFromProfile(p: ProfileView): void {
@@ -240,6 +251,7 @@ export class ProfileEdit {
       this.contacts.at(0).controls.primary.setValue(true);
     }
 
+    this.originalBanks = p.bankAccounts;
     this.bankAccounts.clear();
     p.bankAccounts.forEach((b) =>
       this.bankAccounts.push(new FormControl(b.iban, { nonNullable: true })),
@@ -386,32 +398,23 @@ export class ProfileEdit {
     if (!rc) {
       return;
     }
-    const patches: { step: number; body: StepUpdateRequest }[] = [
-      {
-        step: 1,
-        body: {
-          operatingAddress: this.form.controls.operatingAddress.value || null,
-          website: this.form.controls.website.value || null,
-        },
-      },
-      { step: 2, body: { contacts: this.contactValues() } },
-      {
-        step: 3,
-        body: {
-          employeeCount: this.employeeCountValue(),
-          targetMarkets: this.form.controls.targetMarkets.value,
-          operatingRegions: this.form.controls.operatingRegions.value,
-          bankAccounts: this.bankAccountValues(),
-        },
-      },
-    ];
+    // One PATCH with every user-owned field: the save is a single backend
+    // transaction, so a validation failure can't leave a half-applied edit.
+    // Cleared text fields are sent as '' (backend clears on blank).
+    const body: StepUpdateRequest = {
+      operatingAddress: this.form.controls.operatingAddress.value.trim(),
+      website: this.form.controls.website.value.trim(),
+      employeeCount: this.employeeCountValue(),
+      contacts: this.contactValues(),
+      targetMarkets: this.form.controls.targetMarkets.value,
+      operatingRegions: this.form.controls.operatingRegions.value,
+      bankAccounts: this.bankAccountValues(),
+    };
     this.editSaving.set(true);
     this.editError.set(null);
-    from(patches)
-      .pipe(
-        concatMap((p) => this.api.updateStep(rc, p.step, p.body)),
-        takeUntilDestroyed(this.destroyRef),
-      )
+    this.api
+      .updateStep(rc, this.activeStep() + 1, body)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         error: () => {
           this.editSaving.set(false);

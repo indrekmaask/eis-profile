@@ -55,7 +55,8 @@ export class ProfilePage {
 
   private applyFromUrl(): void {
     const params = new URLSearchParams(window.location.search);
-    const rc = params.get('rc') ?? DEFAULT_REGISTRY_CODE;
+    // || (not ??): URLSearchParams.get returns '' for a present-but-empty ?rc=
+    const rc = params.get('rc') || DEFAULT_REGISTRY_CODE;
     const person = params.get('person');
     if (person) {
       this.context.setPerson(person);

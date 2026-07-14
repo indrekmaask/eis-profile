@@ -10,6 +10,7 @@ public final class ProfileRequests {
     /** Create a profile: register data is fetched server-side; the body carries USER-owned fields. */
     public record CreateProfileRequest(
             String registryCode,
+            String actingPersonCode,
             String website,
             Integer employeeCount,
             String operatingAddress,
@@ -18,7 +19,11 @@ public final class ProfileRequests {
             List<String> targetMarkets,
             List<String> operatingRegions) {}
 
-    /** A single edit-stepper step's user fields. Unknown/omitted fields are left unchanged. */
+    /**
+     * The edit wizard's user fields, sent as ONE request covering every step so the save is
+     * atomic. Scalars are always present: null/blank means cleared. Null collections are
+     * left unchanged.
+     */
     public record StepUpdateRequest(
             Integer employeeCount,
             String website,

@@ -142,6 +142,8 @@ export interface BankAccountInput {
 
 export interface CreateProfileRequest {
   registryCode: string;
+  /** Person creating the profile — granted OWNER access so "Vali roll" lists the company. */
+  actingPersonCode?: string;
   website: string | null;
   employeeCount: number | null;
   operatingAddress: string | null;

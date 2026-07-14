@@ -54,7 +54,7 @@ class ProfileFlowIntegrationTest {
     }
 
     private CreateProfileRequest fullCreate(String rc) {
-        return new CreateProfileRequest(rc, "https://porgand.ee", 12, "Tartu, Näidis tn 1",
+        return new CreateProfileRequest(rc, "37510090251", "https://porgand.ee", 12, "Tartu, Näidis tn 1",
                 List.of(new ContactInput("Mari Maasikas", "Juhatuse liige", "mari@porgand.ee",
                         "+372 5551 2345", "37510090251", true)),
                 List.of(new BankAccountInput("EE382200221020145685", "Swedbank", true)),
@@ -111,7 +111,7 @@ class ProfileFlowIntegrationTest {
     void createForUnknownCompanyIsNotFound() {
         when(registryClient.fetchCompany("00000000")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> command.create(new CreateProfileRequest("00000000", null, null, null,
-                null, null, null, null))).isInstanceOf(ProfileNotFoundException.class);
+                null, null, null, null, null))).isInstanceOf(ProfileNotFoundException.class);
     }
 
     @Test

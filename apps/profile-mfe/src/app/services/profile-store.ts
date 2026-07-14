@@ -7,6 +7,7 @@ import {
   StepUpdateRequest,
 } from '../models/profile.models';
 import { ProfileApiService } from './profile-api.service';
+import { ProfileContextService } from './profile-context.service';
 
 /**
  * - loading: request in flight
@@ -20,6 +21,10 @@ export type ProfileStatus = 'idle' | 'loading' | 'loaded' | 'empty' | 'unavailab
 @Injectable({ providedIn: 'root' })
 export class ProfileStore {
   private readonly api = inject(ProfileApiService);
+  private readonly context = inject(ProfileContextService);
+
+  /** Monotonic load id: responses from a superseded load (company switched) are ignored. */
+  private loadSeq = 0;
 
   readonly status = signal<ProfileStatus>('idle');
   readonly profile = signal<ProfileView | null>(null);
@@ -33,16 +38,23 @@ export class ProfileStore {
 
   /** Load an existing profile; on 404 fall back to prefill (creation flow). */
   load(registryCode: string): void {
+    const seq = ++this.loadSeq;
     this.status.set('loading');
     this.errorMessage.set(null);
     this.api.getProfile(registryCode).subscribe({
       next: (p) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         this.profile.set(p);
         this.status.set('loaded');
       },
       error: (err: HttpErrorResponse) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         if (err.status === 404) {
-          this.loadPrefill(registryCode);
+          this.loadPrefill(registryCode, seq);
         } else {
           this.fail(err);
         }
@@ -50,21 +62,28 @@ export class ProfileStore {
     });
   }
 
-  private loadPrefill(registryCode: string): void {
+  private loadPrefill(registryCode: string, seq: number): void {
     this.api.prefill(registryCode).subscribe({
       next: (p) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         this.prefill.set(p);
         this.profile.set(null);
         this.status.set('empty');
       },
-      error: (err: HttpErrorResponse) => this.fail(err),
+      error: (err: HttpErrorResponse) => {
+        if (seq === this.loadSeq) {
+          this.fail(err);
+        }
+      },
     });
   }
 
   create(request: CreateProfileRequest): void {
     this.saving.set(true);
     this.errorMessage.set(null);
-    this.api.create(request).subscribe({
+    this.api.create({ ...request, actingPersonCode: this.context.personCode() }).subscribe({
       next: (p) => {
         this.profile.set(p);
         this.status.set('loaded');

@@ -6,12 +6,12 @@ import { ServiceApplication } from './services/service-application';
 import { PreAdvisory } from './services/pre-advisory';
 import { ServicesList } from './services/services-list';
 import { ServiceDetail } from './services/service-detail';
-import { Toolaud } from './dashboard/toolaud';
+import { Dashboard } from './dashboard/dashboard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', component: Login },
   { path: 'select-role', component: RoleSelect },
-  { path: 'dashboard', component: Toolaud },
+  { path: 'dashboard', component: Dashboard },
   {
     path: 'profile',
     loadComponent: () =>

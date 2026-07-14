@@ -9,7 +9,7 @@ import { RadarChart } from '../shared/radar-chart';
  * maturity radar, account manager, recommendations and empty-state lists.
  */
 @Component({
-  selector: 'app-toolaud',
+  selector: 'app-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, DdsButton, RadarChart],
   template: `
@@ -298,7 +298,7 @@ import { RadarChart } from '../shared/radar-chart';
     `,
   ],
 })
-export class Toolaud {
+export class Dashboard {
   private readonly identity = inject(IdentityService);
   protected readonly company = this.identity.activeCompany;
 

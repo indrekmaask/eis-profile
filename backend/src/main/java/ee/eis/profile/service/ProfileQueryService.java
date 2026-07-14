@@ -113,7 +113,7 @@ public class ProfileQueryService {
         var comp = completeness.calculate(new ProfileCompletenessCalculator.Input(
                 primary.map(c -> StringUtils.hasText(c.email())).orElse(false),
                 primary.map(c -> StringUtils.hasText(c.phone())).orElse(false),
-                p.getEmployeeCount() != null, !regions.isEmpty(), StringUtils.hasText(p.getWebsite())));
+                p.getEmployeeCount() != null, !targetMarkets.isEmpty(), StringUtils.hasText(p.getWebsite())));
 
         return new ProfileView(
                 p.getRegistryCode(), p.getProfileStatus(), dataAsOf,

@@ -11,6 +11,7 @@ import ee.eis.profile.domain.BankAccount;
 import ee.eis.profile.domain.ContactPerson;
 import ee.eis.profile.domain.CustomerProfile;
 import ee.eis.profile.domain.MarketRegion;
+import ee.eis.profile.domain.ProfileAccess;
 import ee.eis.profile.domain.ProfileSourceSnapshot;
 import ee.eis.profile.domain.Source;
 import ee.eis.profile.integration.RegistryClient;
@@ -21,6 +22,7 @@ import ee.eis.profile.repository.BankAccountRepository;
 import ee.eis.profile.repository.ContactPersonRepository;
 import ee.eis.profile.repository.CustomerProfileRepository;
 import ee.eis.profile.repository.MarketRegionRepository;
+import ee.eis.profile.repository.ProfileAccessRepository;
 import ee.eis.profile.repository.ProfileSourceSnapshotRepository;
 import ee.eis.profile.repository.RelatedPartyRepository;
 import ee.eis.profile.service.validation.IbanValidator;
@@ -48,6 +50,7 @@ public class ProfileCommandService {
     private final AnnualReportRepository annualReports;
     private final MarketRegionRepository marketRegions;
     private final ProfileSourceSnapshotRepository snapshots;
+    private final ProfileAccessRepository access;
     private final RegistryClient registryClient;
     private final RegistryMapper mapper;
     private final ValueResolver resolver;
@@ -62,6 +65,7 @@ public class ProfileCommandService {
                                  BankAccountRepository bankAccounts, AddressRepository addresses,
                                  RelatedPartyRepository relatedParties, AnnualReportRepository annualReports,
                                  MarketRegionRepository marketRegions, ProfileSourceSnapshotRepository snapshots,
+                                 ProfileAccessRepository access,
                                  RegistryClient registryClient, RegistryMapper mapper, ValueResolver resolver,
                                  DiscrepancyDetector discrepancyDetector, IbanValidator ibanValidator,
                                  PersonCodeValidator personCodeValidator, MarketVocabulary vocabulary,
@@ -73,6 +77,7 @@ public class ProfileCommandService {
         this.relatedParties = relatedParties;
         this.annualReports = annualReports;
         this.marketRegions = marketRegions;
+        this.access = access;
         this.snapshots = snapshots;
         this.registryClient = registryClient;
         this.mapper = mapper;
@@ -124,6 +129,15 @@ public class ProfileCommandService {
         saveBankAccounts(id, req.bankAccounts());
         saveMarketRegions(id, req.targetMarkets(), req.operatingRegions());
 
+        if (StringUtils.hasText(req.actingPersonCode())) {
+            ProfileAccess owner = new ProfileAccess();
+            owner.setProfileId(id);
+            owner.setPersonCode(req.actingPersonCode());
+            owner.setAccessRole("OWNER");
+            owner.setGrantedVia("PROFILE_CREATE");
+            access.save(owner);
+        }
+
         return queryService.assemble(profiles.findById(id).orElseThrow(), List.of());
     }
 
@@ -133,10 +147,10 @@ public class ProfileCommandService {
         validate(req.bankAccounts(), req.contacts(), req.targetMarkets(), req.operatingRegions());
         UUID id = profile.getId();
 
-        if (req.employeeCount() != null) {
-            profile.setEmployeeCount(req.employeeCount());
-            profile.setEmployeeCountSource(Source.USER);
-        }
+        // The wizard always sends the full set of user-owned scalars, so null/blank
+        // means "cleared by the user", not "unchanged" (fields were unclearable before).
+        profile.setEmployeeCount(req.employeeCount());
+        profile.setEmployeeCountSource(Source.USER);
         if (req.website() != null) {
             profile.setWebsite(StringUtils.hasText(req.website()) ? req.website() : null);
             profile.setWebsiteSource(Source.USER);
@@ -144,12 +158,14 @@ public class ProfileCommandService {
         profiles.save(profile);
 
         // Replace-on-update: flush deletes before inserts so unique keys don't collide in one flush.
-        if (StringUtils.hasText(req.operatingAddress())) {
+        if (req.operatingAddress() != null) {
             addresses.findByProfileId(id).stream()
                     .filter(a -> "OPERATING".equals(a.getAddressType()))
                     .forEach(addresses::delete);
             addresses.flush();
-            addresses.save(operating(id, req.operatingAddress()));
+            if (StringUtils.hasText(req.operatingAddress())) {
+                addresses.save(operating(id, req.operatingAddress()));
+            }
         }
         if (req.contacts() != null) {
             contacts.deleteAll(contacts.findByProfileId(id));

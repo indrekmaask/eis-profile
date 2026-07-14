@@ -12,6 +12,7 @@ import {
   Verdict,
   money,
   serviceById,
+  totalRevenue,
   verdict,
   verdictIcon,
 } from './services.data';
@@ -34,10 +35,8 @@ interface Field {
   template: `
     <div class="sd">
       @if (service(); as s) {
-        <nav class="sd__crumb">Peamine / Minu teenused / {{ s.name }}</nav>
-        <a class="sd__back" routerLink="/services">‹ tagasi teenuste juurde</a>
+        <nav class="sd__crumb">Peamine / <a routerLink="/services">Minu teenused</a> / {{ s.name }}</nav>
         <h1>{{ s.name }}</h1>
-        <div class="sd__sum">{{ s.sum }}</div>
         <p class="sd__lead">{{ s.intro }}</p>
 
         @if (loading()) {
@@ -52,17 +51,18 @@ interface Field {
           <div class="sd__cols">
             <div class="sd__main">
               @if (s.booking) {
-                <div class="card card--accent">
-                  <div class="card__head">
-                    <h3>Sinu järgmine samm: eelnõustamine</h3>
-                    <span class="pill pill--blue">1. samm teekonnal</span>
-                  </div>
+                <div class="card card--booking">
+                  <h3 class="card--booking__title">Esimene samm: eelnõustamine</h3>
                   <p>
-                    Arenguprogramm on mitmeetapiline teekond (eelnõustamine → kaardistamine →
-                    arenguplaan → elluviimine → hindamine). Kohustuslik esimene samm on
-                    <b>eelnõustamine</b>, kus sulle määratakse kliendihaldur.
+                    Arenguprogramm on mitmeetapiline teekond (eelnõustamine → olukorra kaardistamine →
+                    arenguplaani ettevalmistamine → elluviimine → tulemuste hindamine). Kohustuslik
+                    esimene samm on eelnõustamine, kus sulle määratakse kliendihaldur.
                   </p>
-                  <a dds-button variant="primary" size="sm" routerLink="/programme">Registreeru eelnõustamisele →</a>
+                  <p>
+                    Kogu teekonda ja tingimusi vaata
+                    <a class="card--booking__link" href="https://eis.ee" target="_blank" rel="noopener">eis.ee arenguprogrammi lehelt</a>
+                  </p>
+                  <a dds-button variant="primary" routerLink="/programme" class="card--booking__cta">Broneeri nõustamine →</a>
                 </div>
               } @else {
                 <div class="zone">
@@ -125,7 +125,7 @@ interface Field {
 
             <aside class="sd__side">
               <div class="qual">
-                <div class="qual__head"><span>Sobivuse eelkontroll</span><span>automaatne</span></div>
+                <h3 class="qual__head">Sobivuse eelkontroll</h3>
                 @for (r of panelRows(); track $index) {
                   <div class="qrow">
                     <span class="qi qi--{{ r.kind }}">{{ r.icon }}</span>
@@ -135,9 +135,11 @@ interface Field {
                     </span>
                   </div>
                 }
-                <div class="qsum qsum--{{ panelVerdict().kind }}">
-                  {{ vIcon(panelVerdict().kind) }} {{ panelVerdict().txt }}
-                </div>
+                @if (panelVerdict().kind !== 'ok') {
+                  <div class="qsum qsum--{{ panelVerdict().kind }}">
+                    {{ vIcon(panelVerdict().kind) }} {{ panelVerdict().txt }}
+                  </div>
+                }
               </div>
             </aside>
           </div>
@@ -195,19 +197,17 @@ interface Field {
         color: var(--dds-color-ink-muted);
         font-size: var(--dds-font-size-sm);
       }
-      .sd__back {
-        color: var(--dds-color-primary);
+      .sd__crumb a {
+        color: inherit;
         text-decoration: none;
-        font-size: var(--dds-font-size-sm);
-        width: fit-content;
+      }
+      .sd__crumb a:hover {
+        text-decoration: underline;
       }
       h1 {
         margin: var(--dds-space-2) 0 0;
         font-size: var(--dds-font-size-2xl);
         font-weight: var(--dds-font-weight-bold);
-      }
-      .sd__sum {
-        color: var(--dds-color-ink-muted);
       }
       .sd__lead {
         margin: var(--dds-space-2) 0 var(--dds-space-3);
@@ -234,13 +234,30 @@ interface Field {
         border-radius: var(--dds-radius-card);
         padding: var(--dds-space-5);
       }
-      .card--accent {
-        border-color: var(--dds-color-primary);
+      .card--booking {
+        border: none;
+        box-shadow: var(--dds-shadow-card);
+        padding: var(--dds-space-6);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--dds-space-3);
       }
-      .card--accent p {
-        color: var(--dds-color-ink-muted);
-        font-size: var(--dds-font-size-sm);
-        margin: var(--dds-space-2) 0 var(--dds-space-4);
+      .card--booking__title {
+        margin: 0;
+        font-size: var(--dds-font-size-xl);
+        font-weight: var(--dds-font-weight-bold);
+      }
+      .card--booking p {
+        margin: 0;
+        color: var(--dds-color-ink-strong);
+        max-width: 620px;
+      }
+      .card--booking__link {
+        color: var(--dds-color-primary);
+      }
+      .card--booking__cta {
+        margin-top: var(--dds-space-6);
       }
       .card__head {
         display: flex;
@@ -348,19 +365,15 @@ interface Field {
       }
       /* eligibility panel */
       .qual {
-        background: var(--dds-color-surface);
-        border: 1px solid var(--dds-color-border);
+        background: var(--dds-color-registry-highlight);
         border-radius: var(--dds-radius-card);
-        padding: var(--dds-space-4);
+        padding: var(--dds-space-5);
       }
       .qual__head {
-        display: flex;
-        justify-content: space-between;
-        font-size: var(--dds-font-size-xs);
-        color: var(--dds-color-ink-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        margin-bottom: var(--dds-space-3);
+        margin: 0 0 var(--dds-space-4);
+        font-size: var(--dds-font-size-lg);
+        font-weight: var(--dds-font-weight-medium);
+        color: var(--dds-color-ink-strong);
       }
       .qrow {
         display: flex;
@@ -369,8 +382,8 @@ interface Field {
       }
       .qi {
         flex: none;
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -379,8 +392,8 @@ interface Field {
         font-weight: var(--dds-font-weight-bold);
       }
       .qi--ok {
-        background: var(--dds-color-success-bg);
-        color: var(--dds-color-success);
+        background: var(--dds-color-success);
+        color: #fff;
       }
       .qi--no {
         background: var(--dds-color-error-bg);
@@ -399,7 +412,7 @@ interface Field {
       .ql {
         display: block;
         font-size: var(--dds-font-size-sm);
-        font-weight: var(--dds-font-weight-medium);
+        font-weight: var(--dds-font-weight-bold);
       }
       .qd {
         display: block;
@@ -550,7 +563,7 @@ export class ServiceDetail {
         label: 'Tegevusala',
         value: p.emtakName.value ? `${p.emtakCode.value} — ${p.emtakName.value}` : p.emtakCode.value,
       },
-      { label: `Müügitulu (${r?.reportYear ?? '—'})`, value: money(r?.salesRevenueEstonia) },
+      { label: `Müügitulu (${r?.reportYear ?? '—'})`, value: r ? money(totalRevenue(r)) : money(null) },
     ];
   });
 
