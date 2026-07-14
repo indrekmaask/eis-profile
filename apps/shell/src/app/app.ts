@@ -69,6 +69,11 @@ export class App {
     { label: 'Haldus', icon: 'settings' },
   ];
 
+  protected changeCompany(): void {
+    this.userMenuOpen.set(false);
+    this.router.navigate(['/select-role']);
+  }
+
   protected logout(): void {
     this.userMenuOpen.set(false);
     this.identity.logout();

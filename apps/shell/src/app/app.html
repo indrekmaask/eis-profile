@@ -7,12 +7,23 @@
         <img src="/img/eis-logo.svg" alt="eis" />
       </a>
       <div class="topbar__right">
-        <button type="button" class="topbar__icon" aria-label="Otsi">🔍</button>
+        <button type="button" class="topbar__icon" aria-label="Otsi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+          </svg>
+        </button>
         <button type="button" class="topbar__lang">EST ▾</button>
         @if (identity.loggedIn()) {
           <div class="topbar__usermenu">
             <button type="button" class="topbar__user" (click)="userMenuOpen.set(!userMenuOpen())">
-              <span class="topbar__glyph" aria-hidden="true">◍</span>
+              <span class="topbar__glyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" /><circle cx="12" cy="10" r="4" />
+                  <path d="M6.2 18.8a6 6 0 0 1 11.6 0" />
+                </svg>
+              </span>
               @if (identity.personName()) {
                 <strong>{{ identity.personName() }}</strong>
               }
@@ -22,6 +33,7 @@
             </button>
             @if (userMenuOpen()) {
               <div class="topbar__dropdown">
+                <button type="button" (click)="changeCompany()">Vaheta ettevõtet</button>
                 <button type="button" (click)="logout()">Logi välja</button>
               </div>
             }

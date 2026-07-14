@@ -47,6 +47,14 @@
   font: inherit;
   color: var(--dds-color-ink-muted);
 }
+.topbar__icon {
+  display: inline-flex;
+  align-items: center;
+}
+.topbar__icon svg {
+  width: 20px;
+  height: 20px;
+}
 .topbar__usermenu { position: relative; }
 .topbar__user {
   display: flex; align-items: center; gap: var(--dds-space-2);
@@ -55,7 +63,12 @@
 }
 .topbar__glyph {
   color: var(--dds-color-ink-muted);
-  font-size: var(--dds-font-size-lg);
+  display: inline-flex;
+  align-items: center;
+}
+.topbar__glyph svg {
+  width: 22px;
+  height: 22px;
 }
 .topbar__sep {
   color: var(--dds-color-ink-subtle);
@@ -65,11 +78,15 @@
   background: var(--dds-color-surface); border-radius: var(--dds-radius-control);
   box-shadow: var(--dds-shadow-card); border: 1px solid var(--dds-color-border);
   padding: var(--dds-space-2);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 .topbar__dropdown button {
   background: none; border: none; cursor: pointer; font: inherit;
   color: var(--dds-color-primary); padding: var(--dds-space-2) var(--dds-space-4);
   white-space: nowrap;
+  text-align: left;
 }
 
 /* ---- Body: sidebar + main ---- */
