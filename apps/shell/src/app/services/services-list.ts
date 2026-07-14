@@ -29,7 +29,14 @@ import { SERVICES } from './services.data';
         <p class="svc__muted">Laen teenuseid…</p>
       } @else if (profileMissing()) {
         <div class="svc__empty">
-          <div class="svc__empty-ico">▤</div>
+          <span class="svc__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
+              <path d="M8 13h8" /><path d="M8 17h5" />
+            </svg>
+          </span>
           <h2>Koosta esmalt profiil</h2>
           <p>Kui profiil on olemas, saame arvutada, milliste teenuste jaoks kvalifitseerud.</p>
           <a dds-button variant="primary" size="sm" routerLink="/profile" [queryParams]="profileParams()">
@@ -172,9 +179,6 @@ import { SERVICES } from './services.data';
         flex-direction: column;
         gap: var(--dds-space-3);
         align-items: flex-start;
-      }
-      .svc__empty-ico {
-        font-size: 28px;
       }
       .svc__empty h2 {
         margin: 0;
