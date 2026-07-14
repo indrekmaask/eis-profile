@@ -77,8 +77,8 @@ import { IdentityService } from '../identity/identity.service';
       }
       h1 {
         margin: 0;
-        font-size: var(--dds-font-size-xl);
-        font-weight: var(--dds-font-weight-bold);
+        font-size: var(--dds-font-size-2xl);
+        font-weight: var(--dds-font-weight-regular);
       }
       .svc__banner {
         display: flex;

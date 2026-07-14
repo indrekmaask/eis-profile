@@ -171,7 +171,7 @@
   flex-direction: column;
   min-width: 0;
   gap: var(--dds-space-5);
-  padding: var(--dds-space-5);
+  padding: 0 var(--dds-space-5) var(--dds-space-5);
 }
 
 .footer {

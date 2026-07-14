@@ -81,7 +81,7 @@ const DEMO_REGISTRY_CODES: Record<string, string[]> = {
       h1 {
         margin: 0;
         font-size: var(--dds-font-size-2xl, 44px);
-        font-weight: var(--dds-font-weight-bold);
+        font-weight: var(--dds-font-weight-regular);
       }
       p {
         margin: 0;

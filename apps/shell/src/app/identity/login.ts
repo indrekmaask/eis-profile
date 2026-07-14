@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ProfileApiService } from '@eis/profile-api';
 import { IdentityService } from './identity.service';
 
 const DEMO_PEOPLE = [
@@ -85,6 +86,12 @@ const DEMO_PEOPLE = [
           @for (p of demoPeople; track p.code) {
             <button type="button" class="tara__demo-link" (click)="pick(p.code)">{{ p.label }} →</button>
           }
+        </div>
+
+        <div class="tara__reseed">
+          <button type="button" class="tara__reseed-link" (click)="reseed()" [disabled]="reseeding()">
+            {{ reseedLabel() }}
+          </button>
         </div>
 
         <div class="tara__links">
@@ -297,6 +304,27 @@ const DEMO_PEOPLE = [
         background: #003168;
       }
 
+      .tara__reseed {
+        max-width: 1030px;
+        margin: 12px auto 0;
+        text-align: center;
+      }
+      .tara__reseed-link {
+        background: none;
+        border: none;
+        color: #7a8699;
+        font-size: 13px;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .tara__reseed-link:hover:not(:disabled) {
+        color: #015a96;
+      }
+      .tara__reseed-link:disabled {
+        cursor: default;
+        opacity: 0.7;
+      }
+
       .tara__links {
         display: flex;
         justify-content: space-between;
@@ -342,9 +370,31 @@ const DEMO_PEOPLE = [
 export class Login {
   private readonly identity = inject(IdentityService);
   private readonly router = inject(Router);
+  private readonly api = inject(ProfileApiService);
 
   protected readonly demoPeople = DEMO_PEOPLE;
   protected readonly code = new FormControl('48505150220', { nonNullable: true });
+
+  protected readonly reseeding = signal(false);
+  protected readonly reseedLabel = signal('Lähtesta näidisandmed');
+
+  protected reseed(): void {
+    if (this.reseeding()) {
+      return;
+    }
+    this.reseeding.set(true);
+    this.reseedLabel.set('Lähtestan…');
+    this.api.reseed().subscribe({
+      next: () => {
+        this.reseeding.set(false);
+        this.reseedLabel.set('Näidisandmed lähtestatud ✓');
+      },
+      error: () => {
+        this.reseeding.set(false);
+        this.reseedLabel.set('Lähtestamine ebaõnnestus — proovi uuesti');
+      },
+    });
+  }
 
   protected pick(code: string): void {
     this.code.setValue(code);

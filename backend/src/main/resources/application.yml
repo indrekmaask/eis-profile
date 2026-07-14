@@ -19,6 +19,7 @@ spring:
     default-schema: profile
     schemas: profile
     create-schemas: true
+    clean-disabled: false
     locations: classpath:db/migration,classpath:db/seed
 
 # Integration + feature flags (used from Phase 2 onward; declared here so config is visible early)

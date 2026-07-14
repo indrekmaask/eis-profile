@@ -38,4 +38,12 @@ export class ProfileApiService {
   listAccess(personCode: string): Observable<AccessEntry[]> {
     return this.http.get<AccessEntry[]>(`${this.base}/access`, { params: { personCode } });
   }
+
+  /** Demo helper: wipe + re-seed the profile schema to its canonical Biomarket state. */
+  reseed(): Observable<{ status: string; migrationsApplied: number }> {
+    return this.http.post<{ status: string; migrationsApplied: number }>(
+      `${this.base}/admin/reseed`,
+      {},
+    );
+  }
 }

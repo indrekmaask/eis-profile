@@ -16,7 +16,7 @@ import { SERVICES, evaluate } from './services.data';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, DdsButton],
   template: `
-    <div class="svc">
+    <div class="svc" [class.svc--empty]="showEmpty()">
       <nav class="svc__crumb">Peamine / Minu teenused</nav>
       <h1>Minu teenused</h1>
 
@@ -39,7 +39,7 @@ import { SERVICES, evaluate } from './services.data';
           </span>
           <h2>Koosta esmalt profiil</h2>
           <p>Kui profiil on olemas, saame arvutada, milliste teenuste jaoks kvalifitseerud.</p>
-          <a dds-button variant="primary" size="sm" routerLink="/profile" [queryParams]="profileParams()">
+          <a dds-button variant="primary" routerLink="/profile" [queryParams]="createParams()">
             Koosta profiil →
           </a>
         </div>
@@ -101,6 +101,9 @@ import { SERVICES, evaluate } from './services.data';
         flex-direction: column;
         gap: var(--dds-space-3);
       }
+      .svc--empty {
+        max-width: none;
+      }
       .svc__crumb {
         color: var(--dds-color-ink-muted);
         font-size: var(--dds-font-size-sm);
@@ -108,7 +111,7 @@ import { SERVICES, evaluate } from './services.data';
       h1 {
         margin: 0;
         font-size: var(--dds-font-size-2xl);
-        font-weight: var(--dds-font-weight-bold);
+        font-weight: var(--dds-font-weight-regular);
       }
       .svc__lead {
         margin: 0 0 var(--dds-space-2);
@@ -176,14 +179,18 @@ import { SERVICES, evaluate } from './services.data';
         flex: none;
       }
       .svc__empty {
+        width: 100%;
+        max-width: 720px;
+        align-self: center;
         background: var(--dds-color-surface);
         border-radius: var(--dds-radius-card);
         box-shadow: var(--dds-shadow-card);
-        padding: var(--dds-space-6);
+        padding: var(--dds-space-7) var(--dds-space-6);
         display: flex;
         flex-direction: column;
         gap: var(--dds-space-3);
-        align-items: flex-start;
+        align-items: center;
+        text-align: center;
       }
       .svc__empty h2 {
         margin: 0;
@@ -214,10 +221,18 @@ export class ServicesList {
   protected readonly profileMissing = signal(false);
   private readonly profile = signal<ProfileView | null>(null);
 
+  /** No active company or no profile yet → centered empty card (matches the profile page). */
+  protected readonly showEmpty = computed(
+    () => !this.identity.activeCompany() || this.profileMissing(),
+  );
+
   protected readonly profileParams = computed(() => ({
     rc: this.identity.activeCompany()?.registryCode ?? '',
     person: this.identity.personCode(),
   }));
+
+  /** "Koosta profiil" → profile page, opening the create form directly (?create=1). */
+  protected readonly createParams = computed(() => ({ ...this.profileParams(), create: '1' }));
 
   protected readonly companyName = computed(
     () => this.profile()?.businessName.value ?? this.identity.activeCompany()?.name ?? '',

@@ -86,7 +86,7 @@ import { RadarChart } from '../shared/radar-chart';
       h1 {
         margin: 0;
         font-size: var(--dds-font-size-2xl);
-        font-weight: var(--dds-font-weight-bold);
+        font-weight: var(--dds-font-weight-regular);
       }
       .kt__lead {
         margin: 0;

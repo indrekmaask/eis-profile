@@ -24,6 +24,8 @@ export class ProfilePage {
   /** Non-null when editing an existing profile via the stepper (holds the initial step). */
   protected readonly editStep = signal<number | null>(null);
   private readonly pendingCreate = signal(false);
+  /** Set from ?create=1 (e.g. the "Koosta profiil" link on Minu teenused) → open the form directly. */
+  private readonly autoCreate = signal(false);
 
   constructor() {
     // Apply the active company/person from the URL on load and on every shell
@@ -44,6 +46,14 @@ export class ProfilePage {
       }
     });
 
+    // ?create=1 → jump straight to the create form once the (empty) profile has loaded.
+    effect(() => {
+      if (this.store.status() === 'empty' && this.autoCreate()) {
+        this.autoCreate.set(false);
+        this.editing.set(true);
+      }
+    });
+
     // Auto-dismiss the save toast.
     effect((onCleanup) => {
       if (this.store.toast()) {
@@ -60,6 +70,9 @@ export class ProfilePage {
     const person = params.get('person');
     if (person) {
       this.context.setPerson(person);
+    }
+    if (params.get('create') === '1') {
+      this.autoCreate.set(true);
     }
     if (rc !== this.context.registryCode() || this.store.status() === 'idle') {
       this.context.setCompany(rc);
