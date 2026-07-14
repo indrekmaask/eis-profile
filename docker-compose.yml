@@ -82,7 +82,6 @@ services:
       - "4200:80"
     depends_on:
       - profile-mfe
-      - preadvisory-mfe
       - backend
 
   # ---- Frontend: company-profile MFE (MF remote) ----
@@ -92,14 +91,6 @@ services:
       dockerfile: apps/profile-mfe/Dockerfile
     ports:
       - "4201:80"
-
-  # ---- Frontend: pre-advisory MFE (MF remote) ----
-  preadvisory-mfe:
-    build:
-      context: .
-      dockerfile: apps/preadvisory-mfe/Dockerfile
-    ports:
-      - "4202:80"
 
 volumes:
   eis_pgdata:

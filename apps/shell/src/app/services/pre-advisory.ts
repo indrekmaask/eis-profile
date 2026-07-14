@@ -3,6 +3,8 @@ import { Router, RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DdsButton, DdsCard } from '@dds/ui';
 import { ProfileApiService, ProfileView } from '@eis/profile-api';
+import { IdentityService } from '../identity/identity.service';
+import { exportRevenue, money } from './services.data';
 
 const MARKET_LABELS: Record<string, string> = {
   EE: 'Eesti', FI: 'Soome', SE: 'Rootsi', LV: 'Läti', LT: 'Leedu', NO: 'Norra',
@@ -10,19 +12,10 @@ const MARKET_LABELS: Record<string, string> = {
   GB: 'Ühendkuningriik', US: 'Ameerika Ühendriigid',
 };
 
-function exportRevenue(r: { salesRevenueEu: number | null; salesRevenueNonEu: number | null }): number {
-  return (r.salesRevenueEu ?? 0) + (r.salesRevenueNonEu ?? 0);
-}
-
-function money(v: number | null | undefined): string {
-  if (v == null) {
-    return '—';
-  }
-  return new Intl.NumberFormat('et-EE', {
-    style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
-  }).format(v);
-}
-
+/**
+ * Arenguprogrammi eelnõustamine — registration form per Figma frame 192:6318:
+ * read-only profile provenance rows plus a single participant picker.
+ */
 @Component({
   selector: 'app-pre-advisory',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,12 +24,10 @@ function money(v: number | null | undefined): string {
   styleUrl: './pre-advisory.scss',
 })
 export class PreAdvisory {
+  protected readonly identity = inject(IdentityService);
   private readonly api = inject(ProfileApiService);
   private readonly router = inject(Router);
 
-  // MF remote: the shell passes the active company via the ?rc= query param
-  // (no shared IdentityService), same contract as the profile remote.
-  protected readonly registryCode = signal<string | null>(null);
   protected readonly profile = signal<ProfileView | null>(null);
   protected readonly done = signal(false);
   protected readonly submitAttempted = signal(false);
@@ -54,10 +45,9 @@ export class PreAdvisory {
   });
 
   constructor() {
-    const rc = new URLSearchParams(window.location.search).get('rc');
-    this.registryCode.set(rc);
-    if (rc) {
-      this.api.getProfile(rc).subscribe((p) => this.profile.set(p));
+    const company = this.identity.activeCompany();
+    if (company) {
+      this.api.getProfile(company.registryCode).subscribe((p) => this.profile.set(p));
     }
   }
 

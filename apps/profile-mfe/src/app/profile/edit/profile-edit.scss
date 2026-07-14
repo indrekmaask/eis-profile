@@ -135,18 +135,18 @@
 .edit__step h2 {
   margin: 0;
   font-size: var(--dds-font-size-lg);
-  font-weight: var(--dds-font-weight-bold);
+  font-weight: var(--dds-font-weight-regular);
 }
 .edit__subhead {
-  margin: var(--dds-space-4) 0 0;
+  margin: var(--dds-space-5) 0 0;
   font-size: var(--dds-font-size-lg);
-  font-weight: var(--dds-font-weight-bold);
+  font-weight: var(--dds-font-weight-regular);
 }
 
 .edit__rorows {
   display: flex;
   flex-direction: column;
-  gap: var(--dds-space-4);
+  gap: var(--dds-space-6);
 }
 .edit__rorow {
   display: flex;

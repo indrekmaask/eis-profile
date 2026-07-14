@@ -28,6 +28,7 @@
         [errorMessage]="store.errorMessage()"
         (createProfile)="onCreate($event)"
         (cancel)="onCancel()"
+        (refresh)="onRefresh()"
       />
     } @else {
       <div class="page__intro">

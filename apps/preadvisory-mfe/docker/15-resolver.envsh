@@ -1,9 +1,0 @@
-# Sourced by nginx's docker-entrypoint before envsubst. Exports RESOLVER from
-# the container's DNS config so proxy_pass with a variable upstream can resolve
-# names at runtime (Railway private DNS or Docker's embedded DNS).
-ns="$(awk '/^nameserver/ { print $2; exit }' /etc/resolv.conf 2>/dev/null)"
-[ -n "$ns" ] || ns="127.0.0.11"
-case "$ns" in
-  *:*) ns="[$ns]" ;;   # bracket IPv6 addresses for the resolver directive
-esac
-export RESOLVER="$ns"

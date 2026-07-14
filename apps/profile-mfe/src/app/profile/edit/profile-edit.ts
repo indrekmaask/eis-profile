@@ -112,11 +112,24 @@ export class ProfileEdit {
 
   constructor() {
     effect(() => {
-      const p = this.profile();
-      if (this.mode() === 'edit' && p && !this.populated) {
+      if (this.populated) {
+        return;
+      }
+      if (this.mode() === 'edit') {
+        const p = this.profile();
+        if (p) {
+          this.populated = true;
+          this.prefillFromProfile(p);
+          this.activeStep.set(this.initialStep());
+        }
+      } else if (this.prefill()) {
+        // Seed one empty primary contact so step 0 shows the same E-post/Telefon
+        // fields as edit mode (create otherwise starts with no contacts).
         this.populated = true;
-        this.prefillFromProfile(p);
-        this.activeStep.set(this.initialStep());
+        if (!this.contacts.length) {
+          this.contacts.push(this.contactGroup('', '', '', '', '', '', true));
+          this.contactsVersion.update((v) => v + 1);
+        }
       }
     });
   }
@@ -145,6 +158,25 @@ export class ProfileEdit {
 
   protected readonly profileLegalAddress = computed(
     () => this.profile()?.addresses.find((a) => a.addressType === 'LEGAL')?.fullAddress ?? null,
+  );
+
+  // Step 0 uses one layout for both modes; these resolve the locked register
+  // fields from the profile (edit) or the register prefill (create).
+  protected readonly companyName = computed(() =>
+    this.mode() === 'edit'
+      ? (this.profile()?.businessName.value ?? null)
+      : (this.prefill()?.businessName ?? null),
+  );
+  protected readonly companyAddress = computed(() =>
+    this.mode() === 'edit' ? this.profileLegalAddress() : (this.prefill()?.legalAddress ?? null),
+  );
+  protected readonly companyEmtak = computed(() =>
+    this.mode() === 'edit' ? this.profileEmtak() : this.emtak(),
+  );
+  protected readonly companyCapital = computed(() =>
+    this.mode() === 'edit'
+      ? (this.profile()?.capitalSize.value ?? null)
+      : (this.prefill()?.capitalSize ?? null),
   );
 
   protected readonly partySuggestions = computed<PartySuggestion[]>(() => {

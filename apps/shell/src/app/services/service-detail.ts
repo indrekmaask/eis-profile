@@ -62,7 +62,7 @@ interface Field {
                     Kogu teekonda ja tingimusi vaata
                     <a class="card--booking__link" href="https://eis.ee" target="_blank" rel="noopener">eis.ee arenguprogrammi lehelt</a>
                   </p>
-                  <a dds-button variant="primary" routerLink="/programme" [queryParams]="profileParams()" class="card--booking__cta">Broneeri nõustamine →</a>
+                  <a dds-button variant="primary" routerLink="/programme" class="card--booking__cta">Broneeri nõustamine →</a>
                 </div>
               } @else {
                 <div class="zone">

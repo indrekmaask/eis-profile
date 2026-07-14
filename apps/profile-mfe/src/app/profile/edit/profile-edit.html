@@ -22,99 +22,58 @@
   <form class="edit__form" [formGroup]="form">
     @switch (activeStep()) {
       @case (0) {
-        @if (editMode) {
-          <section class="edit__step card">
-            <h2>Üldandmed</h2>
-            <div class="edit__rorows">
-              <div class="edit__rorow">
-                <span class="edit__rok">Ettevõtte nimi</span>
-                <span>{{ profile()?.businessName?.value }}</span>
-              </div>
-              <div class="edit__rorow">
-                <span class="edit__rok">Aadress</span>
-                <span>{{ profileLegalAddress() || '—' }}</span>
-              </div>
-              <div class="edit__rorow">
-                <span class="edit__rok">Tegevusala</span>
-                <span>{{ profileEmtak() }}</span>
-              </div>
-              <div class="edit__rorow">
-                <span class="edit__rok">Osakapital</span>
-                <span>{{ money(profile()?.capitalSize?.value) }}</span>
-              </div>
+        <section class="edit__step card">
+          <h2>Üldandmed</h2>
+          <div class="edit__rorows">
+            <div class="edit__rorow">
+              <span class="edit__rok">Ettevõtte nimi</span>
+              <span>{{ companyName() || '—' }}</span>
             </div>
+            <div class="edit__rorow">
+              <span class="edit__rok">Aadress</span>
+              <span>{{ companyAddress() || '—' }}</span>
+            </div>
+            <div class="edit__rorow">
+              <span class="edit__rok">Tegevusala</span>
+              <span>{{ companyEmtak() || '—' }}</span>
+            </div>
+            <div class="edit__rorow">
+              <span class="edit__rok">Osakapital</span>
+              <span>{{ money(companyCapital()) }}</span>
+            </div>
+          </div>
 
-            <h3 class="edit__subhead">Kontaktandmed</h3>
-            <div class="edit__stack">
-              <div class="edit__field">
-                <span class="edit__flabel">Tegevusaadress</span>
-                <dds-input label="" formControlName="operatingAddress" />
-              </div>
-              @if (primaryContact(); as pc) {
-                <div class="edit__grid">
-                  <div class="edit__field">
-                    <span class="edit__flabel">E-post *</span>
-                    <dds-input label="" type="email" [formControl]="pc.controls.email" />
-                  </div>
-                  <div class="edit__field">
-                    <span class="edit__flabel">Telefoninumber *</span>
-                    <dds-phone-input label="" [formControl]="pc.controls.phone" />
-                  </div>
+          <h3 class="edit__subhead">Kontaktandmed</h3>
+          <div class="edit__stack">
+            <div class="edit__field">
+              <span class="edit__flabel">Tegevusaadress</span>
+              <dds-input label="" formControlName="operatingAddress" />
+            </div>
+            @if (primaryContact(); as pc) {
+              <div class="edit__grid">
+                <div class="edit__field">
+                  <span class="edit__flabel">E-post *</span>
+                  <dds-input label="" type="email" [formControl]="pc.controls.email" />
                 </div>
-              }
-              <div class="edit__field">
-                <span class="edit__flabel">Veebileht</span>
-                <dds-input label="" placeholder="https://" formControlName="website" />
+                <div class="edit__field">
+                  <span class="edit__flabel">Telefoninumber *</span>
+                  <dds-phone-input label="" [formControl]="pc.controls.phone" />
+                </div>
               </div>
+            }
+            <div class="edit__field">
+              <span class="edit__flabel">Veebileht</span>
+              <dds-input label="" placeholder="https://" formControlName="website" />
             </div>
+          </div>
 
-            <div class="edit__regbar">
-              <span>Andmed pärinevad registritest: {{ asOf() }} seisuga.</span>
-              <button type="button" dds-button variant="pill" size="sm" (click)="refresh.emit()">
-                Värskenda andmeid
-              </button>
-            </div>
-          </section>
-        } @else {
-          <section class="edit__step card">
-            <div class="edit__step-head">
-              <h2>Üldandmed</h2>
-              <span class="edit__src">🔒 osaliselt Äriregistrist</span>
-            </div>
-            <div class="edit__rows">
-              <div class="edit__row"><span class="edit__k">Ettevõtte nimi</span><span>{{ pf?.businessName }}</span></div>
-              <div class="edit__row"><span class="edit__k">Registrikood</span><span>{{ pf?.registryCode }}</span></div>
-              <div class="edit__row"><span class="edit__k">Juriidiline aadress</span><span>{{ pf?.legalAddress }}</span></div>
-              <div class="edit__row edit__row--input">
-                <span class="edit__k">Tegevusaadress <span class="edit__optional">(vabatahtlik)</span></span>
-                <dds-input
-                  label=""
-                  placeholder="Lisa, kui tegevuskoht erineb juriidilisest — muidu jäta tühjaks"
-                  formControlName="operatingAddress"
-                />
-              </div>
-              <div class="edit__row"><span class="edit__k">Tegevusala</span><span>{{ emtak() }}</span></div>
-              <div class="edit__row">
-                <span class="edit__k">Osakapital</span>
-                <span>{{ money(pf?.capitalSize) }}</span>
-              </div>
-              <div class="edit__row edit__row--input">
-                <span class="edit__k">Veebileht</span>
-                <dds-input label="" placeholder="nt firma.ee" formControlName="website" />
-              </div>
-            </div>
-            <p class="edit__note">
-              Registriväljad (lukus) tulevad Äriregistrist@if (asOf()) { (seis {{ asOf() }})} —
-              parandused tehakse Äriregistris. Tegevusaadress ja veebileht on sinu hallatavad. Kui
-              tegevusaadress on tühi, kasutatakse taotlustes juriidilist aadressi.
-            </p>
-            <p class="edit__note">
-              Äriregistrist tuuakse automaatselt ka <strong>majandusnäitajad</strong> (müügitulu,
-              kasum, eksport) ja <strong>seotud isikud</strong> — need on nähtavad pärast profiili
-              loomist profiilivaates.
-            </p>
-          </section>
-        }
+          <div class="edit__regbar">
+            <span>Andmed pärinevad registritest: {{ asOf() }} seisuga.</span>
+            <button type="button" dds-button variant="pill" size="sm" (click)="refresh.emit()">
+              Värskenda andmeid
+            </button>
+          </div>
+        </section>
       }
 
       @case (1) {

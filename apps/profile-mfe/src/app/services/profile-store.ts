@@ -139,6 +139,23 @@ export class ProfileStore {
     });
   }
 
+  // Create flow "Värskenda andmeid": no profile exists yet to re-sync, so
+  // re-pull the register prefill. Same user-facing effect + toast as refresh().
+  reloadPrefill(registryCode: string): void {
+    this.saving.set(true);
+    this.api.prefill(registryCode).subscribe({
+      next: (p) => {
+        this.prefill.set(p);
+        this.saving.set(false);
+        this.toast.set('Andmed värskendatud registrist');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.saving.set(false);
+        this.fail(err);
+      },
+    });
+  }
+
   clearToast(): void {
     this.toast.set(null);
   }

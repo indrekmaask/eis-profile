@@ -86,7 +86,12 @@ export class ProfilePage {
     this.editing.set(false);
   }
   protected onRefresh(): void {
-    this.store.refresh(this.context.registryCode());
+    const rc = this.context.registryCode();
+    if (this.store.status() === 'empty') {
+      this.store.reloadPrefill(rc);
+    } else {
+      this.store.refresh(rc);
+    }
   }
   protected onEditRequested(step: number): void {
     this.editStep.set(step);
