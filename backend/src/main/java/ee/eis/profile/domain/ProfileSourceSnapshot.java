@@ -11,7 +11,9 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.generator.EventType;
 import org.hibernate.type.SqlTypes;
 
 /** Raw source payload (audit + recovery). source_system: RIK or CRM. */
@@ -39,6 +41,9 @@ public class ProfileSourceSnapshot {
     @Column(nullable = false, columnDefinition = "jsonb")
     private String payload;
 
+    // DB fills this via default; @Generated makes Hibernate re-read it after INSERT
+    // so a freshly written snapshot exposes its real timestamp in the same transaction.
+    @Generated(event = EventType.INSERT)
     @Column(insertable = false, updatable = false)
     private OffsetDateTime fetchedAt;
 

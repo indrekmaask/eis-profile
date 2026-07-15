@@ -105,7 +105,11 @@ public class ProfileQueryService {
         Optional<CompanyResponse> snapshot = latestSnapshot(id);
         SnapshotExtractor.Cards cards = snapshot.map(snapshotExtractor::extract)
                 .orElse(new SnapshotExtractor.Cards(0, 0, "—", 0));
-        String dataAsOf = snapshot.map(CompanyResponse::dataAsOfDate).orElse(null);
+        // "Data as of" reflects our last sync with the register, not the register's
+        // self-reported date (static in the mock), so refresh visibly updates it.
+        String dataAsOf = snapshots.findFirstByProfileIdOrderByFetchedAtDesc(id)
+                .map(s -> s.getFetchedAt() == null ? null : s.getFetchedAt().toString())
+                .orElse(null);
 
         var primary = contactList.stream().filter(ProfileView.Contact::primary).findFirst()
                 .or(() -> contactList.stream().findFirst());

@@ -138,11 +138,19 @@ export class ProfileEdit {
     });
   }
 
-  protected readonly asOf = computed(() =>
-    formatEstonianDate(
-      this.mode() === 'edit' ? this.profile()?.dataAsOfDate : this.prefill()?.dataAsOfDate,
-    ),
-  );
+  protected readonly asOf = computed(() => {
+    const iso = this.mode() === 'edit' ? this.profile()?.dataAsOfDate : this.prefill()?.dataAsOfDate;
+    if (!iso) {
+      return formatEstonianDate(iso);
+    }
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime()) || !iso.includes('T')) {
+      return formatEstonianDate(iso);
+    }
+    return new Intl.DateTimeFormat('et-EE', {
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    }).format(d).replace(',', '');
+  });
 
   protected readonly emtak = computed(() => {
     const pf = this.prefill();
