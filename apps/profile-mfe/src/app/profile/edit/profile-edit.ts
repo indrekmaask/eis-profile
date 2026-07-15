@@ -368,6 +368,13 @@ export class ProfileEdit {
     this.bankAccounts.push(new FormControl('', { nonNullable: true }));
   }
 
+  protected removeBank(i: number): void {
+    this.bankAccounts.removeAt(i);
+    if (!this.bankAccounts.length) {
+      this.bankAccounts.push(new FormControl('', { nonNullable: true }));
+    }
+  }
+
   protected go(i: number): void {
     this.activeStep.set(Math.max(0, Math.min(this.steps.length - 1, i)));
   }

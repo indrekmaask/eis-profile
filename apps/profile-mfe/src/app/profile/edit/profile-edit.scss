@@ -173,6 +173,11 @@
 .edit__field--short {
   max-width: 280px;
 }
+.edit__bankrow {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--dds-space-2);
+}
 .edit__flabel {
   display: flex;
   align-items: center;

@@ -182,9 +182,15 @@
           <h3 class="edit__subhead">Pangakontod</h3>
           <div formArrayName="bankAccounts" class="edit__stack">
             @for (b of bankAccounts.controls; track $index; let i = $index) {
-              <div class="edit__field edit__field--short">
-                <span class="edit__flabel">IBAN {{ i + 1 }}</span>
-                <dds-input label="" ariaLabel="IBAN" placeholder="EE.." [formControlName]="i" />
+              <div class="edit__bankrow">
+                <div class="edit__field edit__field--short">
+                  <span class="edit__flabel">IBAN {{ i + 1 }}</span>
+                  <dds-input label="" ariaLabel="IBAN" placeholder="EE.." [formControlName]="i" />
+                </div>
+                <button type="button" dds-button variant="pill" size="sm" (click)="removeBank(i)"
+                  ariaLabel="Eemalda pangakonto">
+                  🗑
+                </button>
               </div>
             }
           </div>
