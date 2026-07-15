@@ -21,7 +21,9 @@ public class RestRegistryClient implements RegistryClient {
             CompanyResponse body = restClient.get()
                     .uri("/api/v1/companies/{registryCode}", registryCode)
                     .retrieve()
-                    .onStatus(status -> status.value() == 404, (req, res) -> {
+                    // 400 = malformed registry code: such a company cannot exist, so it is
+                    // "not found", not a register outage.
+                    .onStatus(status -> status.value() == 404 || status.value() == 400, (req, res) -> {
                         throw new NotFound();
                     })
                     .body(CompanyResponse.class);

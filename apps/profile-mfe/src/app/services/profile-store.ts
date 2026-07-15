@@ -81,16 +81,23 @@ export class ProfileStore {
   }
 
   create(request: CreateProfileRequest): void {
+    const seq = this.loadSeq;
     this.saving.set(true);
     this.errorMessage.set(null);
     this.api.create({ ...request, actingPersonCode: this.context.personCode() }).subscribe({
       next: (p) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         this.profile.set(p);
         this.status.set('loaded');
         this.saving.set(false);
         this.toast.set('Profiil loodud');
       },
       error: (err: HttpErrorResponse) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         this.saving.set(false);
         if (err.status === 400) {
           // Validation failure: stay in the create flow and surface the message inline.
@@ -103,14 +110,21 @@ export class ProfileStore {
   }
 
   updateStep(registryCode: string, step: number, body: StepUpdateRequest): void {
+    const seq = this.loadSeq;
     this.saving.set(true);
     this.api.updateStep(registryCode, step, body).subscribe({
       next: (p) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         this.profile.set(p);
         this.saving.set(false);
         this.toast.set('Salvestatud');
       },
       error: (err: HttpErrorResponse) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         this.saving.set(false);
         this.fail(err);
       },
@@ -118,15 +132,22 @@ export class ProfileStore {
   }
 
   refresh(registryCode: string): void {
+    const seq = this.loadSeq;
     this.saving.set(true);
     this.api.refresh(registryCode).subscribe({
       next: (p) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         this.profile.set(p);
         this.status.set('loaded');
         this.saving.set(false);
         this.toast.set('Andmed värskendatud registrist');
       },
       error: (err: HttpErrorResponse) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         this.saving.set(false);
         if (err.status === 503) {
           // Register down: keep the last-saved profile readable (CFR-047).
@@ -142,16 +163,28 @@ export class ProfileStore {
   // Create flow "Värskenda andmeid": no profile exists yet to re-sync, so
   // re-pull the register prefill. Same user-facing effect + toast as refresh().
   reloadPrefill(registryCode: string): void {
+    const seq = this.loadSeq;
     this.saving.set(true);
     this.api.prefill(registryCode).subscribe({
       next: (p) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         this.prefill.set(p);
         this.saving.set(false);
         this.toast.set('Andmed värskendatud registrist');
       },
       error: (err: HttpErrorResponse) => {
+        if (seq !== this.loadSeq) {
+          return;
+        }
         this.saving.set(false);
-        this.fail(err);
+        if (err.status === 503) {
+          // Register down: keep the create form (and its entered data) intact.
+          this.errorMessage.set('Register on ajutiselt kättesaamatu. Kuvatakse viimati salvestatud andmed.');
+        } else {
+          this.fail(err);
+        }
       },
     });
   }

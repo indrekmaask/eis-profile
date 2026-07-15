@@ -60,7 +60,12 @@ export class IdentityService {
   }
 
   login(personCode: string, personName = ''): void {
-    this.personCode.set(personCode.trim());
+    const code = personCode.trim();
+    if (code !== this.personCode()) {
+      // A different person must not inherit the previous person's company.
+      this.activeCompany.set(null);
+    }
+    this.personCode.set(code);
     this.personName.set(personName);
   }
   logout(): void {

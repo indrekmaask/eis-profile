@@ -22,6 +22,8 @@ import { SERVICES, evaluate } from './services.data';
         </div>
       } @else if (loading()) {
         <p class="svc__muted">Laen teenuseid…</p>
+      } @else if (loadFailed()) {
+        <p class="svc__muted">Profiili andmete laadimine ebaõnnestus — teenuste sobivust ei saa praegu hinnata. Proovi hiljem uuesti.</p>
       } @else if (profileMissing()) {
         <div class="svc__empty">
           <span class="svc__ico" aria-hidden="true">
@@ -214,6 +216,7 @@ export class ServicesList {
   });
   protected readonly loading = signal(true);
   protected readonly profileMissing = signal(false);
+  protected readonly loadFailed = signal(false);
   private readonly profile = signal<ProfileView | null>(null);
 
   protected readonly showEmpty = computed(
@@ -253,7 +256,11 @@ export class ServicesList {
         this.loading.set(false);
       },
       error: (err: HttpErrorResponse) => {
-        this.profileMissing.set(err.status === 404);
+        if (err.status === 404) {
+          this.profileMissing.set(true);
+        } else {
+          this.loadFailed.set(true);
+        }
         this.loading.set(false);
       },
     });

@@ -131,7 +131,9 @@ export class DdsPhoneInput implements ControlValueAccessor {
   }
   private emit(): void {
     const num = this.number().trim();
-    this.onChange(num ? `${this.prefix()} ${num}` : '');
+    // A number already carrying a country code (e.g. an unrecognized prefix that
+    // writeValue left in the number part) must not get the prefix re-applied.
+    this.onChange(!num ? '' : num.startsWith('+') ? num : `${this.prefix()} ${num}`);
   }
 
   writeValue(v: string): void {

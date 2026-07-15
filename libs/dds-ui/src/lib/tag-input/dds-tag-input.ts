@@ -1,6 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, forwardRef, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  forwardRef,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { DdsOption } from '../dropdown/dds-dropdown';
+
+let uid = 0;
 
 /**
  * Tag input bound to a controlled vocabulary (markets / regions).
@@ -9,7 +20,7 @@ import { DdsOption } from '../dropdown/dds-dropdown';
 @Component({
   selector: 'dds-tag-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:keydown.escape)': 'open.set(false)' },
+  host: { '(document:keydown.escape)': 'onDocEscape()' },
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => DdsTagInput), multi: true },
   ],
@@ -36,13 +47,18 @@ import { DdsOption } from '../dropdown/dds-dropdown';
           </span>
         }
         <button
+          #trigger
           type="button"
           class="dds-ms__add"
+          role="combobox"
           aria-haspopup="listbox"
           [attr.aria-expanded]="open()"
+          [attr.aria-controls]="open() ? panelId : null"
+          [attr.aria-activedescendant]="open() && activeIndex() >= 0 ? optId(activeIndex()) : null"
           [attr.aria-label]="label() || ariaLabel() || null"
           [disabled]="disabled() || !available().length"
-          (click)="open.set(!open())"
+          (click)="toggle()"
+          (keydown)="onKeydown($event)"
         >
           @if (!selectedOptions().length) {
             <span class="dds-ms__placeholder">{{ placeholder() || 'Lisa…' }}</span>
@@ -53,9 +69,20 @@ import { DdsOption } from '../dropdown/dds-dropdown';
 
       @if (open() && available().length) {
         <button type="button" class="dds-ms__backdrop" aria-hidden="true" tabindex="-1" (click)="open.set(false)"></button>
-        <div class="dds-ms__panel" role="listbox" aria-multiselectable="true" [attr.aria-label]="label() || ariaLabel() || null">
-          @for (opt of available(); track opt.value) {
-            <button type="button" role="option" aria-selected="false" class="dds-ms__opt" (click)="addValue(opt.value)">
+        <div class="dds-ms__panel" role="listbox" aria-multiselectable="true" [id]="panelId"
+          [attr.aria-label]="label() || ariaLabel() || null">
+          @for (opt of available(); track opt.value; let i = $index) {
+            <button
+              type="button"
+              role="option"
+              tabindex="-1"
+              aria-selected="false"
+              [id]="optId(i)"
+              class="dds-ms__opt"
+              [class.dds-ms__opt--active]="activeIndex() === i"
+              (mouseenter)="activeIndex.set(i)"
+              (click)="addValue(opt.value)"
+            >
               {{ opt.label }}
             </button>
           }
@@ -175,13 +202,15 @@ import { DdsOption } from '../dropdown/dds-dropdown';
         cursor: pointer;
         text-align: left;
       }
-      .dds-ms__opt:hover {
+      .dds-ms__opt:hover,
+      .dds-ms__opt--active {
         background: var(--dds-color-surface-alt);
       }
     `,
   ],
 })
 export class DdsTagInput implements ControlValueAccessor {
+  readonly panelId = `dds-ms-panel-${uid++}`;
   readonly label = input<string>('');
   readonly ariaLabel = input<string>('');
   readonly placeholder = input<string>('');
@@ -191,6 +220,8 @@ export class DdsTagInput implements ControlValueAccessor {
   protected readonly open = signal(false);
   protected readonly selected = signal<string[]>([]);
   protected readonly disabled = signal(false);
+  protected readonly activeIndex = signal(-1);
+  private readonly triggerEl = viewChild<ElementRef<HTMLButtonElement>>('trigger');
 
   protected readonly selectedOptions = computed(() => {
     const opts = this.options();
@@ -206,13 +237,85 @@ export class DdsTagInput implements ControlValueAccessor {
   private onChange: (v: string[]) => void = () => {};
   protected onTouched: () => void = () => {};
 
+  protected optId(i: number): string {
+    return `${this.panelId}-opt-${i}`;
+  }
+
+  protected toggle(): void {
+    if (this.open()) {
+      this.open.set(false);
+    } else {
+      this.activeIndex.set(0);
+      this.open.set(true);
+    }
+  }
+
+  protected onDocEscape(): void {
+    if (this.open()) {
+      this.open.set(false);
+      this.triggerEl()?.nativeElement.focus();
+    }
+  }
+
+  protected onKeydown(event: KeyboardEvent): void {
+    const opts = this.available();
+    if (!this.open()) {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.activeIndex.set(0);
+        this.open.set(true);
+      }
+      return;
+    }
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.activeIndex.set(Math.min(this.activeIndex() + 1, opts.length - 1));
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.activeIndex.set(Math.max(this.activeIndex() - 1, 0));
+        break;
+      case 'Home':
+        event.preventDefault();
+        this.activeIndex.set(0);
+        break;
+      case 'End':
+        event.preventDefault();
+        this.activeIndex.set(opts.length - 1);
+        break;
+      case 'Enter':
+      case ' ': {
+        event.preventDefault();
+        const opt = opts[this.activeIndex()];
+        if (opt) {
+          this.addValue(opt.value);
+        }
+        break;
+      }
+      case 'Escape':
+        event.preventDefault();
+        this.open.set(false);
+        this.triggerEl()?.nativeElement.focus();
+        break;
+      case 'Tab':
+        this.open.set(false);
+        break;
+    }
+  }
+
   protected addValue(v: string): void {
     if (v && !this.selected().includes(v)) {
       this.selected.update((cur) => [...cur, v]);
       this.onChange(this.selected());
       this.onTouched();
     }
-    if (!this.available().length) {
+    // The picked option leaves the list: clamp the active index and restore
+    // focus to the trigger (a mouse click focused the now-removed button).
+    const left = this.available().length;
+    this.activeIndex.set(left ? Math.min(this.activeIndex(), left - 1) : -1);
+    this.triggerEl()?.nativeElement.focus();
+    if (!left) {
       this.open.set(false);
     }
   }

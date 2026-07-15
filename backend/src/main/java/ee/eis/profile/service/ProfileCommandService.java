@@ -29,7 +29,9 @@ import ee.eis.profile.service.validation.IbanValidator;
 import ee.eis.profile.service.validation.MarketVocabulary;
 import ee.eis.profile.service.validation.PersonCodeValidator;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,7 +99,7 @@ public class ProfileCommandService {
         CompanyResponse company = registryClient.fetchCompany(rc)
                 .orElseThrow(() -> new ProfileNotFoundException(rc));
 
-        validate(req.bankAccounts(), req.contacts(), req.targetMarkets(), req.operatingRegions());
+        validate(req.employeeCount(), req.bankAccounts(), req.contacts(), req.targetMarkets(), req.operatingRegions());
 
         CustomerProfile profile = new CustomerProfile();
         mapper.applyRegistryFields(profile, company);
@@ -149,7 +151,7 @@ public class ProfileCommandService {
     public ProfileView updateStep(String registryCode, int step, StepUpdateRequest req) {
         CustomerProfile profile = profiles.findByRegistryCode(registryCode)
                 .orElseThrow(() -> new ProfileNotFoundException(registryCode));
-        validate(req.bankAccounts(), req.contacts(), req.targetMarkets(), req.operatingRegions());
+        validate(req.employeeCount(), req.bankAccounts(), req.contacts(), req.targetMarkets(), req.operatingRegions());
         UUID id = profile.getId();
 
         // The wizard always sends the full set of user-owned scalars, so null/blank
@@ -189,7 +191,16 @@ public class ProfileCommandService {
             saveBankAccounts(id, req.bankAccounts());
         }
         if (req.targetMarkets() != null || req.operatingRegions() != null) {
-            marketRegions.deleteAll(marketRegions.findByProfileId(id));
+            // Scope the replace per region type: a null list means "unchanged", so its rows must survive.
+            var existing = marketRegions.findByProfileId(id);
+            if (req.targetMarkets() != null) {
+                existing.stream().filter(m -> "TARGET_MARKET".equals(m.getRegionType()))
+                        .forEach(marketRegions::delete);
+            }
+            if (req.operatingRegions() != null) {
+                existing.stream().filter(m -> "OPERATING_REGION".equals(m.getRegionType()))
+                        .forEach(marketRegions::delete);
+            }
             marketRegions.flush();
             saveMarketRegions(id, req.targetMarkets(), req.operatingRegions());
         }
@@ -216,6 +227,12 @@ public class ProfileCommandService {
         var cap = resolver.mergeRegistry(profile.getCapitalSize(), profile.getCapitalSizeSource(), fresh.capitalSize());
         profile.setCapitalSize(cap.value());
         profile.setCapitalSizeSource(cap.source());
+        var em = resolver.mergeRegistry(profile.getEmtakCode(), profile.getEmtakSource(), fresh.emtakCode());
+        profile.setEmtakCode(em.value());
+        profile.setEmtakSource(em.source());
+        if (em.source() == Source.REGISTRY && fresh.emtakCode() != null) {
+            profile.setEmtakName(fresh.emtakName());
+        }
         profiles.save(profile);
 
         UUID id = profile.getId();
@@ -252,20 +269,29 @@ public class ProfileCommandService {
         }
     }
 
-    private void validate(List<BankAccountInput> banks, List<ContactInput> contactInputs,
+    private void validate(Integer employeeCount, List<BankAccountInput> banks, List<ContactInput> contactInputs,
                           List<String> targetMarkets, List<String> operatingRegions) {
         List<String> errors = new ArrayList<>();
+        if (employeeCount != null && employeeCount < 0) {
+            errors.add("Employee count must not be negative");
+        }
         if (banks != null) {
+            Set<String> seenIbans = new HashSet<>();
             for (BankAccountInput b : banks) {
                 if (!ibanValidator.isValid(b.iban())) {
                     errors.add("Invalid IBAN: " + b.iban());
+                } else if (!seenIbans.add(b.iban().replace(" ", "").toUpperCase())) {
+                    errors.add("Duplicate IBAN: " + b.iban());
                 }
             }
         }
         if (contactInputs != null) {
+            Set<String> seenCodes = new HashSet<>();
             for (ContactInput c : contactInputs) {
                 if (StringUtils.hasText(c.personCode()) && !personCodeValidator.isValid(c.personCode())) {
                     errors.add("Invalid person code: " + c.personCode());
+                } else if (StringUtils.hasText(c.personCode()) && !seenCodes.add(c.personCode())) {
+                    errors.add("Duplicate contact person code: " + c.personCode());
                 }
             }
         }

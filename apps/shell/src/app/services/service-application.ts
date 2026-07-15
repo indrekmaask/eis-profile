@@ -48,6 +48,8 @@ import { IdentityService } from '../identity/identity.service';
         } @else {
           <button dds-button variant="primary" (click)="submit()">Esita taotlus</button>
         }
+      } @else if (profileMissing()) {
+        <p>Profiili andmeid ei õnnestunud laadida. Koosta esmalt ettevõtte profiil või proovi hiljem uuesti.</p>
       } @else {
         <p>Laen profiili…</p>
       }
@@ -116,12 +118,16 @@ export class ServiceApplication {
   private readonly router = inject(Router);
 
   protected readonly profile = signal<ProfileView | null>(null);
+  protected readonly profileMissing = signal(false);
   protected readonly submitted = signal(false);
 
   constructor() {
     const company = this.identity.activeCompany();
     if (company) {
-      this.api.getProfile(company.registryCode).subscribe((p) => this.profile.set(p));
+      this.api.getProfile(company.registryCode).subscribe({
+        next: (p) => this.profile.set(p),
+        error: () => this.profileMissing.set(true),
+      });
     }
   }
 

@@ -30,6 +30,7 @@ export class PreAdvisory {
   private readonly router = inject(Router);
 
   protected readonly profile = signal<ProfileView | null>(null);
+  protected readonly profileMissing = signal(false);
   protected readonly done = signal(false);
   protected readonly submitAttempted = signal(false);
 
@@ -52,7 +53,7 @@ export class PreAdvisory {
   protected readonly participantOptions = computed<DdsOption[]>(() => [
     ...(this.profile()?.contacts ?? []).map((c) => ({
       value: c.id,
-      label: `${c.fullName} (${c.role})`,
+      label: c.role ? `${c.fullName} (${c.role})` : c.fullName,
     })),
     { value: '__new__', label: '+ Lisage uus isik', action: true },
   ]);
@@ -77,7 +78,10 @@ export class PreAdvisory {
   constructor() {
     const company = this.identity.activeCompany();
     if (company) {
-      this.api.getProfile(company.registryCode).subscribe((p) => this.profile.set(p));
+      this.api.getProfile(company.registryCode).subscribe({
+        next: (p) => this.profile.set(p),
+        error: () => this.profileMissing.set(true),
+      });
     }
     effect(() => {
       const sc = this.selectedContact();

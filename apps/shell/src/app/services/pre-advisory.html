@@ -104,6 +104,8 @@
       <a dds-button variant="pill" routerLink="/services/dev">← Tagasi</a>
       <button dds-button variant="primary" (click)="submit()">Registreeru →</button>
     </footer>
+  } @else if (profileMissing()) {
+    <p class="adv__muted">Profiili andmeid ei õnnestunud laadida. Koosta esmalt ettevõtte profiil või proovi hiljem uuesti.</p>
   } @else {
     <p class="adv__muted">Laen profiili…</p>
   }

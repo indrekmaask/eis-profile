@@ -52,7 +52,8 @@
             <div class="edit__grid">
               <div class="edit__field">
                 <span class="edit__flabel">E-post *</span>
-                <dds-input label="" ariaLabel="E-post" type="email" formControlName="contactEmail" />
+                <dds-input label="" ariaLabel="E-post" type="email" formControlName="contactEmail"
+                  [error]="showError(form.controls.contactEmail) ? 'Sisesta korrektne e-post' : ''" />
               </div>
               <div class="edit__field">
                 <span class="edit__flabel">Telefoninumber *</span>
@@ -105,7 +106,8 @@
                 <div class="edit__grid">
                   <div class="edit__field">
                     <span class="edit__flabel">Ametinimetus *</span>
-                    <dds-input label="" ariaLabel="Ametinimetus" formControlName="role" />
+                    <dds-input label="" ariaLabel="Ametinimetus" formControlName="role"
+                      [error]="showError(c.controls.role) ? 'Ametinimetus on kohustuslik' : ''" />
                   </div>
                   <div class="edit__field">
                     <span class="edit__flabel">Isikukood</span>
@@ -172,7 +174,8 @@
             </div>
             <div class="edit__field edit__field--short">
               <span class="edit__flabel">Töötajate arv <span class="edit__srcbadge">👤 Kasutaja</span></span>
-              <dds-input label="" ariaLabel="Töötajate arv" inputmode="numeric" formControlName="employeeCount" />
+              <dds-input label="" ariaLabel="Töötajate arv" inputmode="numeric" formControlName="employeeCount"
+                [error]="showError(form.controls.employeeCount) ? 'Sisesta täisarv' : ''" />
             </div>
           </div>
 

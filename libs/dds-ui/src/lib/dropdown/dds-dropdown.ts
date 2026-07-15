@@ -1,11 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   computed,
   forwardRef,
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -20,7 +22,7 @@ let uid = 0;
 @Component({
   selector: 'dds-dropdown',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:keydown.escape)': 'open.set(false)' },
+  host: { '(document:keydown.escape)': 'onDocEscape()' },
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => DdsDropdown), multi: true },
   ],
@@ -32,15 +34,20 @@ let uid = 0;
         </span>
       }
       <button
+        #trigger
         type="button"
         class="dds-dd__trigger"
         [class.dds-dd__trigger--error]="!!error()"
+        role="combobox"
         aria-haspopup="listbox"
         [attr.aria-expanded]="open()"
+        [attr.aria-controls]="open() ? panelId : null"
+        [attr.aria-activedescendant]="open() && activeIndex() >= 0 ? optId(activeIndex()) : null"
         [attr.aria-label]="label() ? null : ariaLabel() || null"
         [attr.aria-labelledby]="label() ? labelId : null"
         [disabled]="disabled()"
-        (click)="open.set(!open())"
+        (click)="toggle()"
+        (keydown)="onKeydown($event)"
       >
         <span [class.dds-dd__placeholder]="!triggerLabel()">{{ triggerLabel() || placeholder() }}</span>
         <span class="dds-dd__chevron" aria-hidden="true">⌄</span>
@@ -54,23 +61,22 @@ let uid = 0;
           tabindex="-1"
           (click)="open.set(false)"
         ></button>
-        <div class="dds-dd__panel" role="listbox" [attr.aria-label]="label() || ariaLabel() || null">
-          @if (placeholder() && !resetAfterSelect()) {
-            <button type="button" role="option" [attr.aria-selected]="!value()" class="dds-dd__opt" (click)="choose('')">
-              {{ placeholder() }}
-            </button>
-          }
-          @for (opt of options(); track opt.value) {
+        <div class="dds-dd__panel" role="listbox" [id]="panelId" [attr.aria-label]="label() || ariaLabel() || null">
+          @for (opt of navOptions(); track opt.value; let i = $index) {
             <button
               type="button"
               role="option"
-              [attr.aria-selected]="value() === opt.value"
+              tabindex="-1"
+              [id]="optId(i)"
+              [attr.aria-selected]="opt.value ? value() === opt.value : !value()"
               class="dds-dd__opt"
               [class.dds-dd__opt--action]="opt.action"
+              [class.dds-dd__opt--active]="activeIndex() === i"
+              (mouseenter)="activeIndex.set(i)"
               (click)="choose(opt.value)"
             >
               <span>{{ opt.label }}</span>
-              @if (!opt.action && value() === opt.value) {
+              @if (!opt.action && opt.value && value() === opt.value) {
                 <span class="dds-dd__check" aria-hidden="true">✓</span>
               }
             </button>
@@ -172,7 +178,8 @@ let uid = 0;
         cursor: pointer;
         text-align: left;
       }
-      .dds-dd__opt:hover {
+      .dds-dd__opt:hover,
+      .dds-dd__opt--active {
         background: var(--dds-color-surface-alt);
       }
       .dds-dd__opt--action {
@@ -191,6 +198,7 @@ let uid = 0;
 })
 export class DdsDropdown implements ControlValueAccessor {
   readonly labelId = `dds-dd-${uid++}`;
+  readonly panelId = `${this.labelId}-panel`;
   readonly label = input<string>('');
   readonly ariaLabel = input<string>('');
   readonly placeholder = input<string>('');
@@ -204,6 +212,15 @@ export class DdsDropdown implements ControlValueAccessor {
   protected readonly open = signal(false);
   protected readonly value = signal('');
   protected readonly disabled = signal(false);
+  protected readonly activeIndex = signal(-1);
+  private readonly triggerEl = viewChild<ElementRef<HTMLButtonElement>>('trigger');
+
+  /** Options as rendered, with the placeholder ("clear") entry prepended when shown. */
+  protected readonly navOptions = computed<DdsOption[]>(() =>
+    this.placeholder() && !this.resetAfterSelect()
+      ? [{ value: '', label: this.placeholder() }, ...this.options()]
+      : this.options(),
+  );
 
   protected readonly triggerLabel = computed(() => {
     if (this.resetAfterSelect()) {
@@ -215,8 +232,83 @@ export class DdsDropdown implements ControlValueAccessor {
   private onChange: (v: string) => void = () => {};
   protected onTouched: () => void = () => {};
 
+  protected optId(i: number): string {
+    return `${this.labelId}-opt-${i}`;
+  }
+
+  protected toggle(): void {
+    if (this.open()) {
+      this.open.set(false);
+    } else {
+      this.openPanel();
+    }
+  }
+
+  protected onDocEscape(): void {
+    if (this.open()) {
+      this.closePanel();
+    }
+  }
+
+  protected onKeydown(event: KeyboardEvent): void {
+    const opts = this.navOptions();
+    if (!this.open()) {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.openPanel();
+      }
+      return;
+    }
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.activeIndex.set(Math.min(this.activeIndex() + 1, opts.length - 1));
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.activeIndex.set(Math.max(this.activeIndex() - 1, 0));
+        break;
+      case 'Home':
+        event.preventDefault();
+        this.activeIndex.set(0);
+        break;
+      case 'End':
+        event.preventDefault();
+        this.activeIndex.set(opts.length - 1);
+        break;
+      case 'Enter':
+      case ' ': {
+        event.preventDefault();
+        const opt = opts[this.activeIndex()];
+        if (opt) {
+          this.choose(opt.value);
+        }
+        break;
+      }
+      case 'Escape':
+        event.preventDefault();
+        this.closePanel();
+        break;
+      case 'Tab':
+        this.open.set(false);
+        break;
+    }
+  }
+
+  private openPanel(): void {
+    const idx = this.navOptions().findIndex((o) => o.value && o.value === this.value());
+    this.activeIndex.set(idx >= 0 ? idx : 0);
+    this.open.set(true);
+  }
+
+  private closePanel(): void {
+    this.open.set(false);
+    this.triggerEl()?.nativeElement.focus();
+  }
+
   protected choose(value: string): void {
     this.open.set(false);
+    this.triggerEl()?.nativeElement.focus();
     this.selected.emit(value);
     if (this.resetAfterSelect()) {
       return;

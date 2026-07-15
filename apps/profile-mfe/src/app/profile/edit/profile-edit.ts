@@ -106,7 +106,7 @@ export class ProfileEdit {
     website: new FormControl('', { nonNullable: true }),
     contactEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     contactPhone: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    employeeCount: new FormControl('', { nonNullable: true }),
+    employeeCount: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d*$/)] }),
     contacts: new FormArray<ContactGroup>([]),
     targetMarkets: new FormControl<string[]>([], { nonNullable: true }),
     operatingRegions: new FormControl<string[]>([], { nonNullable: true }),
@@ -129,12 +129,9 @@ export class ProfileEdit {
           this.activeStep.set(this.initialStep());
         }
       } else if (this.prefill()) {
-        // Seed one empty primary contact so the create flow's step 1 starts
-        // with a person card (create otherwise starts with no contacts).
         this.populated = true;
-        if (!this.contacts.length) {
-          this.contacts.push(this.contactGroup('', '', '', '', '', '', true));
-          this.contactsVersion.update((v) => v + 1);
+        if (!this.bankAccounts.length) {
+          this.bankAccounts.push(new FormControl('', { nonNullable: true }));
         }
       }
     });
@@ -243,11 +240,12 @@ export class ProfileEdit {
   private bankAccountValues(): BankAccountInput[] {
     const ibans = this.bankAccounts.controls.map((c) => c.value.trim()).filter(Boolean);
     // Preserve bankName/primary of unchanged accounts — the wizard only edits IBANs.
-    const keepsPrimary = ibans.some(
-      (iban) => this.originalBanks.find((o) => o.iban === iban)?.primary,
-    );
+    // Compare normalized (stored IBANs are uppercased/despaced by the backend).
+    const norm = (iban: string) => iban.replace(/\s+/g, '').toUpperCase();
+    const findOrig = (iban: string) => this.originalBanks.find((o) => o.iban === norm(iban));
+    const keepsPrimary = ibans.some((iban) => findOrig(iban)?.primary);
     return ibans.map((iban, i) => {
-      const orig = this.originalBanks.find((o) => o.iban === iban);
+      const orig = findOrig(iban);
       return {
         iban,
         bankName: orig?.bankName ?? null,
@@ -303,7 +301,7 @@ export class ProfileEdit {
     return new FormGroup({
       firstName: new FormControl(firstName, { nonNullable: true, validators: [Validators.required] }),
       lastName: new FormControl(lastName, { nonNullable: true, validators: [Validators.required] }),
-      role: new FormControl(role, { nonNullable: true }),
+      role: new FormControl(role, { nonNullable: true, validators: [Validators.required] }),
       email: new FormControl(email, {
         nonNullable: true,
         validators: [Validators.required, Validators.email],
@@ -409,6 +407,15 @@ export class ProfileEdit {
     return true;
   }
 
+  private employeeCountValid(): boolean {
+    const c = this.form.controls.employeeCount;
+    if (c.invalid) {
+      c.markAsTouched();
+      return false;
+    }
+    return true;
+  }
+
   private employeeCountValue(): number | null {
     const raw = this.form.controls.employeeCount.value.trim();
     const n = raw ? Number(raw) : null;
@@ -422,6 +429,10 @@ export class ProfileEdit {
     }
     if (!this.contactsValid()) {
       this.go(1);
+      return;
+    }
+    if (!this.employeeCountValid()) {
+      this.go(2);
       return;
     }
     const rc = this.prefill()?.registryCode;
@@ -452,6 +463,10 @@ export class ProfileEdit {
       this.go(1);
       return;
     }
+    if (!this.employeeCountValid()) {
+      this.go(2);
+      return;
+    }
     const rc = this.profile()?.registryCode;
     if (!rc) {
       return;
@@ -476,13 +491,15 @@ export class ProfileEdit {
       .updateStep(rc, this.activeStep() + 1, body)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
+        // Success on next, not complete: takeUntilDestroyed also completes the
+        // stream when the component is destroyed mid-flight (aborted save).
+        next: () => {
+          this.editSaving.set(false);
+          this.saved.emit();
+        },
         error: (err: HttpErrorResponse) => {
           this.editSaving.set(false);
           this.editError.set(profileErrorMessage(err, 'Salvestamine ebaõnnestus. Proovi uuesti.'));
-        },
-        complete: () => {
-          this.editSaving.set(false);
-          this.saved.emit();
         },
       });
   }
