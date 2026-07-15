@@ -32,6 +32,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
+    // OpenAPI / Swagger UI — 3.0.0 targets Spring Boot 4 / Spring Framework 7.
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
+
     // Spring Boot 4 split autoconfiguration into per-technology modules;
     // spring-boot-flyway provides the Flyway autoconfiguration (+ flyway-core).
     implementation("org.springframework.boot:spring-boot-flyway")

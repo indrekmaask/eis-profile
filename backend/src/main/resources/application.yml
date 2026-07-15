@@ -32,6 +32,13 @@ eis:
   crm:
     enabled: ${CRM_ENABLED:false}
 
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    doc-expansion: list
+
 management:
   endpoints:
     web:
