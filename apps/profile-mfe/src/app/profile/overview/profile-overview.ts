@@ -155,7 +155,9 @@ export class ProfileOverview {
   }
 
   protected revenueRows(): { year: number; pct: number; label: string }[] {
-    const reports = [...this.profile().annualReports].sort((a, b) => b.reportYear - a.reportYear);
+    const reports = [...this.profile().annualReports]
+      .sort((a, b) => b.reportYear - a.reportYear)
+      .slice(0, 5);
     const totals = reports.map((r) => ({ year: r.reportYear, total: this.totalRevenue(r) ?? 0 }));
     const max = Math.max(1, ...totals.map((t) => t.total));
     return totals.map((t) => ({

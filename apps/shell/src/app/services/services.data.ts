@@ -131,6 +131,8 @@ export const SERVICES: ServiceDef[] = [
           label: 'Vähemalt 8 töötajat',
           detail: emp != null ? `Profiilis ${emp}` : 'Lisa töötajate arv profiilile',
         },
+        { icon: '○', label: 'Vähese tähtsusega abi (VTA) jääk', detail: 'kontrollib menetleja' },
+        { icon: '?', label: 'Projekti eelarve ja tegevused', detail: 'valitakse taotlusel' },
       ];
     },
   },

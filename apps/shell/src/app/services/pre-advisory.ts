@@ -33,6 +33,7 @@ export class PreAdvisory {
   protected readonly profileMissing = signal(false);
   protected readonly done = signal(false);
   protected readonly submitAttempted = signal(false);
+  protected readonly refreshing = signal(false);
 
   protected readonly participant = new FormControl('', { nonNullable: true });
   private readonly participantId = toSignal(this.participant.valueChanges, { initialValue: '' });
@@ -104,8 +105,29 @@ export class PreAdvisory {
       this.contactEdit.markAllAsTouched();
       return;
     }
+    const company = this.identity.activeCompany();
+    if (company) {
+      this.api.captureSnapshot(company.registryCode, 'PRE_ADVISORY').subscribe();
+    }
     this.done.set(true);
     window.scrollTo(0, 0);
+  }
+
+  // Refreshing from a service form triggers a profile-level refresh, so every service
+  // sees the fresh register state, not just this form (spec §5).
+  protected refreshRegistry(): void {
+    const company = this.identity.activeCompany();
+    if (!company || this.refreshing()) {
+      return;
+    }
+    this.refreshing.set(true);
+    this.api.refresh(company.registryCode).subscribe({
+      next: (p) => {
+        this.profile.set(p);
+        this.refreshing.set(false);
+      },
+      error: () => this.refreshing.set(false),
+    });
   }
 
   protected toDashboard(): void {

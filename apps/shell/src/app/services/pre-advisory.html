@@ -82,7 +82,13 @@
       </section>
 
       <section>
-        <h3>Arenguprogrammi taust</h3>
+        <div class="adv__blockhead">
+          <h3>Arenguprogrammi taust</h3>
+          <span class="adv__chip">profiilist · registriväljad lukus</span>
+          <button dds-button variant="pill" size="sm" [disabled]="refreshing()" (click)="refreshRegistry()">
+            {{ refreshing() ? 'Värskendan…' : 'Värskenda registriandmed' }}
+          </button>
+        </div>
         <div class="adv__row">
           <span class="adv__k">Eelmise MA eksportkäive</span>
           <span class="adv__v">{{ exportLabel() }}</span>

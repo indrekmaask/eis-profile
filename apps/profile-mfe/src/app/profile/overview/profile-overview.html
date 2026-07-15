@@ -133,6 +133,7 @@
         <h3>Töötajate arv</h3>
         @if (p.employeeCount.value != null) {
           <p class="mcard__value">{{ p.employeeCount.value }}</p>
+          <p class="ov__muted-italic">sinu lisatud</p>
         } @else {
           <p class="ov__muted-italic">Puuduvad</p>
         }
@@ -144,6 +145,7 @@
           <div class="mcard__pills">
             @for (m of marketLabels(); track m) { <span class="ov__chip">{{ m }}</span> }
           </div>
+          <p class="ov__muted-italic">sinu lisatud</p>
         } @else { <p class="ov__muted-italic">Puuduvad</p> }
       </div>
       <div class="card mcard">
@@ -168,7 +170,7 @@
   </section>
 
   <section class="ov__block">
-    <div class="ov__blockhead"><h2>Taustaandmed <dds-icon class="ov__lock" name="lock" /></h2></div>
+    <div class="ov__blockhead"><h2>Registriandmed <dds-icon class="ov__lock" name="lock" /></h2></div>
     <div class="ov__cards ov__cards--3">
       <button type="button" class="card mcard mcard--action" (click)="partiesOpen.set(true)">
         <span class="mcard__icon"><dds-icon name="users" /></span>
@@ -222,8 +224,8 @@
   }
 
   <div class="card ov__refreshbar">
-    <span>Andmed pärinevad registritest: {{ asOfDateTime() }} seisuga.</span>
-    <button dds-button variant="pill" size="sm" (click)="refresh.emit()">Värskenda andmeid</button>
+    <span>Registriandmed päritud {{ asOfDateTime() }} seisuga.</span>
+    <button dds-button variant="pill" size="sm" (click)="refresh.emit()">Värskenda registriandmed</button>
   </div>
 
 </div>
