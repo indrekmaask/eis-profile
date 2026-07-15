@@ -37,3 +37,6 @@ build/
 # source/deliverable docs (kept out of git), except tracked project docs
 docs/*
 .serena/
+
+# Local docs (not tracked)
+docs/
