@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DdsButton } from '@dds/ui';
 import { ProfileApiService, ProfileView } from '@eis/profile-api';
 import { IdentityService } from '../identity/identity.service';
-import { SERVICES, evaluate } from './services.data';
+import { SERVICES, ServiceDef, Verdict, evaluate, verdictRank } from './services.data';
 
 @Component({
   selector: 'app-services-list',
@@ -61,6 +61,9 @@ import { SERVICES, evaluate } from './services.data';
               <span class="svc__body">
                 <span class="svc__name">{{ s.listTitle ?? s.name }}</span>
                 <span class="svc__desc">{{ s.listIntro ?? s.intro }}</span>
+                <span [style.color]="verdictColor(s)" [style.fontWeight]="600" [style.fontSize.px]="13" [style.marginTop.px]="4">
+                  {{ verdictFor(s).txt }}
+                </span>
               </span>
               <dds-button variant="pill" size="sm" class="svc__cta">Vaata lähemalt →</dds-button>
             </a>
@@ -206,14 +209,25 @@ export class ServicesList {
   private readonly api = inject(ProfileApiService);
   private readonly router = inject(Router);
 
-  /** Only services whose automatic pre-check doesn't fail — the heading promises an eelhinnang. */
+  /** All services are shown; ineligible ones sink to the bottom (detail page explains why). */
   protected readonly services = computed(() => {
     const p = this.profile();
     if (!p) {
       return [];
     }
-    return SERVICES.filter((s) => evaluate(p, s).kind !== 'no');
+    return [...SERVICES].sort((a, b) => verdictRank(evaluate(p, a).kind) - verdictRank(evaluate(p, b).kind));
   });
+
+  protected verdictFor(s: ServiceDef): Verdict {
+    const p = this.profile();
+    return p ? evaluate(p, s) : { txt: '', kind: 'open' };
+  }
+
+  protected verdictColor(s: ServiceDef): string {
+    return { ok: '#067647', warn: '#b54708', maybe: '#475467', open: '#475467', no: '#b42318' }[
+      this.verdictFor(s).kind
+    ];
+  }
   protected readonly loading = signal(true);
   protected readonly profileMissing = signal(false);
   protected readonly loadFailed = signal(false);
