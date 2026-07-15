@@ -190,7 +190,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: var(--dds-space-4);
 }
-.ov__cards--3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--dds-space-4); }
+.ov__cards--3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--dds-space-4); }
 .mcard {
   position: relative;
   display: flex;

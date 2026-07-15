@@ -32,22 +32,15 @@
 
       <section>
         <h3>Kontaktisik</h3>
-        <label class="adv__label" for="participant">Nõustamisel osaleja *</label>
-        <div class="adv__selectwrap">
-          <select
-            id="participant"
-            class="adv__select"
-            [formControl]="participant"
-            [class.adv__select--error]="submitAttempted() && !participant.value"
-          >
-            <option value="" selected hidden>Valige isik</option>
-            @for (c of p.contacts; track c.id) {
-              <option [value]="c.id">{{ c.fullName }} — {{ c.role }}</option>
-            }
-            <option value="__new__">Lisage uus isik</option>
-          </select>
-          <span class="adv__chevron" aria-hidden="true">▾</span>
-        </div>
+        <dds-dropdown
+          class="adv__participant"
+          label="Nõustamisel osaleja"
+          [required]="true"
+          placeholder="Valige isik"
+          [options]="participantOptions()"
+          [formControl]="participant"
+          [error]="submitAttempted() && !participant.value ? 'Vali nõustamisel osaleja' : ''"
+        />
 
         @if (isNew()) {
           <div class="adv__contactgrid" [formGroup]="newPerson">

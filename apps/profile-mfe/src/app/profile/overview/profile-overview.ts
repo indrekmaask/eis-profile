@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 import { DdsButton, DdsIcon } from '@dds/ui';
 import { derivePersonInfo } from '@eis/profile-api';
 import { ProfileView } from '../../models/profile.models';
-import { TARGET_MARKETS, formatEstonianDate, labelFor } from '../../models/vocabulary';
+import { OPERATING_REGIONS, TARGET_MARKETS, formatEstonianDate, labelFor } from '../../models/vocabulary';
 
 interface PartyGroup {
   displayName: string;
@@ -149,7 +149,7 @@ export class ProfileOverview {
   protected readonly latestReport = computed(() => this.profile().annualReports[0] ?? null);
 
   protected regionLabels(): string[] {
-    return this.profile().cards.operatingRegions ?? [];
+    return (this.profile().cards.operatingRegions ?? []).map((c) => labelFor(OPERATING_REGIONS, c));
   }
 
   protected paymentLabel(): string {

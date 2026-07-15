@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { profileErrorMessage } from '@eis/profile-api';
 import {
   CreateProfileRequest,
   PrefillView,
@@ -94,7 +95,7 @@ export class ProfileStore {
         this.saving.set(false);
         if (err.status === 400) {
           // Validation failure: stay in the create flow and surface the message inline.
-          this.errorMessage.set(err.error?.detail ?? 'Kontrolli sisestatud andmeid');
+          this.errorMessage.set(profileErrorMessage(err, 'Kontrolli sisestatud andmeid'));
         } else {
           this.fail(err);
         }

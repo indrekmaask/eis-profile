@@ -199,6 +199,21 @@
   gap: var(--dds-space-4);
 }
 
+.edit__radio {
+  display: flex;
+  align-items: center;
+  gap: var(--dds-space-2);
+  cursor: pointer;
+  color: var(--dds-color-ink-strong);
+  font-size: var(--dds-font-size-md);
+}
+.edit__radio input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--dds-color-primary);
+  cursor: pointer;
+}
+
 .edit__robox {
   display: flex;
   align-items: center;

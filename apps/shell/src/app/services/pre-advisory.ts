@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DdsButton, DdsCard, DdsInput, DdsPhoneInput } from '@dds/ui';
+import { DdsButton, DdsCard, DdsDropdown, DdsInput, DdsPhoneInput, type DdsOption } from '@dds/ui';
 import { ProfileApiService, ProfileView } from '@eis/profile-api';
 import { IdentityService } from '../identity/identity.service';
 import { exportRevenue, money } from './services.data';
@@ -20,7 +20,7 @@ const MARKET_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-pre-advisory',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, DdsButton, DdsCard, DdsInput, DdsPhoneInput],
+  imports: [ReactiveFormsModule, RouterLink, DdsButton, DdsCard, DdsDropdown, DdsInput, DdsPhoneInput],
   templateUrl: './pre-advisory.html',
   styleUrl: './pre-advisory.scss',
 })
@@ -48,6 +48,14 @@ export class PreAdvisory {
   protected readonly selectedContact = computed(
     () => this.profile()?.contacts.find((c) => c.id === this.participantId()) ?? null,
   );
+
+  protected readonly participantOptions = computed<DdsOption[]>(() => [
+    ...(this.profile()?.contacts ?? []).map((c) => ({
+      value: c.id,
+      label: `${c.fullName} (${c.role})`,
+    })),
+    { value: '__new__', label: '+ Lisage uus isik', action: true },
+  ]);
 
   // Editable copy of the picked contact's details — local to this form; edits here
   // never write back to the profile.

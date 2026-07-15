@@ -9,23 +9,24 @@ import { DdsOption } from '../dropdown/dds-dropdown';
 @Component({
   selector: 'dds-tag-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(document:keydown.escape)': 'open.set(false)' },
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => DdsTagInput), multi: true },
   ],
   template: `
-    <label class="dds-field">
+    <div class="dds-ms">
       @if (label()) {
-        <span class="dds-field__label">
-          {{ label() }}@if (required()) {<span class="dds-field__req" aria-hidden="true">*</span>}
+        <span class="dds-ms__label">
+          {{ label() }}@if (required()) {<span class="dds-ms__req" aria-hidden="true">*</span>}
         </span>
       }
-      <div class="dds-field__box">
+      <div class="dds-ms__control">
         @for (opt of selectedOptions(); track opt.value) {
-          <span class="dds-tags__chip">
+          <span class="dds-ms__chip">
             <span>{{ opt.label }}</span>
             <button
               type="button"
-              class="dds-tags__remove"
+              class="dds-ms__remove"
               [attr.aria-label]="'Eemalda ' + opt.label"
               [disabled]="disabled()"
               (click)="remove(opt.value)"
@@ -34,41 +35,52 @@ import { DdsOption } from '../dropdown/dds-dropdown';
             </button>
           </span>
         }
-        @if (available().length) {
-          <select
-            class="dds-field__control"
-            [disabled]="disabled()"
-            [attr.aria-label]="label() || ariaLabel() || null"
-            (change)="add($event)"
-          >
-            <option value="" selected hidden>{{ selectedOptions().length ? '' : placeholder() || 'Lisa…' }}</option>
-            @for (opt of available(); track opt.value) {
-              <option [value]="opt.value">{{ opt.label }}</option>
-            }
-          </select>
-          <span class="dds-field__chevron" aria-hidden="true">▾</span>
-        }
+        <button
+          type="button"
+          class="dds-ms__add"
+          aria-haspopup="listbox"
+          [attr.aria-expanded]="open()"
+          [attr.aria-label]="label() || ariaLabel() || null"
+          [disabled]="disabled() || !available().length"
+          (click)="open.set(!open())"
+        >
+          @if (!selectedOptions().length) {
+            <span class="dds-ms__placeholder">{{ placeholder() || 'Lisa…' }}</span>
+          }
+          <span class="dds-ms__chevron" aria-hidden="true">⌄</span>
+        </button>
       </div>
-    </label>
+
+      @if (open() && available().length) {
+        <button type="button" class="dds-ms__backdrop" aria-hidden="true" tabindex="-1" (click)="open.set(false)"></button>
+        <div class="dds-ms__panel" role="listbox" aria-multiselectable="true" [attr.aria-label]="label() || ariaLabel() || null">
+          @for (opt of available(); track opt.value) {
+            <button type="button" role="option" aria-selected="false" class="dds-ms__opt" (click)="addValue(opt.value)">
+              {{ opt.label }}
+            </button>
+          }
+        </div>
+      }
+    </div>
   `,
   styles: [
     `
-      .dds-field {
+      .dds-ms {
+        position: relative;
         display: flex;
         flex-direction: column;
         gap: var(--dds-space-2);
         font-family: var(--dds-font-family);
       }
-      .dds-field__label {
+      .dds-ms__label {
         font-size: var(--dds-font-size-sm);
         font-weight: var(--dds-font-weight-medium);
       }
-      .dds-field__req {
+      .dds-ms__req {
         color: var(--dds-color-error);
         margin-left: 2px;
       }
-      .dds-field__box {
-        position: relative;
+      .dds-ms__control {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -76,14 +88,14 @@ import { DdsOption } from '../dropdown/dds-dropdown';
         background: var(--dds-color-surface);
         border: 1px solid var(--dds-color-border);
         border-radius: var(--dds-radius-control);
-        padding: var(--dds-space-2) var(--dds-space-6) var(--dds-space-2) var(--dds-space-3);
+        padding: var(--dds-space-2) var(--dds-space-3);
         min-height: 48px;
       }
-      .dds-field__box:focus-within {
+      .dds-ms__control:focus-within {
         border-color: var(--dds-color-primary-strong);
         box-shadow: var(--dds-focus-ring);
       }
-      .dds-tags__chip {
+      .dds-ms__chip {
         display: inline-flex;
         align-items: center;
         gap: var(--dds-space-2);
@@ -93,7 +105,7 @@ import { DdsOption } from '../dropdown/dds-dropdown';
         padding: var(--dds-space-1) var(--dds-space-2) var(--dds-space-1) var(--dds-space-3);
         font-size: var(--dds-font-size-sm);
       }
-      .dds-tags__remove {
+      .dds-ms__remove {
         background: none;
         border: none;
         cursor: pointer;
@@ -102,27 +114,69 @@ import { DdsOption } from '../dropdown/dds-dropdown';
         color: var(--dds-color-registry-accent);
         padding: 0 var(--dds-space-1);
       }
-      .dds-field__control {
-        appearance: none;
+      .dds-ms__add {
         flex: 1;
-        min-width: 120px;
-        font-family: inherit;
-        font-size: var(--dds-font-size-md);
-        background: transparent;
+        min-width: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--dds-space-2);
+        background: none;
         border: none;
         padding: var(--dds-space-2) 0;
+        font: inherit;
+        font-size: var(--dds-font-size-md);
+        color: var(--dds-color-ink-strong);
+        cursor: pointer;
+        text-align: left;
+      }
+      .dds-ms__add:disabled {
+        cursor: default;
+      }
+      .dds-ms__placeholder {
         color: var(--dds-color-ink-muted);
       }
-      .dds-field__control:focus {
-        outline: none;
+      .dds-ms__chevron {
+        margin-left: auto;
+        color: var(--dds-color-ink-muted);
       }
-      .dds-field__chevron {
+      .dds-ms__backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        background: none;
+        border: none;
+        cursor: default;
+      }
+      .dds-ms__panel {
         position: absolute;
-        right: var(--dds-space-4);
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
-        color: var(--dds-color-ink-subtle);
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        z-index: 30;
+        padding: var(--dds-space-2);
+        background: var(--dds-color-surface);
+        border: 1px solid var(--dds-color-border);
+        border-radius: var(--dds-radius-control);
+        box-shadow: var(--dds-shadow-card);
+        max-height: 320px;
+        overflow-y: auto;
+      }
+      .dds-ms__opt {
+        width: 100%;
+        display: block;
+        padding: var(--dds-space-3) var(--dds-space-4);
+        background: none;
+        border: none;
+        border-radius: var(--dds-radius-control);
+        font: inherit;
+        font-size: var(--dds-font-size-md);
+        color: var(--dds-color-ink-strong);
+        cursor: pointer;
+        text-align: left;
+      }
+      .dds-ms__opt:hover {
+        background: var(--dds-color-surface-alt);
       }
     `,
   ],
@@ -134,6 +188,7 @@ export class DdsTagInput implements ControlValueAccessor {
   readonly options = input<DdsOption[]>([]);
   readonly required = input(false);
 
+  protected readonly open = signal(false);
   protected readonly selected = signal<string[]>([]);
   protected readonly disabled = signal(false);
 
@@ -151,15 +206,15 @@ export class DdsTagInput implements ControlValueAccessor {
   private onChange: (v: string[]) => void = () => {};
   protected onTouched: () => void = () => {};
 
-  protected add(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    const v = select.value;
+  protected addValue(v: string): void {
     if (v && !this.selected().includes(v)) {
       this.selected.update((cur) => [...cur, v]);
       this.onChange(this.selected());
       this.onTouched();
     }
-    select.value = '';
+    if (!this.available().length) {
+      this.open.set(false);
+    }
   }
   protected remove(value: string): void {
     this.selected.update((cur) => cur.filter((v) => v !== value));

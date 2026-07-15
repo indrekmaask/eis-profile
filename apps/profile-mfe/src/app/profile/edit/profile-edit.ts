@@ -9,7 +9,9 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { profileErrorMessage } from '@eis/profile-api';
 import {
   FormArray,
   FormControl,
@@ -19,7 +21,9 @@ import {
 } from '@angular/forms';
 import {
   DdsButton,
+  DdsDropdown,
   DdsInput,
+  type DdsOption,
   DdsPhoneInput,
   DdsStep,
   DdsStepper,
@@ -65,7 +69,7 @@ export function joinName(first: string, last: string): string {
 @Component({
   selector: 'app-profile-edit',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DdsButton, DdsInput, DdsPhoneInput, DdsStepper, DdsTagInput],
+  imports: [ReactiveFormsModule, DdsButton, DdsDropdown, DdsInput, DdsPhoneInput, DdsStepper, DdsTagInput],
   templateUrl: './profile-edit.html',
   styleUrl: './profile-edit.scss',
 })
@@ -292,13 +296,13 @@ export class ProfileEdit {
   ): ContactGroup {
     return new FormGroup({
       firstName: new FormControl(firstName, { nonNullable: true, validators: [Validators.required] }),
-      lastName: new FormControl(lastName, { nonNullable: true }),
+      lastName: new FormControl(lastName, { nonNullable: true, validators: [Validators.required] }),
       role: new FormControl(role, { nonNullable: true }),
       email: new FormControl(email, {
         nonNullable: true,
         validators: [Validators.required, Validators.email],
       }),
-      phone: new FormControl(phone, { nonNullable: true }),
+      phone: new FormControl(phone, { nonNullable: true, validators: [Validators.required] }),
       personCode: new FormControl(personCode, { nonNullable: true }),
       primary: new FormControl(primary, { nonNullable: true }),
     });
@@ -323,6 +327,11 @@ export class ProfileEdit {
     this.contactsError.set(null);
   }
 
+  protected setPrimary(i: number): void {
+    this.contacts.controls.forEach((g, idx) => g.controls.primary.setValue(idx === i));
+    this.contactsVersion.update((v) => v + 1);
+  }
+
   protected removeContact(i: number): void {
     const wasPrimary = this.contacts.at(i).controls.primary.value;
     this.contacts.removeAt(i);
@@ -332,9 +341,15 @@ export class ProfileEdit {
     this.contactsVersion.update((v) => v + 1);
   }
 
-  protected onAddSelect(event: Event): void {
-    const sel = event.target as HTMLSelectElement;
-    const v = sel.value;
+  protected readonly contactAddOptions = computed<DdsOption[]>(() => [
+    ...this.partySuggestions().map((s) => ({
+      value: s.personCode,
+      label: `${s.displayName} — ${s.roles}`,
+    })),
+    { value: '__new__', label: '+ Lisage uus isik', action: true },
+  ]);
+
+  protected onAddSelect(v: string): void {
     if (v === '__new__') {
       this.addContact();
     } else if (v) {
@@ -343,7 +358,6 @@ export class ProfileEdit {
         this.addContact(s);
       }
     }
-    sel.value = '';
   }
 
   protected addBank(): void {
@@ -433,9 +447,9 @@ export class ProfileEdit {
       .updateStep(rc, this.activeStep() + 1, body)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        error: () => {
+        error: (err: HttpErrorResponse) => {
           this.editSaving.set(false);
-          this.editError.set('Salvestamine ebaõnnestus. Proovi uuesti.');
+          this.editError.set(profileErrorMessage(err, 'Salvestamine ebaõnnestus. Proovi uuesti.'));
         },
         complete: () => {
           this.editSaving.set(false);

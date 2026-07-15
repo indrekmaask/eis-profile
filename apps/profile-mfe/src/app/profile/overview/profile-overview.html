@@ -132,7 +132,7 @@
         @if (p.employeeCount.value != null) {
           <p class="mcard__value">{{ p.employeeCount.value }}</p>
         } @else {
-          <p class="ov__muted-italic">Sisestamata</p>
+          <p class="ov__muted-italic">Puuduvad</p>
         }
       </div>
       <div class="card mcard">
@@ -142,7 +142,7 @@
           <div class="mcard__pills">
             @for (m of marketLabels(); track m) { <span class="ov__chip">{{ m }}</span> }
           </div>
-        } @else { <p class="ov__muted-italic">Sisestamata</p> }
+        } @else { <p class="ov__muted-italic">Puuduvad</p> }
       </div>
       <div class="card mcard">
         <span class="mcard__icon"><dds-icon name="map-pin" /></span>
@@ -151,7 +151,16 @@
           <div class="mcard__pills">
             @for (r of regionLabels(); track r) { <span class="ov__chip">{{ r }}</span> }
           </div>
-        } @else { <p class="ov__muted-italic">Sisestamata</p> }
+        } @else { <p class="ov__muted-italic">Puuduvad</p> }
+      </div>
+      <div class="card mcard">
+        <span class="mcard__icon"><dds-icon name="landmark" /></span>
+        <h3>Pangakontod</h3>
+        @if (p.bankAccounts.length) {
+          <div class="mcard__pills">
+            @for (b of p.bankAccounts; track b.iban) { <span class="ov__chip">{{ b.iban }}</span> }
+          </div>
+        } @else { <p class="ov__muted-italic">Puuduvad</p> }
       </div>
     </div>
   </section>

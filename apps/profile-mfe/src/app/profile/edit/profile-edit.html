@@ -91,8 +91,20 @@
                   </div>
                   <div class="edit__field">
                     <span class="edit__flabel">Perekonnanimi *</span>
-                    <dds-input label="" ariaLabel="Perekonnanimi" formControlName="lastName" />
+                    <dds-input label="" ariaLabel="Perekonnanimi" formControlName="lastName"
+                      [error]="showError(c.controls.lastName) ? 'Perekonnanimi on kohustuslik' : ''" />
                   </div>
+                </div>
+                <label class="edit__radio">
+                  <input
+                    type="radio"
+                    name="primaryContact"
+                    [checked]="c.controls.primary.value"
+                    (change)="setPrimary(i)"
+                  />
+                  <span>Peamine kontaktisik</span>
+                </label>
+                <div class="edit__grid">
                   <div class="edit__field">
                     <span class="edit__flabel">Ametinimetus *</span>
                     <dds-input label="" ariaLabel="Ametinimetus" formControlName="role" />
@@ -108,7 +120,8 @@
                   </div>
                   <div class="edit__field">
                     <span class="edit__flabel">Telefoninumber *</span>
-                    <dds-phone-input label="" ariaLabel="Telefoninumber" formControlName="phone" />
+                    <dds-phone-input label="" ariaLabel="Telefoninumber" formControlName="phone"
+                      [error]="showError(c.controls.phone) ? 'Telefoninumber on kohustuslik' : ''" />
                   </div>
                 </div>
                 <button type="button" dds-button variant="pill" size="sm" (click)="removeContact(i)">
@@ -120,13 +133,13 @@
 
           <div class="edit__field">
             <span class="edit__flabel">Lisa kontaktisik</span>
-            <select class="edit__select" aria-label="Lisa kontaktisik" (change)="onAddSelect($event)">
-              <option value="" selected>Vali isik</option>
-              @for (s of partySuggestions(); track s.personCode) {
-                <option [value]="s.personCode">{{ s.displayName }} — {{ s.roles }}</option>
-              }
-              <option value="__new__">+ Lisage uus isik</option>
-            </select>
+            <dds-dropdown
+              ariaLabel="Lisa kontaktisik"
+              placeholder="Vali isik"
+              [resetAfterSelect]="true"
+              [options]="contactAddOptions()"
+              (selected)="onAddSelect($event)"
+            />
           </div>
 
           @if (contactsError()) {

@@ -72,26 +72,9 @@ h1 {
   font-size: var(--dds-font-size-sm);
 }
 
-.adv__selectwrap {
-  position: relative;
+.adv__participant {
+  display: block;
   max-width: 720px;
-}
-
-.adv__select {
-  appearance: none;
-  width: 100%;
-  font-family: inherit;
-  font-size: var(--dds-font-size-md);
-  background: var(--dds-color-surface);
-  border: 1px solid var(--dds-color-border);
-  border-radius: var(--dds-radius-control);
-  padding: var(--dds-space-3) var(--dds-space-6) var(--dds-space-3) var(--dds-space-4);
-  min-height: 48px;
-  color: var(--dds-color-ink-strong);
-}
-
-.adv__select--error {
-  border-color: var(--dds-color-error);
 }
 
 .adv__contactgrid {
