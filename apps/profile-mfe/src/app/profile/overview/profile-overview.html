@@ -35,7 +35,7 @@
       <p class="ov__sub"><strong>Registrikood</strong> {{ p.registryCode }}</p>
     </div>
     <div class="ov__cta card" role="group" aria-label="Profiili täituvus">
-      @if (p.completeness.percent < 100) {
+      @if (missingLabels()) {
         <span>Profiili peaaegu täidetud</span>
         <button dds-button variant="primary" (click)="editRequested.emit(0)">Jätka täitmisega</button>
       } @else {
@@ -81,11 +81,13 @@
         <h2>Kontaktandmed</h2>
         <button dds-button variant="pill" size="sm" (click)="editRequested.emit(0)">Muuda ✎</button>
       </div>
-      @if (primaryContact(); as pc) {
-        <p>{{ pc.email }}</p>
-        <p>{{ pc.phone }}</p>
+      @if (p.contactEmail; as em) {
+        <p>{{ em }}</p>
       }
-      @if (operatingAddress() || legalAddress(); as addr) {
+      @if (p.contactPhone; as ph) {
+        <p>{{ ph }}</p>
+      }
+      @if (operatingAddress(); as addr) {
         <p class="ov__contactpanel-addr">{{ addr }}</p>
       }
       @if (profile().website.value; as site) {

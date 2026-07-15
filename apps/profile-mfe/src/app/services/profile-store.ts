@@ -34,7 +34,6 @@ export class ProfileStore {
   readonly toast = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
 
-  readonly completeness = computed(() => this.profile()?.completeness.percent ?? 0);
   readonly hasDiscrepancies = computed(() => (this.profile()?.discrepancies.length ?? 0) > 0);
 
   /** Load an existing profile; on 404 fall back to prefill (creation flow). */

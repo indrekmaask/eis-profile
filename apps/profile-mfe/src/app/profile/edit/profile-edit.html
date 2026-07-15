@@ -49,18 +49,16 @@
               <span class="edit__flabel">Tegevusaadress</span>
               <dds-input label="" ariaLabel="Tegevusaadress" formControlName="operatingAddress" />
             </div>
-            @if (primaryContact(); as pc) {
-              <div class="edit__grid">
-                <div class="edit__field">
-                  <span class="edit__flabel">E-post *</span>
-                  <dds-input label="" ariaLabel="E-post" type="email" [formControl]="pc.controls.email" />
-                </div>
-                <div class="edit__field">
-                  <span class="edit__flabel">Telefoninumber *</span>
-                  <dds-phone-input label="" ariaLabel="Telefoninumber" [formControl]="pc.controls.phone" />
-                </div>
+            <div class="edit__grid">
+              <div class="edit__field">
+                <span class="edit__flabel">E-post *</span>
+                <dds-input label="" ariaLabel="E-post" type="email" formControlName="contactEmail" />
               </div>
-            }
+              <div class="edit__field">
+                <span class="edit__flabel">Telefoninumber *</span>
+                <dds-phone-input label="" ariaLabel="Telefoninumber" formControlName="contactPhone" />
+              </div>
+            </div>
             <div class="edit__field">
               <span class="edit__flabel">Veebileht</span>
               <dds-input label="" ariaLabel="Veebileht" placeholder="https://" formControlName="website" />

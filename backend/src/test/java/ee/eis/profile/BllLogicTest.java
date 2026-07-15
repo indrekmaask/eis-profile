@@ -71,12 +71,10 @@ class BllLogicTest {
 
     @Test
     void completenessChecklist() {
-        var full = completeness.calculate(new Input(true, true, true, true, true));
-        assertThat(full.percent()).isEqualTo(100);
+        var full = completeness.calculate(new Input(true, true, true, true));
         assertThat(full.missing()).isEmpty();
 
-        var partial = completeness.calculate(new Input(true, true, true, true, false));
-        assertThat(partial.percent()).isEqualTo(80); // 4/5
+        var partial = completeness.calculate(new Input(true, true, true, false));
         assertThat(partial.missing()).containsExactly("website");
     }
 }

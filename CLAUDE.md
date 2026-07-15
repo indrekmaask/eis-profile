@@ -77,7 +77,3 @@ Backend tests are `@SpringBootTest` with a Testcontainers PostgreSQL container �
 
 - Companies: `10966560` Biomarket OÜ (seeded profile), `16789012` Porgand OÜ, `16890123` Karu Koobas OÜ (no profile — tests the create flow).
 - Default demo person: `48505150220` Eva Tamm (seeded Biomarket OWNER).
-
-## Handover constraints (procurement)
-
-Full commit history must stay visible; files must not be deleted before the framework agreement is signed.

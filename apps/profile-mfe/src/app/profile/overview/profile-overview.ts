@@ -77,22 +77,18 @@ export class ProfileOverview {
     this.profile().cards.targetMarkets.map((c) => labelFor(TARGET_MARKETS, c)),
   );
 
-  protected primaryContact() {
-    const p = this.profile();
-    return p.contacts.find((c) => c.primary) ?? p.contacts[0] ?? null;
-  }
-
   protected missingLabels(): string {
     const map: Record<string, string> = {
-      primaryContactEmail: 'kontakti e-post',
-      primaryContactPhone: 'kontakti telefon',
+      contactEmail: 'kontakti e-post',
+      contactPhone: 'kontakti telefon',
       employeeCount: 'töötajate arv',
-      marketRegion: 'sihtturud',
       website: 'veebileht',
     };
-    return this.profile()
-      .completeness.missing.map((m) => map[m] ?? m)
-      .join(', ');
+    const missing = this.profile().completeness.missing.map((m) => map[m] ?? m);
+    if (!this.operatingAddress()) {
+      missing.push('tegevuskoha aadress');
+    }
+    return missing.join(', ');
   }
 
   protected readonly partyGroups = computed<PartyGroup[]>(() => {

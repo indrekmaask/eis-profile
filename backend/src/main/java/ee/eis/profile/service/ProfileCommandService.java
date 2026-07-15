@@ -109,6 +109,12 @@ public class ProfileCommandService {
             profile.setEmployeeCount(req.employeeCount());
             profile.setEmployeeCountSource(Source.USER);
         }
+        if (StringUtils.hasText(req.contactEmail())) {
+            profile.setContactEmail(req.contactEmail());
+        }
+        if (StringUtils.hasText(req.contactPhone())) {
+            profile.setContactPhone(req.contactPhone());
+        }
         profile.setProfileStatus("ACTIVE");
         profile = profiles.save(profile);
         UUID id = profile.getId();
@@ -153,6 +159,12 @@ public class ProfileCommandService {
         if (req.website() != null) {
             profile.setWebsite(StringUtils.hasText(req.website()) ? req.website() : null);
             profile.setWebsiteSource(Source.USER);
+        }
+        if (req.contactEmail() != null) {
+            profile.setContactEmail(StringUtils.hasText(req.contactEmail()) ? req.contactEmail() : null);
+        }
+        if (req.contactPhone() != null) {
+            profile.setContactPhone(StringUtils.hasText(req.contactPhone()) ? req.contactPhone() : null);
         }
         profiles.save(profile);
 

@@ -11,7 +11,6 @@ export interface SourcedValue<T> {
 }
 
 export interface Completeness {
-  percent: number;
   missing: string[];
 }
 
@@ -93,6 +92,8 @@ export interface ProfileView {
   capitalSize: SourcedValue<number>;
   website: SourcedValue<string>;
   employeeCount: SourcedValue<number>;
+  contactEmail: string | null;
+  contactPhone: string | null;
   completeness: Completeness;
   cards: Cards;
   contacts: Contact[];
@@ -147,6 +148,8 @@ export interface CreateProfileRequest {
   website: string | null;
   employeeCount: number | null;
   operatingAddress: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
   contacts: ContactInput[];
   bankAccounts: BankAccountInput[];
   targetMarkets: string[];
@@ -157,6 +160,8 @@ export interface StepUpdateRequest {
   employeeCount?: number | null;
   website?: string | null;
   operatingAddress?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
   contacts?: ContactInput[];
   bankAccounts?: BankAccountInput[];
   targetMarkets?: string[];

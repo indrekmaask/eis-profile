@@ -15,6 +15,8 @@ public record ProfileView(
         SourcedValue<Long> capitalSize,
         SourcedValue<String> website,
         SourcedValue<Integer> employeeCount,
+        String contactEmail,
+        String contactPhone,
         Completeness completeness,
         Cards cards,
         List<Contact> contacts,
@@ -27,7 +29,7 @@ public record ProfileView(
 
     public record SourcedValue<T>(T value, String source) {}
 
-    public record Completeness(int percent, List<String> missing) {}
+    public record Completeness(List<String> missing) {}
 
     public record Cards(int relatedPartyCount, int realEstateCount, int officialNoticeCount,
                         String paymentBehaviour, long taxDebt, Integer employeeCount,

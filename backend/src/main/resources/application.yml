@@ -20,6 +20,9 @@ spring:
     schemas: profile
     create-schemas: true
     clean-disabled: false
+    # Seeds live in the V900+ range and are applied first on fresh DBs, so later
+    # schema migrations (V12+) are out-of-order by design.
+    out-of-order: true
     locations: classpath:db/migration,classpath:db/seed
 
 # Integration + feature flags (used from Phase 2 onward; declared here so config is visible early)

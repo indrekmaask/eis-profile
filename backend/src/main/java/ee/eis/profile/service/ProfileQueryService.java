@@ -111,12 +111,10 @@ public class ProfileQueryService {
                 .map(s -> s.getFetchedAt() == null ? null : s.getFetchedAt().toString())
                 .orElse(null);
 
-        var primary = contactList.stream().filter(ProfileView.Contact::primary).findFirst()
-                .or(() -> contactList.stream().findFirst());
         var comp = completeness.calculate(new ProfileCompletenessCalculator.Input(
-                primary.map(c -> StringUtils.hasText(c.email())).orElse(false),
-                primary.map(c -> StringUtils.hasText(c.phone())).orElse(false),
-                p.getEmployeeCount() != null, !targetMarkets.isEmpty(), StringUtils.hasText(p.getWebsite())));
+                StringUtils.hasText(p.getContactEmail()),
+                StringUtils.hasText(p.getContactPhone()),
+                p.getEmployeeCount() != null, StringUtils.hasText(p.getWebsite())));
 
         return new ProfileView(
                 p.getRegistryCode(), p.getProfileStatus(), dataAsOf,
@@ -127,7 +125,8 @@ public class ProfileQueryService {
                 sv(p.getCapitalSize(), p.getCapitalSizeSource()),
                 sv(p.getWebsite(), p.getWebsiteSource()),
                 sv(p.getEmployeeCount(), p.getEmployeeCountSource()),
-                new ProfileView.Completeness(comp.percent(), comp.missing()),
+                p.getContactEmail(), p.getContactPhone(),
+                new ProfileView.Completeness(comp.missing()),
                 new ProfileView.Cards(partyList.size(), cards.realEstateCount(), cards.officialNoticeCount(),
                         cards.paymentBehaviour(), cards.totalDebt(), p.getEmployeeCount(), targetMarkets, operatingRegions),
                 contactList, bankList, addressList, partyList, reportList, regionViews, discrepancies);

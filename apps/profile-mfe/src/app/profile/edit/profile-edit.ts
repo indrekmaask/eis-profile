@@ -104,6 +104,8 @@ export class ProfileEdit {
   protected readonly form = new FormGroup({
     operatingAddress: new FormControl('', { nonNullable: true }),
     website: new FormControl('', { nonNullable: true }),
+    contactEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    contactPhone: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     employeeCount: new FormControl('', { nonNullable: true }),
     contacts: new FormArray<ContactGroup>([]),
     targetMarkets: new FormControl<string[]>([], { nonNullable: true }),
@@ -127,8 +129,8 @@ export class ProfileEdit {
           this.activeStep.set(this.initialStep());
         }
       } else if (this.prefill()) {
-        // Seed one empty primary contact so step 0 shows the same E-post/Telefon
-        // fields as edit mode (create otherwise starts with no contacts).
+        // Seed one empty primary contact so the create flow's step 1 starts
+        // with a person card (create otherwise starts with no contacts).
         this.populated = true;
         if (!this.contacts.length) {
           this.contacts.push(this.contactGroup('', '', '', '', '', '', true));
@@ -224,12 +226,6 @@ export class ProfileEdit {
     return this.form.controls.bankAccounts;
   }
 
-  protected primaryContact(): ContactGroup | null {
-    this.contactsVersion();
-    const arr = this.contacts.controls;
-    return arr.find((g) => g.controls.primary.value) ?? arr[0] ?? null;
-  }
-
   protected contactValues(): ContactInput[] {
     this.contactsVersion();
     return this.contacts.controls.map((g) => ({
@@ -265,6 +261,8 @@ export class ProfileEdit {
       p.addresses.find((a) => a.addressType === 'OPERATING')?.fullAddress ?? '',
     );
     this.form.controls.website.setValue(p.website.value ?? '');
+    this.form.controls.contactEmail.setValue(p.contactEmail ?? '');
+    this.form.controls.contactPhone.setValue(p.contactPhone ?? '');
     this.form.controls.employeeCount.setValue(
       p.employeeCount.value != null ? String(p.employeeCount.value) : '',
     );
@@ -387,6 +385,17 @@ export class ProfileEdit {
 
   protected readonly isLastStep = computed(() => this.activeStep() === this.steps.length - 1);
 
+  private companyContactValid(): boolean {
+    const email = this.form.controls.contactEmail;
+    const phone = this.form.controls.contactPhone;
+    if (email.invalid || phone.invalid) {
+      email.markAsTouched();
+      phone.markAsTouched();
+      return false;
+    }
+    return true;
+  }
+
   private contactsValid(): boolean {
     if (!this.contacts.length) {
       this.contactsError.set('Lisa vähemalt üks kontaktisik.');
@@ -407,6 +416,10 @@ export class ProfileEdit {
   }
 
   protected onCreate(): void {
+    if (!this.companyContactValid()) {
+      this.go(0);
+      return;
+    }
     if (!this.contactsValid()) {
       this.go(1);
       return;
@@ -420,6 +433,8 @@ export class ProfileEdit {
       website: this.form.controls.website.value || null,
       employeeCount: this.employeeCountValue(),
       operatingAddress: this.form.controls.operatingAddress.value || null,
+      contactEmail: this.form.controls.contactEmail.value.trim() || null,
+      contactPhone: this.form.controls.contactPhone.value.trim() || null,
       contacts: this.contactValues(),
       bankAccounts: this.bankAccountValues(),
       targetMarkets: this.form.controls.targetMarkets.value,
@@ -429,6 +444,10 @@ export class ProfileEdit {
   }
 
   protected onSave(): void {
+    if (!this.companyContactValid()) {
+      this.go(0);
+      return;
+    }
     if (!this.contactsValid()) {
       this.go(1);
       return;
@@ -443,6 +462,8 @@ export class ProfileEdit {
     const body: StepUpdateRequest = {
       operatingAddress: this.form.controls.operatingAddress.value.trim(),
       website: this.form.controls.website.value.trim(),
+      contactEmail: this.form.controls.contactEmail.value.trim(),
+      contactPhone: this.form.controls.contactPhone.value.trim(),
       employeeCount: this.employeeCountValue(),
       contacts: this.contactValues(),
       targetMarkets: this.form.controls.targetMarkets.value,

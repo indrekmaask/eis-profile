@@ -57,6 +57,10 @@ public class CustomerProfile {
     @Enumerated(EnumType.STRING)
     private Source websiteSource;
 
+    private String contactEmail;
+
+    private String contactPhone;
+
     private Integer employeeCount;
 
     @Enumerated(EnumType.STRING)
