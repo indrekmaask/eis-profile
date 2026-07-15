@@ -7,6 +7,8 @@ import ee.eis.profile.api.dto.ProfileRequests.CreateProfileRequest;
 import ee.eis.profile.api.dto.ProfileRequests.StepUpdateRequest;
 import ee.eis.profile.api.dto.ProfileView;
 import ee.eis.profile.domain.Address;
+import ee.eis.profile.domain.AnnualReport;
+import ee.eis.profile.domain.AuditAction;
 import ee.eis.profile.domain.BankAccount;
 import ee.eis.profile.domain.ContactPerson;
 import ee.eis.profile.domain.CustomerProfile;
@@ -31,8 +33,10 @@ import ee.eis.profile.service.validation.PersonCodeValidator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -61,6 +65,7 @@ public class ProfileCommandService {
     private final MarketVocabulary vocabulary;
     private final ProfileQueryService queryService;
     private final ObjectMapper objectMapper;
+    private final AuditService auditService;
 
     public ProfileCommandService(CustomerProfileRepository profiles, ContactPersonRepository contacts,
                                  BankAccountRepository bankAccounts, AddressRepository addresses,
@@ -70,7 +75,8 @@ public class ProfileCommandService {
                                  RegistryClient registryClient, RegistryMapper mapper, ValueResolver resolver,
                                  DiscrepancyDetector discrepancyDetector, IbanValidator ibanValidator,
                                  PersonCodeValidator personCodeValidator, MarketVocabulary vocabulary,
-                                 ProfileQueryService queryService, ObjectMapper objectMapper) {
+                                 ProfileQueryService queryService, ObjectMapper objectMapper,
+                                 AuditService auditService) {
         this.profiles = profiles;
         this.contacts = contacts;
         this.bankAccounts = bankAccounts;
@@ -89,6 +95,7 @@ public class ProfileCommandService {
         this.vocabulary = vocabulary;
         this.queryService = queryService;
         this.objectMapper = objectMapper;
+        this.auditService = auditService;
     }
 
     public ProfileView create(CreateProfileRequest req) {
@@ -145,6 +152,8 @@ public class ProfileCommandService {
             access.save(owner);
         }
 
+        auditService.record(AuditAction.CREATE_PROFILE, rc, req.actingPersonCode(),
+                Map.of("profileStatus", profile.getProfileStatus()));
         return queryService.assemble(profiles.findById(id).orElseThrow(), List.of());
     }
 
@@ -204,6 +213,7 @@ public class ProfileCommandService {
             marketRegions.flush();
             saveMarketRegions(id, req.targetMarkets(), req.operatingRegions());
         }
+        auditService.record(AuditAction.UPDATE_STEP, registryCode, Map.of("step", step));
         return queryService.assemble(profiles.findById(id).orElseThrow(), List.of());
     }
 
@@ -236,23 +246,32 @@ public class ProfileCommandService {
         profiles.save(profile);
 
         UUID id = profile.getId();
-        // Register-owned children are replaced wholesale. Flush the deletes before re-inserting
-        // so unique keys (e.g. related_party_unique) do not collide within the same flush.
+        // Current-state register children are replaced wholesale. Flush the deletes before
+        // re-inserting so unique keys (e.g. related_party_unique) do not collide within one flush.
         relatedParties.deleteAll(relatedParties.findByProfileId(id));
-        annualReports.deleteAll(annualReports.findByProfileIdOrderByReportYearDesc(id));
         addresses.findByProfileId(id).stream()
                 .filter(a -> "LEGAL".equals(a.getAddressType()))
                 .forEach(addresses::delete);
         relatedParties.flush();
 
         relatedParties.saveAll(mapper.toRelatedParties(id, fresh));
-        annualReports.saveAll(mapper.toAnnualReports(id, fresh));
+
+        // Annual reports are immutable history: an already-stored year is never overwritten;
+        // only report years not yet present are added.
+        Set<Integer> existingYears = annualReports.findByProfileIdOrderByReportYearDesc(id).stream()
+                .map(AnnualReport::getReportYear).collect(Collectors.toSet());
+        annualReports.saveAll(mapper.toAnnualReports(id, fresh).stream()
+                .filter(r -> !existingYears.contains(r.getReportYear())).toList());
+
         Address legal = mapper.toLegalAddress(id, fresh);
         if (legal != null) {
             addresses.save(legal);
         }
 
         writeSnapshot(id, registryCode, fresh);
+        auditService.record(AuditAction.REFRESH, registryCode,
+                Map.of("discrepancyFields", discrepancies.stream()
+                        .map(ProfileView.Discrepancy::field).toList()));
         return queryService.assemble(profiles.findById(id).orElseThrow(), discrepancies);
     }
 

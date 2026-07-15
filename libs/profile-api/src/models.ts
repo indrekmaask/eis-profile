@@ -173,3 +173,11 @@ export interface AccessEntry {
   businessName: string;
   accessRole: string;
 }
+
+export type SnapshotType = 'PRE_ADVISORY' | 'APPLICATION';
+
+export interface SnapshotSummary {
+  id: string;
+  snapshotType: string;
+  capturedAt: string | null;
+}

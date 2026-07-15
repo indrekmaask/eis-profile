@@ -6,6 +6,8 @@ import {
   CreateProfileRequest,
   PrefillView,
   ProfileView,
+  SnapshotSummary,
+  SnapshotType,
   StepUpdateRequest,
 } from './models';
 
@@ -37,6 +39,24 @@ export class ProfileApiService {
 
   listAccess(personCode: string): Observable<AccessEntry[]> {
     return this.http.get<AccessEntry[]>(`${this.base}/access`, { params: { personCode } });
+  }
+
+  captureSnapshot(registryCode: string, type: SnapshotType): Observable<SnapshotSummary> {
+    return this.http.post<SnapshotSummary>(
+      `${this.base}/profiles/${registryCode}/snapshots`,
+      {},
+      { params: { type } },
+    );
+  }
+
+  listSnapshots(registryCode: string): Observable<SnapshotSummary[]> {
+    return this.http.get<SnapshotSummary[]>(`${this.base}/profiles/${registryCode}/snapshots`);
+  }
+
+  getSnapshot(registryCode: string, snapshotId: string): Observable<ProfileView> {
+    return this.http.get<ProfileView>(
+      `${this.base}/profiles/${registryCode}/snapshots/${snapshotId}`,
+    );
   }
 
   /** Demo helper: wipe + re-seed the profile schema to its canonical Biomarket state. */

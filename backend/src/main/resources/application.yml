@@ -17,7 +17,7 @@ spring:
   flyway:
     enabled: true
     default-schema: profile
-    schemas: profile
+    schemas: profile,audit
     create-schemas: true
     clean-disabled: false
     # Seeds live in the V900+ range and are applied first on fresh DBs, so later

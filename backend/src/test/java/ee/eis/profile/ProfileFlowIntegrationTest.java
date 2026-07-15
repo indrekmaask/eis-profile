@@ -13,12 +13,18 @@ import ee.eis.profile.integration.RegistryUnavailableException;
 import ee.eis.profile.integration.dto.CompanyResponse;
 import ee.eis.profile.integration.dto.CompanyResponse.AnnualReportResponse;
 import ee.eis.profile.integration.dto.CompanyResponse.RelatedPartyResponse;
+import ee.eis.profile.api.dto.AuditEntry;
+import ee.eis.profile.api.dto.SnapshotSummary;
+import ee.eis.profile.domain.SnapshotType;
+import ee.eis.profile.service.AuditService;
 import ee.eis.profile.service.ProfileCommandService;
 import ee.eis.profile.service.ProfileNotFoundException;
 import ee.eis.profile.service.ProfileQueryService;
+import ee.eis.profile.service.ProfileSnapshotService;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,6 +47,8 @@ class ProfileFlowIntegrationTest {
 
     @Autowired ProfileCommandService command;
     @Autowired ProfileQueryService query;
+    @Autowired ProfileSnapshotService snapshotService;
+    @Autowired AuditService auditService;
 
     private CompanyResponse company(String rc, String name) {
         return new CompanyResponse(rc, name, "2026-05-15T00:00:00Z", "Osaühing",
@@ -51,6 +59,20 @@ class ProfileFlowIntegrationTest {
                 List.of(new AnnualReportResponse(2025, true, true, 500000L, null, null, null, null,
                         null, null, 42000L, null, 300000L, null, null, null, 120000L, null,
                         null, null, null, null, null, null, null, null, null, null, null, null, null, null)));
+    }
+
+    private AnnualReportResponse report(int year, long netProfit) {
+        return new AnnualReportResponse(year, true, true, 500000L, null, null, null, null,
+                null, null, netProfit, null, 300000L, null, null, null, 120000L,
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+    }
+
+    private CompanyResponse companyReports(String rc, List<AnnualReportResponse> reports) {
+        return new CompanyResponse(rc, "Porgand OÜ", "2026-05-15T00:00:00Z", "Osaühing",
+                "Tartu maakond, Tartu, Näidis tn 1", "47111", "Toidukaupade jaemüük", 2500L,
+                List.of(), List.of(new RelatedPartyResponse("Osanik", "12305242", "EE", "Juriidiline isik",
+                        null, null, "Philia OÜ", new BigDecimal("100.00"))),
+                List.of(), List.of(), reports);
     }
 
     private CreateProfileRequest fullCreate(String rc) {
@@ -113,6 +135,64 @@ class ProfileFlowIntegrationTest {
         when(registryClient.fetchCompany("00000000")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> command.create(new CreateProfileRequest("00000000", null, null, null,
                 null, null, null, null, null, null, null))).isInstanceOf(ProfileNotFoundException.class);
+    }
+
+    @Test
+    void snapshotIsImmutableAndEachProcessCapturesIndependently() {
+        String rc = "16333333";
+        when(registryClient.fetchCompany(rc)).thenReturn(Optional.of(company(rc, "Porgand OÜ")));
+        command.create(fullCreate(rc));
+
+        SnapshotSummary preAdvisory = snapshotService.capture(rc, SnapshotType.PRE_ADVISORY);
+        assertThat(preAdvisory.snapshotType()).isEqualTo("NÕUSTAMISE_EELREGISTREERIMINE");
+
+        when(registryClient.fetchCompany(rc)).thenReturn(Optional.of(company(rc, "Porgand Uus OÜ")));
+        command.refresh(rc);
+        assertThat(query.getProfile(rc).businessName().value()).isEqualTo("Porgand Uus OÜ");
+
+        String frozen = snapshotService.getPayload(rc, UUID.fromString(preAdvisory.id()));
+        assertThat(frozen).contains("Porgand OÜ").doesNotContain("Porgand Uus OÜ");
+
+        SnapshotSummary application = snapshotService.capture(rc, SnapshotType.APPLICATION);
+        assertThat(application.snapshotType()).isEqualTo("TAOTLUS");
+        assertThat(snapshotService.getPayload(rc, UUID.fromString(application.id())))
+                .contains("Porgand Uus OÜ");
+
+        assertThat(snapshotService.list(rc)).hasSize(2);
+    }
+
+    @Test
+    void refreshPreservesAnnualReportHistoryAndAddsNewYears() {
+        String rc = "16555555";
+        when(registryClient.fetchCompany(rc)).thenReturn(Optional.of(companyReports(rc, List.of(report(2025, 42000L)))));
+        command.create(fullCreate(rc));
+
+        when(registryClient.fetchCompany(rc))
+                .thenReturn(Optional.of(companyReports(rc, List.of(report(2025, 999L), report(2026, 55000L)))));
+        ProfileView refreshed = command.refresh(rc);
+
+        assertThat(refreshed.annualReports()).extracting(ProfileView.AnnualReport::reportYear)
+                .containsExactlyInAnyOrder(2025, 2026);
+        var y2025 = refreshed.annualReports().stream().filter(r -> r.reportYear() == 2025).findFirst().orElseThrow();
+        assertThat(y2025.netProfit()).isEqualTo(42000L); // stored year not overwritten
+    }
+
+    @Test
+    void mutationsAreRecordedInAuditTrail() {
+        String rc = "16444444";
+        when(registryClient.fetchCompany(rc)).thenReturn(Optional.of(company(rc, "Porgand OÜ")));
+        command.create(fullCreate(rc));
+        snapshotService.capture(rc, SnapshotType.PRE_ADVISORY);
+        when(registryClient.fetchCompany(rc)).thenReturn(Optional.of(company(rc, "Porgand Uus OÜ")));
+        command.refresh(rc);
+
+        List<AuditEntry> trail = auditService.list(rc);
+        assertThat(trail).extracting(AuditEntry::action)
+                .contains("CREATE_PROFILE", "CAPTURE_SNAPSHOT", "REFRESH");
+        assertThat(trail).anySatisfy(e -> {
+            assertThat(e.action()).isEqualTo("CREATE_PROFILE");
+            assertThat(e.actorPersonCode()).isEqualTo("37510090251");
+        });
     }
 
     @Test
