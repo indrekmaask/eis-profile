@@ -42,7 +42,7 @@ const DEMO_PEOPLE = [
             EST
           </text>
         </svg>
-        <span class="tara__brandtitle">Riigi autentimisteenus</span>
+        <span class="tara__brandtitle">Riigi autentimisteenus (MOCK)</span>
       </div>
 
       <div class="tara__content">
